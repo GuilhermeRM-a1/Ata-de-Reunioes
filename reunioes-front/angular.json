@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "telas-reunioes": {
+    "reunioes-front": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/telas-reunioes",
+            "outputPath": "dist/reunioes-front",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -64,10 +64,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "telas-reunioes:build:production"
+              "buildTarget": "reunioes-front:build:production"
             },
             "development": {
-              "buildTarget": "telas-reunioes:build:development"
+              "buildTarget": "reunioes-front:build:development"
             }
           },
           "defaultConfiguration": "development"

@@ -1,4 +1,4 @@
-package com.empresa.reunioes;
+package br.com.empresa.reunioes;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
