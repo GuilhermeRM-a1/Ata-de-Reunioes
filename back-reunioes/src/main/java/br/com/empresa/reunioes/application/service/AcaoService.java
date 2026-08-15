@@ -8,10 +8,9 @@ import br.com.empresa.reunioes.domain.repository.ColaboradorRepository;
 import br.com.empresa.reunioes.domain.repository.ReuniaoRepository;
 import br.com.empresa.reunioes.web.controller.dto.Acao.AcaoDTO;
 import br.com.empresa.reunioes.web.controller.dto.Acao.AcaoRequest;
+import br.com.empresa.reunioes.web.exception.RecursoNaoEncontradoException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -111,23 +110,13 @@ public class AcaoService {
         private Acao buscarEntidade(Long id) {
 
             return repository.findById(id)
-                    .orElseThrow(() ->
-                            new ResponseStatusException(
-                                    HttpStatus.NOT_FOUND,
-                                    "Ação não encontrada"
-                            )
-                    );
+                    .orElseThrow(() -> RecursoNaoEncontradoException.de("Ação", id));
         }
 
         private Reuniao buscarReuniao(Long id) {
 
             return reuniaoRepository.findById(id)
-                    .orElseThrow(() ->
-                            new ResponseStatusException(
-                                    HttpStatus.NOT_FOUND,
-                                    "Reunião não encontrada"
-                            )
-                    );
+                    .orElseThrow(() -> RecursoNaoEncontradoException.de("Reunião", id));
         }
 
         /**
@@ -144,8 +133,7 @@ public class AcaoService {
             List<Colaborador> colaboradores = colaboradorRepository.findAllById(ids);
 
             if (colaboradores.size() != ids.stream().distinct().count()) {
-                throw new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
+                throw new RecursoNaoEncontradoException(
                         "Colaborador não encontrado entre os responsáveis informados");
             }
 

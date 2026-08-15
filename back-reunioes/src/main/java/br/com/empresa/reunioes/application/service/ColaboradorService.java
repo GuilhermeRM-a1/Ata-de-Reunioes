@@ -4,10 +4,11 @@ import br.com.empresa.reunioes.domain.model.Colaborador;
 import br.com.empresa.reunioes.domain.repository.ColaboradorRepository;
 import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorDTO;
 import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorRequest;
+import br.com.empresa.reunioes.web.controller.dto.PaginaResponse;
+import br.com.empresa.reunioes.web.exception.RecursoNaoEncontradoException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -41,6 +42,10 @@ public class ColaboradorService {
                 .toList();
     }
 
+    public PaginaResponse<ColaboradorDTO> listar(Pageable paginacao) {
+        return PaginaResponse.de(colaboradorRepository.findAll(paginacao).map(ColaboradorDTO::de));
+    }
+
     public ColaboradorDTO atualizar(Long id, ColaboradorRequest request) {
         Colaborador colaborador = buscarEntidade(id);
         colaborador.setNome(request.nome());
@@ -72,10 +77,7 @@ public class ColaboradorService {
     /** Uso interno da propria camada de servico — a web recebe DTO. */
     private Colaborador buscarEntidade(Long id) {
         return colaboradorRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResponseStatusException(
-                                HttpStatus.NOT_FOUND,
-                                "Colaborador não encontrado"));
+                .orElseThrow(() -> RecursoNaoEncontradoException.de("Colaborador", id));
     }
 
 }

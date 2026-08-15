@@ -6,12 +6,13 @@ import br.com.empresa.reunioes.domain.model.Reuniao;
 import br.com.empresa.reunioes.domain.repository.AcaoRepository;
 import br.com.empresa.reunioes.domain.repository.ColaboradorRepository;
 import br.com.empresa.reunioes.domain.repository.ReuniaoRepository;
+import br.com.empresa.reunioes.web.controller.dto.PaginaResponse;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoDTO;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoRequest;
+import br.com.empresa.reunioes.web.exception.RecursoNaoEncontradoException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +54,10 @@ public class ReuniaoService{
         return reuniaoRepository.findAll().stream()
                 .map(ReuniaoDTO::de)
                 .toList();
+    }
+
+    public PaginaResponse<ReuniaoDTO> listar(Pageable paginacao) {
+        return PaginaResponse.de(reuniaoRepository.findAll(paginacao).map(ReuniaoDTO::de));
     }
 
     public ReuniaoDTO atualizar(Long id, ReuniaoRequest request) {
@@ -108,9 +113,7 @@ public class ReuniaoService{
     /** Uso interno da propria camada de servico — a web recebe DTO. */
     private Reuniao buscarEntidade(Long id) {
         return this.reuniaoRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Reunião não encontrada"));
+                .orElseThrow(() -> RecursoNaoEncontradoException.de("Reunião", id));
     }
 
     /**
@@ -127,8 +130,7 @@ public class ReuniaoService{
         List<Colaborador> colaboradores = colaboradorRepository.findAllById(ids);
 
         if (colaboradores.size() != ids.stream().distinct().count()) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
+            throw new RecursoNaoEncontradoException(
                     "Colaborador não encontrado entre os participantes informados");
         }
 
@@ -144,8 +146,7 @@ public class ReuniaoService{
         List<Acao> acoes = acaoRepository.findAllById(ids);
 
         if (acoes.size() != ids.stream().distinct().count()) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
+            throw new RecursoNaoEncontradoException(
                     "Ação não encontrada entre as ações informadas");
         }
 
