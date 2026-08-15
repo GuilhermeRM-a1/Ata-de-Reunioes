@@ -6,8 +6,8 @@ import br.com.empresa.reunioes.domain.model.Reuniao;
 import br.com.empresa.reunioes.domain.repository.AcaoRepository;
 import br.com.empresa.reunioes.domain.repository.ColaboradorRepository;
 import br.com.empresa.reunioes.domain.repository.ReuniaoRepository;
+import br.com.empresa.reunioes.web.controller.dto.Acao.AcaoDTO;
 import br.com.empresa.reunioes.web.controller.dto.Acao.AcaoRequest;
-import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -16,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.ArrayList;
 import java.util.List;
 
+/** Todo metodo publico devolve DTO — a camada web nao ve entidade JPA. */
 @Service
 @RequiredArgsConstructor
 public class AcaoService {
@@ -24,7 +25,7 @@ public class AcaoService {
     private final ColaboradorRepository colaboradorRepository;
     private final ReuniaoRepository reuniaoRepository;
 
-    public Acao salvar(AcaoRequest request) {
+    public AcaoDTO salvar(AcaoRequest request) {
 
             Acao acao = new Acao();
 
@@ -35,39 +36,26 @@ public class AcaoService {
 
             acao.setResponsavel(buscarResponsaveis(request.responsavel()));
 
-            Reuniao reuniao = reuniaoRepository
-                    .findById(request.reuniao())
-                    .orElseThrow(() ->
-                            new ResponseStatusException(
-                                    HttpStatus.NOT_FOUND,
-                                    "Reunião não encontrada"
-                            )
-                    );
+            acao.setReuniao(buscarReuniao(request.reuniao()));
 
-            acao.setReuniao(reuniao);
-
-            return repository.save(acao);
+            return AcaoDTO.de(repository.save(acao));
         }
 
-        public Acao buscarPorId(Long id) {
+        public AcaoDTO buscarPorId(Long id) {
 
-            return repository.findById(id)
-                    .orElseThrow(() ->
-                            new ResponseStatusException(
-                                    HttpStatus.NOT_FOUND,
-                                    "Ação não encontrada"
-                            )
-                    );
+            return AcaoDTO.de(buscarEntidade(id));
         }
 
-        public List<Acao> listar() {
+        public List<AcaoDTO> listar() {
 
-            return repository.findAll();
+            return repository.findAll().stream()
+                    .map(AcaoDTO::de)
+                    .toList();
         }
 
-        public Acao atualizar(Long id, AcaoRequest request) {
+        public AcaoDTO atualizar(Long id, AcaoRequest request) {
 
-            Acao acao = buscarPorId(id);
+            Acao acao = buscarEntidade(id);
 
             acao.setTitulo(request.titulo());
             acao.setDescricao(request.descricao());
@@ -76,23 +64,14 @@ public class AcaoService {
 
             acao.setResponsavel(buscarResponsaveis(request.responsavel()));
 
-            Reuniao reuniao = reuniaoRepository
-                    .findById(request.reuniao())
-                    .orElseThrow(() ->
-                            new ResponseStatusException(
-                                    HttpStatus.NOT_FOUND,
-                                    "Reunião não encontrada"
-                            )
-                    );
+            acao.setReuniao(buscarReuniao(request.reuniao()));
 
-            acao.setReuniao(reuniao);
-
-            return repository.save(acao);
+            return AcaoDTO.de(repository.save(acao));
         }
 
-        public Acao atualizarParcial(Long id, AcaoRequest request) {
+        public AcaoDTO atualizarParcial(Long id, AcaoRequest request) {
 
-            Acao acao = buscarPorId(id);
+            Acao acao = buscarEntidade(id);
 
             if (request.titulo() != null) {
                 acao.setTitulo(request.titulo());
@@ -115,26 +94,40 @@ public class AcaoService {
             }
 
             if (request.reuniao() != null) {
-                Reuniao reuniao = reuniaoRepository
-                        .findById(request.reuniao())
-                        .orElseThrow(() ->
-                                new ResponseStatusException(
-                                        HttpStatus.NOT_FOUND,
-                                        "Reunião não encontrada"
-                                )
-                        );
-
-                acao.setReuniao(reuniao);
+                acao.setReuniao(buscarReuniao(request.reuniao()));
             }
 
-            return repository.save(acao);
+            return AcaoDTO.de(repository.save(acao));
         }
 
         public void deletar(Long id) {
 
-            Acao acao = buscarPorId(id);
+            Acao acao = buscarEntidade(id);
 
             repository.delete(acao);
+        }
+
+        /** Uso interno da propria camada de servico — a web recebe DTO. */
+        private Acao buscarEntidade(Long id) {
+
+            return repository.findById(id)
+                    .orElseThrow(() ->
+                            new ResponseStatusException(
+                                    HttpStatus.NOT_FOUND,
+                                    "Ação não encontrada"
+                            )
+                    );
+        }
+
+        private Reuniao buscarReuniao(Long id) {
+
+            return reuniaoRepository.findById(id)
+                    .orElseThrow(() ->
+                            new ResponseStatusException(
+                                    HttpStatus.NOT_FOUND,
+                                    "Reunião não encontrada"
+                            )
+                    );
         }
 
         /**

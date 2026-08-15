@@ -6,6 +6,7 @@ import br.com.empresa.reunioes.domain.model.Reuniao;
 import br.com.empresa.reunioes.domain.repository.AcaoRepository;
 import br.com.empresa.reunioes.domain.repository.ColaboradorRepository;
 import br.com.empresa.reunioes.domain.repository.ReuniaoRepository;
+import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoDTO;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,11 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A camada web nunca recebe entidade JPA: todo metodo publico devolve DTO.
+ * Isso evita vazar campo interno na resposta e serializacao de relacionamento
+ * preguicoso fora da transacao.
+ */
 @Service
 @RequiredArgsConstructor
 public class ReuniaoService{
@@ -23,7 +29,7 @@ public class ReuniaoService{
     private final ColaboradorRepository colaboradorRepository;
     private final AcaoRepository acaoRepository;
 
-    public Reuniao salvar(ReuniaoRequest request) {
+    public ReuniaoDTO salvar(ReuniaoRequest request) {
         Reuniao reuniao = new Reuniao();
 
         reuniao.setTitulo(request.titulo());
@@ -36,24 +42,22 @@ public class ReuniaoService{
         reuniao.setAcoes(buscarAcoes(request.acoes()));
         reuniao.setTotalAcoes(calcularTotalAcoes(request, reuniao.getAcoes()));
 
-        return reuniaoRepository.save(reuniao);
+        return ReuniaoDTO.de(reuniaoRepository.save(reuniao));
     }
 
-    public Reuniao buscarPorId(Long id) {
-        return this.reuniaoRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Reunião não encontrada"));
-
+    public ReuniaoDTO buscarPorId(Long id) {
+        return ReuniaoDTO.de(buscarEntidade(id));
     }
 
-    public List<Reuniao> listar() {
-        return reuniaoRepository.findAll();
+    public List<ReuniaoDTO> listar() {
+        return reuniaoRepository.findAll().stream()
+                .map(ReuniaoDTO::de)
+                .toList();
     }
 
-    public Reuniao atualizar(Long id, ReuniaoRequest request) {
+    public ReuniaoDTO atualizar(Long id, ReuniaoRequest request) {
 
-        Reuniao reuniao = buscarPorId(id);
+        Reuniao reuniao = buscarEntidade(id);
 
         reuniao.setTitulo(request.titulo());
         reuniao.setData(request.data());
@@ -65,12 +69,12 @@ public class ReuniaoService{
         reuniao.setAcoes(buscarAcoes(request.acoes()));
         reuniao.setTotalAcoes(calcularTotalAcoes(request, reuniao.getAcoes()));
 
-        return reuniaoRepository.save(reuniao);
+        return ReuniaoDTO.de(reuniaoRepository.save(reuniao));
     }
 
-    public Reuniao atualizarParcial(Long id, ReuniaoRequest request) {
+    public ReuniaoDTO atualizarParcial(Long id, ReuniaoRequest request) {
 
-        Reuniao reuniao = buscarPorId(id);
+        Reuniao reuniao = buscarEntidade(id);
 
         if(request.titulo() != null)
             reuniao.setTitulo(request.titulo());
@@ -91,14 +95,22 @@ public class ReuniaoService{
         if(request.totalAcoes() != null)
             reuniao.setTotalAcoes(request.totalAcoes());
 
-        return this.reuniaoRepository.save(reuniao);
+        return ReuniaoDTO.de(this.reuniaoRepository.save(reuniao));
     }
 
     public void deletar(Long id) {
 
-        Reuniao reuniao = buscarPorId(id);
+        Reuniao reuniao = buscarEntidade(id);
 
         reuniaoRepository.delete(reuniao);
+    }
+
+    /** Uso interno da propria camada de servico — a web recebe DTO. */
+    private Reuniao buscarEntidade(Long id) {
+        return this.reuniaoRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Reunião não encontrada"));
     }
 
     /**

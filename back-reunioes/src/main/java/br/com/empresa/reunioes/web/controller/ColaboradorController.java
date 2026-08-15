@@ -1,9 +1,8 @@
 package br.com.empresa.reunioes.web.controller;
 
 import br.com.empresa.reunioes.application.service.ColaboradorService;
-import br.com.empresa.reunioes.domain.model.Colaborador;
-import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorRequest;
 import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorDTO;
+import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,62 +19,40 @@ public class ColaboradorController {
 
     @PostMapping()
     public ResponseEntity<ColaboradorDTO> salvar (@RequestBody ColaboradorRequest request) {
-        try {
-            Colaborador colaborador = this.service.salvar(request);
 
-            return new ResponseEntity<>(ColaboradorDTO.de(colaborador),HttpStatus.CREATED);
-
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(this.service.salvar(request), HttpStatus.CREATED);
     }
 
     @GetMapping()
     public ResponseEntity<List<ColaboradorDTO>> listar () {
-        List<ColaboradorDTO> colaboradores = service.listar().stream()
-                .map(ColaboradorDTO::de)
-                .toList();
 
-        return ResponseEntity.ok(colaboradores);
+        return ResponseEntity.ok(service.listar());
     }
+
     @GetMapping("/{id}")
     public ResponseEntity<ColaboradorDTO> buscarPorId (@PathVariable Long id) {
 
-        Colaborador colaborador = this.service.buscarPorId(id);
-
-        return ResponseEntity.ok(ColaboradorDTO.de(colaborador));
+        return ResponseEntity.ok(this.service.buscarPorId(id));
     }
-
 
     @PutMapping("/{id}")
     public ResponseEntity<ColaboradorDTO> atualizar (@PathVariable Long id, @RequestBody ColaboradorRequest request) {
-        try {
-            Colaborador colaborador = this.service.atualizar(id, request);
 
-            return new ResponseEntity<>(ColaboradorDTO.de(colaborador), HttpStatus.ACCEPTED);
-
-        } catch(Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(this.service.atualizar(id, request), HttpStatus.ACCEPTED);
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<ColaboradorDTO> atualizarParcial (@PathVariable Long id, @RequestBody ColaboradorRequest request) {
-        try {
-            Colaborador colaborador = this.service.atualizarParcial(id, request);
-            
-            return new ResponseEntity<>(ColaboradorDTO.de(colaborador), HttpStatus.ACCEPTED);
 
-        } catch(Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(this.service.atualizarParcial(id, request), HttpStatus.ACCEPTED);
     }
 
-    @DeleteMapping()
-    public ResponseEntity<ColaboradorDTO> deletar(@PathVariable Long id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+
         this.service.deletar(id);
-        return new ResponseEntity<>(HttpStatus.ACCEPTED);
-    }
 
+        return ResponseEntity.noContent().build();
+    }
 
 }
