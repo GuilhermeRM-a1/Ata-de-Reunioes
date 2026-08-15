@@ -2,7 +2,9 @@ package br.com.empresa.reunioes.application.mapper;
 
 import br.com.empresa.reunioes.domain.model.Colaborador;
 import br.com.empresa.reunioes.domain.model.Reuniao;
-import br.com.empresa.reunioes.web.controller.dto.*;
+import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorRequest;
+import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorDTO;
+import br.com.empresa.reunioes.web.controller.dto.Reuniao.RelatorioReuniaoResponse;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -12,7 +14,6 @@ public class ColaboradorMapper {
         if (request == null) return null;
 
         Colaborador entity = new Colaborador();
-        entity.setEmail(request.email());
         entity.setNome(request.nome());
         entity.setMonitorarReunioes(request.monitorarReunioes());
         entity.setDataCadastro(request.dataCadastro());
@@ -20,14 +21,14 @@ public class ColaboradorMapper {
     }
 
     // 2. Recebe a Entidade e retorna o DTO de resposta completo
-    public ColaboradorResponse toResponse(Colaborador entity) {
+    public ColaboradorDTO toResponse(Colaborador entity) {
         if (entity == null) return null;
 
-        return ColaboradorResponse.de(entity);
+        return ColaboradorDTO.de(entity);
     }
 
     // 3. Recebe a Entidade e retorna o Resumo (REGRA: Não copiar transcrição!)
-    public ReuniaoResumoResponse toResumo(Reuniao entity) {
+    public RelatorioReuniaoResponse toResumo(Reuniao entity) {
         if (entity == null) return null;
 
         // IMPORTANTE: Não defina/copie o campo transcrição aqui
