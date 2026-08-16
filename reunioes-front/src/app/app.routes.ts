@@ -1,15 +1,18 @@
 import { Routes } from '@angular/router';
 import { ShellComponent } from './shell/shell.component';
 
+
 export const routes: Routes = [
   {
     path: '',
     component: ShellComponent,
     children: [
       { path: '', redirectTo: 'reunioes', pathMatch: 'full' },
-      // Troque os componentes abaixo quando criar as telas de verdade:
-      // { path: 'reunioes', component: ReunioesComponent },
-      // { path: 'colaboradores', component: ColaboradoresComponent },
+      { path: 'reunioes', loadComponent: () => import('./features/reunioes/pages/reunioes/reunioes.component').then(m => m.ReunioesComponent) },
+      { path: 'reunioes/novo', loadComponent: () => import('./features/reunioes/pages/reuniao-novo/reuniao-novo.component').then(m => m.ReuniaoNovoComponent) },
+      { path: 'reunioes/:id', loadComponent: () => import('./features/reunioes/pages/reuniao-detalhe/reuniao-detalhe.component').then(m => m.ReuniaoDetalheComponent) },
+      { path: 'reunioes/:id/editar', loadComponent: () => import('./features/reunioes/pages/reuniao-editar/reuniao-editar.component').then(m => m.ReuniaoEditarComponent) },
+      { path: 'colaboradores', loadComponent: () => import('./features/colaboradores/pages/colaboradores/colaboradores.component').then(m => m.ColaboradoresComponent) },
     ]
   }
 ];
