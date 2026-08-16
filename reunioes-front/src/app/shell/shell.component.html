@@ -1,0 +1,27 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container-fluid">
+    <a class="navbar-brand" routerLink="/reunioes">
+      Sistema de Reuniões
+    </a>
+
+    <div class="navbar-nav">
+          <a
+            class="nav-link"
+            routerLink="/reunioes"
+            routerLinkActive="active">
+            Reuniões
+          </a>
+
+          <a
+            class="nav-link"
+            routerLink="/colaboradores"
+            routerLinkActive="active">
+            Colaboradores
+          </a>
+    </div>
+  </div>
+</nav>
+
+<main class="container">
+  <router-outlet></router-outlet>
+</main>
