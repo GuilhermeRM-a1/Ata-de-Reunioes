@@ -32,6 +32,8 @@
               }
             ],
             "styles": [
+              "@fortawesome/fontawesome-free/css/all.min.css",
+              "node_modules/mdb-angular-ui-kit/assets/scss/mdb.scss",
               "src/styles.scss"
             ],
             "scripts": []
@@ -91,12 +93,17 @@
               }
             ],
             "styles": [
-              "src/styles.scss"
-            ],
+  "@fortawesome/fontawesome-free/css/all.min.css",
+  "node_modules/mdb-angular-ui-kit/assets/scss/mdb.scss",
+  "src/styles.scss"
+],
             "scripts": []
           }
         }
       }
     }
+  },
+  "cli": {
+    "analytics": false
   }
 }
