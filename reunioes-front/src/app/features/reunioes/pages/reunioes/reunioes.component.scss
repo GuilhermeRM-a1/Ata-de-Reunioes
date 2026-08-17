@@ -1,0 +1,22 @@
+.modal-backdrop-custom {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+}
+
+.modal-dialog-custom {
+  width: 100%;
+  max-width: 500px;
+  margin: 1rem;
+
+  .modal-content {
+    background-color: #fff;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.3);
+    border: none;
+  }
+}
