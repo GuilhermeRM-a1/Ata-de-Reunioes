@@ -25,3 +25,11 @@ spring:
 
 server:
   port: 8080
+
+# Swagger UI em /swagger-ui.html — e por onde a API e testada sem Postman.
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+  api-docs:
+    path: /v3/api-docs

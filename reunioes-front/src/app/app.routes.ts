@@ -1,8 +1,11 @@
 import { Routes } from '@angular/router';
 import { ShellComponent } from './shell/shell.component';
 
-
 export const routes: Routes = [
+  {
+    path: 'login',
+    loadComponent: () => import('./features/login/pages/login/login.component').then(m => m.LoginComponent)
+  },
   {
     path: '',
     component: ShellComponent,

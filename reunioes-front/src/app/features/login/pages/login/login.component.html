@@ -1,0 +1,60 @@
+<div class="login-page">
+  <div class="card login-card">
+    <div class="card-body">
+      <h3 class="text-center mb-4">Ata de Reuniões</h3>
+      <p class="text-center text-muted mb-4">Faça login para continuar</p>
+
+      <form [formGroup]="form" (ngSubmit)="login()">
+
+        <div class="form-outline mb-3">
+          <input
+            type="email"
+            id="email"
+            formControlName="email"
+            class="form-control"
+            [class.is-invalid]="email?.invalid && email?.touched"
+          />
+          <label class="form-label" for="email">E-mail</label>
+
+          @if (email?.invalid && email?.touched) {
+            <div class="invalid-feedback d-block">
+              @if (email?.errors?.['required']) {
+                E-mail é obrigatório.
+              } @else if (email?.errors?.['email']) {
+                Informe um e-mail válido.
+              }
+            </div>
+          }
+        </div>
+
+        <div class="form-outline mb-3">
+          <input
+            type="password"
+            id="senha"
+            formControlName="senha"
+            class="form-control"
+            [class.is-invalid]="senha?.invalid && senha?.touched"
+          />
+          <label class="form-label" for="senha">Senha</label>
+
+          @if (senha?.invalid && senha?.touched) {
+            <div class="invalid-feedback d-block">
+              Senha é obrigatória.
+            </div>
+          }
+        </div>
+
+        @if (erroLogin) {
+          <div class="alert alert-danger" role="alert">
+            E-mail não encontrado. Verifique e tente novamente.
+          </div>
+        }
+
+        <button type="submit" class="btn btn-primary w-100 mt-2">
+          Entrar
+        </button>
+
+      </form>
+    </div>
+  </div>
+</div>
