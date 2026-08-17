@@ -1,59 +1,124 @@
-<div *ngIf="idNaoEncontrado">
-  <p>Reunião não encontrada.</p>
-  <button type="button" (click)="cancelar()">Voltar para a listagem</button>
-</div>
+<div class="container py-4">
 
-<form *ngIf="!idNaoEncontrado" [formGroup]="form" (ngSubmit)="salvar()">
-
-  <label for="tituloReuniao">Título da reunião</label>
-  <input id="tituloReuniao" type="text" formControlName="tituloReuniao"/>
-
-  <span *ngIf="form.get('tituloReuniao')?.invalid && form.get('tituloReuniao')?.touched" style="color: red;">
-    O título é obrigatório e precisa ter no mínimo 5 caracteres.
-  </span>
-
-  <label for="dataProcessamento">Data</label>
-  <input id="dataProcessamento" type="date" formControlName="dataProcessamento" />
-
-  <span *ngIf="form.get('dataProcessamento')?.invalid && form.get('dataProcessamento')?.touched" style="color: red;">
-    A data é obrigatória.
-  </span>
-
-  <label for="resumoExecutivo">Resumo executivo</label>
-  <textarea id="resumoExecutivo" formControlName="resumoExecutivo"></textarea>
-
-  <label for="status">Status</label>
-  <select id="status" formControlName="status">
-    <option value="">Selecione...</option>
-    <option value="agendada">Agendada</option>
-    <option value="em-andamento">Em andamento</option>
-    <option value="concluida">Concluída</option>
-    <option value="cancelada">Cancelada</option>
-    <option value="pendente">Pendente</option>
-  </select>
-
-  <span *ngIf="form.get('status')?.invalid && form.get('status')?.touched" style="color: red;">
-    O status é obrigatório.
-  </span>
-
-  <label for="areas">Áreas</label>
-  <input id="areas" type="text" formControlName="areas" />
-
-  <label for="participantes">Participantes</label>
-  <input id="participantes" type="text" formControlName="participantes" />
-
-  <div formArrayName="acoes">
-    <h3>Ações</h3>
-
-    <div *ngFor="let acao of acoes.controls; let i = index" [formGroupName]="i">
-      <input type="text" formControlName="descricao" placeholder="Descrição da ação" />
-      <input type="text" formControlName="responsavel" placeholder="Responsável" />
-      <button type="button" (click)="removerAcao(i)">Remover</button>
+  @if (idNaoEncontrado) {
+    <div class="alert alert-warning text-center">
+      Reunião não encontrada.
     </div>
+    <div class="text-center">
+      <button type="button" class="btn btn-primary" (click)="cancelar()">Voltar para a listagem</button>
+    </div>
+  } @else {
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <h4 class="mb-4">{{ idEditando ? 'Editar reunião' : 'Nova reunião' }}</h4>
 
-    <button type="button" (click)="adicionarAcao()">Adicionar ação</button>
-  </div>
+        <form [formGroup]="form" (ngSubmit)="salvar()">
 
-  <button type="submit" [disabled]="form.invalid">Salvar</button>
-  <button type="button" (click)="cancelar()">Cancelar</button>
-</form>
+          <div class="mb-3">
+            <label class="form-label small text-muted" for="tituloReuniao">Título da reunião</label>
+            <input type="text" id="tituloReuniao" formControlName="tituloReuniao" class="form-control"
+              [class.is-invalid]="form.get('tituloReuniao')?.invalid && form.get('tituloReuniao')?.touched" />
+            @if (form.get('tituloReuniao')?.invalid && form.get('tituloReuniao')?.touched) {
+              <div class="invalid-feedback d-block">O título é obrigatório e precisa ter no mínimo 5 caracteres.</div>
+            }
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label small text-muted" for="dataProcessamento">Data</label>
+              <input type="date" id="dataProcessamento" formControlName="dataProcessamento" class="form-control"
+                [class.is-invalid]="form.get('dataProcessamento')?.invalid && form.get('dataProcessamento')?.touched" />
+              @if (form.get('dataProcessamento')?.invalid && form.get('dataProcessamento')?.touched) {
+                <div class="invalid-feedback d-block">A data é obrigatória.</div>
+              }
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label small text-muted" for="status">Status</label>
+              <select id="status" formControlName="status" class="form-select"
+                [class.is-invalid]="form.get('status')?.invalid && form.get('status')?.touched">
+                <option value="">Selecione...</option>
+                <option value="RECEBIDA">Recebida</option>
+                <option value="TRANSCREVENDO">Transcrevendo</option>
+                <option value="ANALISANDO">Analisando</option>
+                <option value="CONCLUIDA">Concluída</option>
+                <option value="ERRO">Erro</option>
+              </select>
+              @if (form.get('status')?.invalid && form.get('status')?.touched) {
+                <div class="invalid-feedback d-block">O status é obrigatório.</div>
+              }
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small text-muted" for="resumoExecutivo">Resumo executivo</label>
+            <textarea id="resumoExecutivo" formControlName="resumoExecutivo" class="form-control" rows="3"></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small text-muted" for="pontosChave">Pontos-chave (uma linha por ponto)</label>
+            <textarea id="pontosChave" formControlName="pontosChave" class="form-control" rows="3"></textarea>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label small text-muted" for="areas">Áreas (separadas por vírgula)</label>
+              <input type="text" id="areas" formControlName="areas" class="form-control" />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label small text-muted" for="participantes">Participantes (separados por vírgula)</label>
+              <input type="text" id="participantes" formControlName="participantes" class="form-control" />
+            </div>
+          </div>
+
+          <hr class="my-4">
+
+          <div formArrayName="acoes" class="mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="text-uppercase text-muted mb-0">Ações</h6>
+              <button type="button" class="btn btn-sm btn-outline-primary" (click)="adicionarAcao()">
+                <i class="fas fa-plus me-1"></i> Adicionar ação
+              </button>
+            </div>
+
+            @for (acao of acoes.controls; track acao; let i = $index) {
+              <div [formGroupName]="i" class="card bg-light border-0 mb-2 p-3">
+                <div class="row g-2 align-items-start">
+                  <div class="col-md-4">
+                    <input type="text" formControlName="descricao" class="form-control form-control-sm" placeholder="Descrição" />
+                  </div>
+                  <div class="col-md-2">
+                    <select formControlName="tipo" class="form-select form-select-sm">
+                      <option value="ACAO">Ação</option>
+                      <option value="TAREFA">Tarefa</option>
+                    </select>
+                  </div>
+                  <div class="col-md-2">
+                    <input type="date" formControlName="prazo" class="form-control form-control-sm" />
+                  </div>
+                  <div class="col-md-3">
+                    <input type="text" formControlName="responsavel" class="form-control form-control-sm" placeholder="Responsável" />
+                  </div>
+                  <div class="col-md-1 text-end">
+                    <button type="button" class="btn btn-sm btn-outline-danger" (click)="removerAcao(i)">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            } @empty {
+              <p class="text-muted small">Nenhuma ação adicionada.</p>
+            }
+          </div>
+
+          <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-secondary" (click)="cancelar()">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar</button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  }
+
+</div>

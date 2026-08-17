@@ -3,7 +3,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { ReuniaoStoreService } from '../../../../core/services/reuniao-store.service';
 import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
-import { Reuniao } from '../../../../core/models/reuniao.model';
+import { Reuniao } from '../../../../core/models';
 
 @Component({
   selector: 'app-reunioes',
@@ -16,7 +16,7 @@ export class ReunioesComponent {
   private readonly store = inject(ReuniaoStoreService);
   private readonly router = inject(Router);
 
-  readonly reunioes = this.store.reunioes;
+  readonly reunioes = this.store.listar;
 
   reuniaoParaExcluir: Reuniao | null = null;
 
