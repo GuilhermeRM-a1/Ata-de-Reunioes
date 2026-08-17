@@ -9,9 +9,9 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'reunioes', pathMatch: 'full' },
       { path: 'reunioes', loadComponent: () => import('./features/reunioes/pages/reunioes/reunioes.component').then(m => m.ReunioesComponent) },
-      { path: 'reunioes/novo', loadComponent: () => import('./features/reunioes/pages/reuniao-novo/reuniao-novo.component').then(m => m.ReuniaoNovoComponent) },
+      { path: 'reunioes/novo', loadComponent: () => import('./features/reunioes/pages/reuniao-form/reuniao-form.component').then(m => m.ReuniaoFormComponent) },
       { path: 'reunioes/:id', loadComponent: () => import('./features/reunioes/pages/reuniao-detalhe/reuniao-detalhe.component').then(m => m.ReuniaoDetalheComponent) },
-      { path: 'reunioes/:id/editar', loadComponent: () => import('./features/reunioes/pages/reuniao-editar/reuniao-editar.component').then(m => m.ReuniaoEditarComponent) },
+      { path: 'reunioes/:id/editar', loadComponent: () => import('./features/reunioes/pages/reuniao-form/reuniao-form.component').then(m => m.ReuniaoFormComponent) },
       { path: 'colaboradores', loadComponent: () => import('./features/colaboradores/pages/colaboradores/colaboradores.component').then(m => m.ColaboradoresComponent) },
     ]
   }

@@ -1,0 +1,59 @@
+<div *ngIf="idNaoEncontrado">
+  <p>Reunião não encontrada.</p>
+  <button type="button" (click)="cancelar()">Voltar para a listagem</button>
+</div>
+
+<form *ngIf="!idNaoEncontrado" [formGroup]="form" (ngSubmit)="salvar()">
+
+  <label for="tituloReuniao">Título da reunião</label>
+  <input id="tituloReuniao" type="text" formControlName="tituloReuniao"/>
+
+  <span *ngIf="form.get('tituloReuniao')?.invalid && form.get('tituloReuniao')?.touched" style="color: red;">
+    O título é obrigatório e precisa ter no mínimo 5 caracteres.
+  </span>
+
+  <label for="dataProcessamento">Data</label>
+  <input id="dataProcessamento" type="date" formControlName="dataProcessamento" />
+
+  <span *ngIf="form.get('dataProcessamento')?.invalid && form.get('dataProcessamento')?.touched" style="color: red;">
+    A data é obrigatória.
+  </span>
+
+  <label for="resumoExecutivo">Resumo executivo</label>
+  <textarea id="resumoExecutivo" formControlName="resumoExecutivo"></textarea>
+
+  <label for="status">Status</label>
+  <select id="status" formControlName="status">
+    <option value="">Selecione...</option>
+    <option value="agendada">Agendada</option>
+    <option value="em-andamento">Em andamento</option>
+    <option value="concluida">Concluída</option>
+    <option value="cancelada">Cancelada</option>
+    <option value="pendente">Pendente</option>
+  </select>
+
+  <span *ngIf="form.get('status')?.invalid && form.get('status')?.touched" style="color: red;">
+    O status é obrigatório.
+  </span>
+
+  <label for="areas">Áreas</label>
+  <input id="areas" type="text" formControlName="areas" />
+
+  <label for="participantes">Participantes</label>
+  <input id="participantes" type="text" formControlName="participantes" />
+
+  <div formArrayName="acoes">
+    <h3>Ações</h3>
+
+    <div *ngFor="let acao of acoes.controls; let i = index" [formGroupName]="i">
+      <input type="text" formControlName="descricao" placeholder="Descrição da ação" />
+      <input type="text" formControlName="responsavel" placeholder="Responsável" />
+      <button type="button" (click)="removerAcao(i)">Remover</button>
+    </div>
+
+    <button type="button" (click)="adicionarAcao()">Adicionar ação</button>
+  </div>
+
+  <button type="submit" [disabled]="form.invalid">Salvar</button>
+  <button type="button" (click)="cancelar()">Cancelar</button>
+</form>
