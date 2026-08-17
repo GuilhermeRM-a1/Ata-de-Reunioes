@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormArray, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ReuniaoStoreService } from '../../core/services/reuniao-store.service'; 
+import { ReuniaoStoreService } from '../../../../core/mock/reuniao-store.service'; 
 
 @Component({
   selector: 'app-reuniao-form',

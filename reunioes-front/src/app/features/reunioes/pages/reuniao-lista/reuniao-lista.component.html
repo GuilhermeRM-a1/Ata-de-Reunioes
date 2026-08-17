@@ -1,0 +1,87 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Lista de Reuniões</h2>
+    <button class="btn btn-primary" (click)="irParaCriar()">
+      <i class="fas fa-plus"></i> Nova Reunião
+    </button>
+  </div>
+
+  <table class="table table-striped table-hover align-middle">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Título</th>
+        <th>Data</th>
+        <th>Resumo</th>
+        <th>Áreas</th>
+        <th>Ações</th>
+        <th>Status</th>
+        <th class="text-end">Gerenciar</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (reuniao of reunioes(); track reuniao.id) {
+        <tr
+          (click)="verDetalhes(reuniao.id)"
+          style="cursor: pointer"
+          title="Clique para ver os detalhes"
+        >
+          <td>{{ reuniao.id }}</td>
+          <td>{{ reuniao.tituloReuniao }}</td>
+          <td>{{ reuniao.dataProcessamento | date: "dd/MM/yyyy HH:mm" }}</td>
+          <td>
+            {{
+              (reuniao.resumoExecutivo | slice: 0 : 50) +
+                (reuniao.resumoExecutivo?.length > 50 ? "..." : "")
+            }}
+          </td>
+
+          <td>
+            <div class="d-flex gap-1 flex-wrap">
+              @for (area of reuniao.areas; track area) {
+                <span class="badge bg-primary">{{ area }}</span>
+              }
+            </div>
+          </td>
+
+          <td>
+            <span class="badge bg-info text-dark">
+              {{ reuniao.totalAcoes }} ações
+            </span>
+          </td>
+
+          <td>
+            <app-status-badge [status]="reuniao.status"></app-status-badge>
+          </td>
+
+          <td class="text-end" (click)="$event.stopPropagation()">
+            <button
+              class="btn btn-sm btn-secondary me-2"
+              (click)="verDetalhes(reuniao.id)"
+            >
+              Ver
+            </button>
+            <button
+              class="btn btn-sm btn-info me-2 text-white"
+              (click)="editar(reuniao.id)"
+            >
+              Editar
+            </button>
+            <button class="btn btn-sm btn-danger" 
+            (click)="excluir(reuniao.id)"
+            >
+              Excluir
+            </button>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="8" class="text-center text-muted py-4">
+            <i class="fas fa-folder-open fa-2x mb-2"></i>
+            <p class="mb-0">Nenhuma reunião cadastrada no momento.</p>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
