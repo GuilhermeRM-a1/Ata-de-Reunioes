@@ -1,17 +1,70 @@
-@import '../../../../styles/status';
+@use 'sass:map';
+@use 'sass:math';
+@use 'sass:color';
+@use '../../../../styles/status' as s;
+
+// Cada status recebe uma das cores do [B-01]. A ordem segue o ciclo de vida
+// da reuniao: chega, transcreve, analisa, e termina em concluida ou erro.
+$cores-por-status: (
+  'recebida': s.$status-5,
+  'transcrevendo': s.$status-1,
+  'analisando': s.$status-3,
+  'concluida': s.$status-2,
+  'erro': s.$status-4,
+);
+
+$texto-escuro: #212529;
+$texto-claro: #ffffff;
+
+// Luminancia relativa (WCAG). Serve para escolher o texto que fica legivel
+// sobre cada cor — o amarelo, por exemplo, precisa de texto escuro.
+@function canal-linear($valor) {
+  $c: math.div($valor, 255);
+
+  @if $c <= 0.03928 {
+    @return math.div($c, 12.92);
+  }
+
+  @return math.pow(math.div($c + 0.055, 1.055), 2.4);
+}
+
+@function luminancia($cor) {
+  @return 0.2126 * canal-linear(color.channel($cor, 'red', $space: rgb)) +
+    0.7152 * canal-linear(color.channel($cor, 'green', $space: rgb)) +
+    0.0722 * canal-linear(color.channel($cor, 'blue', $space: rgb));
+}
+
+@function contraste($a, $b) {
+  $la: luminancia($a);
+  $lb: luminancia($b);
+  $claro: math.max($la, $lb);
+  $escuro: math.min($la, $lb);
+
+  @return math.div($claro + 0.05, $escuro + 0.05);
+}
+
+/** Devolve, entre o texto claro e o escuro, o que contrasta mais com o fundo. */
+@function texto-legivel($fundo) {
+  @if contraste($fundo, $texto-escuro) > contraste($fundo, $texto-claro) {
+    @return $texto-escuro;
+  }
+
+  @return $texto-claro;
+}
 
 .status-badge {
   display: inline-block;
-  padding: 0.3rem 0.7rem;
+  padding: 0.25rem 0.7rem;
   border-radius: 1rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.2;
   white-space: nowrap;
 }
 
-.status-recebida      { background-color: $status-1; }
-.status-concluida     { background-color: $status-2; }
-.status-analisando    { background-color: $status-3; }
-.status-erro          { background-color: $status-4; }
-.status-transcrevendo { background-color: $status-5; }
+@each $status, $fundo in $cores-por-status {
+  .status-badge--#{$status} {
+    background-color: $fundo;
+    color: texto-legivel($fundo);
+  }
+}

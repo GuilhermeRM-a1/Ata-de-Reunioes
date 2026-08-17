@@ -1,30 +1,23 @@
-import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { StatusReuniao } from '../../../core/models/reuniao.model';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { STATUS_LABEL, StatusReuniao } from '../../../core/models';
 
+/**
+ * Badge de status usado pela listagem e pelo detalhe. Sai como componente
+ * proprio justamente para as duas telas nao duplicarem cor e rotulo.
+ */
 @Component({
   selector: 'app-status-badge',
-  standalone: true,
-  imports: [CommonModule],
+  imports: [],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './status-badge.component.html',
-  styleUrl: './status-badge.component.scss'
+  styleUrl: './status-badge.component.scss',
 })
 export class StatusBadgeComponent {
-  @Input({ required: true }) status!: StatusReuniao;
+  readonly status = input.required<StatusReuniao>();
 
-  private readonly rotulos: Record<StatusReuniao, string> = {
-    [StatusReuniao.RECEBIDA]: 'Recebida',
-    [StatusReuniao.TRANSCREVENDO]: 'Transcrevendo',
-    [StatusReuniao.ANALISANDO]: 'Analisando',
-    [StatusReuniao.CONCLUIDA]: 'Concluída',
-    [StatusReuniao.ERRO]: 'Erro',
-  };
+  /** Rotulo legivel: CONCLUIDA vira "Concluída". */
+  readonly rotulo = computed(() => STATUS_LABEL[this.status()]);
 
-  get rotulo(): string {
-    return this.rotulos[this.status];
-  }
-
-  get classeCss(): string {
-    return `status-badge status-${this.status.toLowerCase()}`;
-  }
+  /** Uma classe por status, para o SCSS pintar cada um de um jeito. */
+  readonly classe = computed(() => `status-badge--${this.status().toLowerCase()}`);
 }

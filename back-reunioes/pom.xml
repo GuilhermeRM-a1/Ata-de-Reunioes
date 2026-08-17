@@ -30,6 +30,12 @@
 		<java.version>17</java.version>
 	</properties>
 	<dependencies>
+		<!-- Swagger UI. A linha 3.x e a compativel com Spring Boot 4. -->
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>3.1.0</version>
+		</dependency>
 		<dependency>
 		<groupId>com.h2database</groupId>
 		<artifactId>h2</artifactId>

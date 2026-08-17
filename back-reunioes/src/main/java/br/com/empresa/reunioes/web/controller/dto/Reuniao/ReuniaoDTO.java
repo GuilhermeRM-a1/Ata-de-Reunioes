@@ -13,11 +13,19 @@ public record ReuniaoDTO(String titulo,
                          Integer totalAcoes) {
 
     public static ReuniaoDTO de(Reuniao reuniao) {
+
+        // Registro antigo pode ter as colecoes nulas — sem isso a listagem quebra.
+        List<String> participantes = reuniao.getParticipantes() == null
+                ? List.of()
+                : reuniao.getParticipantes().stream().map(Colaborador::getNome).toList();
+
+        List<String> areas = reuniao.getAreas() == null ? List.of() : reuniao.getAreas();
+
         return new ReuniaoDTO(reuniao.getTitulo(),
                 reuniao.getData(),
                 reuniao.getStatus(),
-                reuniao.getParticipantes().stream().map(Colaborador::getNome).toList(),
-                reuniao.getAreas(),
+                participantes,
+                areas,
                 reuniao.getTotalAcoes());
     }
 }
