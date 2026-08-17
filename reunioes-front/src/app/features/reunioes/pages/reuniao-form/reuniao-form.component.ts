@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormArray, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ReunioesStore } from '../../data/reunioes.store';
+import { ReuniaoStoreService } from '../../core/services/reuniao-store.service'; 
 
 @Component({
   selector: 'app-reuniao-form',
@@ -12,15 +12,14 @@ import { ReunioesStore } from '../../data/reunioes.store';
 })
 export class ReuniaoFormComponent implements OnInit {
   form!: FormGroup;
-  idEditando: string | null = null;
+  idEditando: number | null = null; 
   idNaoEncontrado = false;
 
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
-    private store: ReunioesStore,
+    private store: ReuniaoStoreService, 
     private router: Router
-
   ) {
     this.form = this.fb.group({
       tituloReuniao: ['', [Validators.required, Validators.minLength(5)]],
@@ -33,19 +32,20 @@ export class ReuniaoFormComponent implements OnInit {
     });
   }
 
- ngOnInit(): void {
-  this.idEditando = this.route.snapshot.paramMap.get('id');
+  ngOnInit(): void {
+    const idParam = this.route.snapshot.paramMap.get('id');
+    
+    if (idParam) {
+      this.idEditando = Number(idParam);
+      const reuniao = this.store.buscarPorId(this.idEditando); 
 
-  if (this.idEditando) {
-    const reuniao = this.store.obterPorId(this.idEditando);
-
-    if (reuniao) {
-      this.form.patchValue(reuniao);
-    } else {
-      this.idNaoEncontrado = true;
+      if (reuniao) {
+        this.form.patchValue(reuniao);
+      } else {
+        this.idNaoEncontrado = true;
+      }
     }
   }
-}
 
   get acoes(): FormArray {
     return this.form.get('acoes') as FormArray;
@@ -60,26 +60,24 @@ export class ReuniaoFormComponent implements OnInit {
   }
 
   salvar(): void {
-  if (this.form.invalid) {
-    return;
+    if (this.form.invalid) {
+      return;
+    }
+
+    const dados = this.form.value;
+
+    if (this.idEditando !== null) {
+      this.store.atualizar(this.idEditando, dados); 
+    } else {
+      this.store.criar(dados); 
+    }
+
+    this.router.navigate(['/reunioes']);
   }
 
-  const dados = this.form.value;
-
-  if (this.idEditando) {
-    this.store.atualizar(this.idEditando, dados);
-  } else {
-    this.store.criar(dados);
+  cancelar(): void {
+    this.router.navigate(['/reunioes']);
   }
-
-  this.router.navigate(['/reunioes']);
-}
-
-  cancelar():void{
-    this.router.navigate(['/reunioes'])
-  }
-
-
 
   removerAcao(index: number): void {
     this.acoes.removeAt(index);
