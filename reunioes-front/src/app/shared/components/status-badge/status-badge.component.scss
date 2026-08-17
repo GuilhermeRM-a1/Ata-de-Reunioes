@@ -1,0 +1,17 @@
+@import '../../../../styles/status';
+
+.status-badge {
+  display: inline-block;
+  padding: 0.3rem 0.7rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.status-recebida      { background-color: $status-1; }
+.status-concluida     { background-color: $status-2; }
+.status-analisando    { background-color: $status-3; }
+.status-erro          { background-color: $status-4; }
+.status-transcrevendo { background-color: $status-5; }

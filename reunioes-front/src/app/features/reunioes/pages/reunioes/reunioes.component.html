@@ -1,1 +1,71 @@
-<p>reunioes works!</p>
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Reuniões</h2>
+    <button class="btn btn-primary" (click)="novaReuniao()">
+      <i class="fas fa-plus me-1"></i> Nova reunião
+    </button>
+  </div>
+
+  @if (reunioes().length === 0) {
+    <div class="alert alert-info text-center">
+      Nenhuma reunião cadastrada ainda.
+    </div>
+  } @else {
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>Título</th>
+          <th>Data</th>
+          <th>Resumo</th>
+          <th>Áreas</th>
+          <th>Ações</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (reuniao of reunioes(); track reuniao.id) {
+          <tr (click)="verReuniao(reuniao.id)" style="cursor: pointer;">
+            <td>{{ reuniao.titulo }}</td>
+            <td>{{ reuniao.data | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td>{{ resumoTruncado(reuniao.resumoExecutivo) }}</td>
+            <td>
+              @for (area of reuniao.areas; track area) {
+                <span class="badge rounded-pill bg-light text-dark border me-1">{{ area }}</span>
+              }
+            </td>
+            <td>{{ reuniao.acoes.length }}</td>
+            <td><app-status-badge [status]="reuniao.status"></app-status-badge></td>
+            <td class="text-end">
+              <button class="btn btn-sm btn-outline-secondary me-1" (click)="editarReuniao(reuniao.id, $event)" title="Editar">
+                <i class="fas fa-pen"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger" (click)="abrirConfirmacaoExclusao(reuniao, $event)" title="Excluir">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>
+
+@if (reuniaoParaExcluir) {
+  <div class="modal-backdrop-custom" (click)="cancelarExclusao()">
+    <div class="modal-dialog-custom" (click)="$event.stopPropagation()">
+      <div class="modal-content p-3">
+        <div class="modal-header border-0">
+          <h5 class="modal-title">Confirmar exclusão</h5>
+        </div>
+        <div class="modal-body">
+          Tem certeza que deseja excluir a reunião <strong>{{ reuniaoParaExcluir.titulo }}</strong>? Essa ação não pode ser desfeita.
+        </div>
+        <div class="modal-footer border-0">
+          <button class="btn btn-secondary" (click)="cancelarExclusao()">Cancelar</button>
+          <button class="btn btn-danger" (click)="confirmarExclusao()">Excluir</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
