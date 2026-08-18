@@ -5,7 +5,8 @@ import br.com.empresa.reunioes.domain.model.Reuniao;
 
 import java.util.List;
 
-public record ReuniaoDTO(String titulo,
+public record ReuniaoDTO(Long id,
+                         String titulo,
                          String data,
                          String status,
                          List<String> participantes,
@@ -21,7 +22,8 @@ public record ReuniaoDTO(String titulo,
 
         List<String> areas = reuniao.getAreas() == null ? List.of() : reuniao.getAreas();
 
-        return new ReuniaoDTO(reuniao.getTitulo(),
+        return new ReuniaoDTO(reuniao.getId(),
+                reuniao.getTitulo(),
                 reuniao.getData(),
                 reuniao.getStatus(),
                 participantes,
