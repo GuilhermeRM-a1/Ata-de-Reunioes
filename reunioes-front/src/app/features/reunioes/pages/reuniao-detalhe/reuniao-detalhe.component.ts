@@ -17,9 +17,12 @@ export class ReuniaoDetalheComponent {
   private readonly router = inject(Router);
   private readonly store = inject(ReuniaoStoreService);
 
+  mensagemSucessoVisivel = false;
   reuniao: ReuniaoDetalhe | undefined;
   reuniaoNaoEncontrada = false;
   modalExclusaoAberto = false;
+  transcricaoAberta = false;
+
 
   constructor() {
     const idParam = this.route.snapshot.paramMap.get('id');
@@ -29,6 +32,8 @@ export class ReuniaoDetalheComponent {
     this.reuniao = this.store.buscarPorId(id) as ReuniaoDetalhe | undefined;
     this.reuniaoNaoEncontrada = !this.reuniao;
   }
+
+  
 
   get pontosChaveLista(): string[] {
     if (!this.reuniao?.pontosChave) return [];
@@ -51,6 +56,20 @@ export class ReuniaoDetalheComponent {
     if (this.reuniao) {
       this.store.remover(this.reuniao.id);
       this.router.navigate(['/reunioes']);
+    }
+  }
+
+  alternarTranscricao(): void {
+  this.transcricaoAberta = !this.transcricaoAberta;
+}
+  salvarAlteracoes(): void {
+    if (this.reuniao) { 
+  this.mensagemSucessoVisivel = true;
+      
+      setTimeout(() => {
+        this.mensagemSucessoVisivel = false;
+        this.router.navigate([`/reunioes/${this.reuniao?.id}`]);
+      }, 1500);
     }
   }
 }
