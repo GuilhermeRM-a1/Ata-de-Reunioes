@@ -3,6 +3,11 @@ import { ShellComponent } from './shell/shell.component';
 
 export const routes: Routes = [
   {
+    path: '',
+    redirectTo: 'login',
+    pathMatch: 'full'
+  },
+  {
     path: 'login',
     loadComponent: () => import('./features/login/pages/login/login.component').then(m => m.LoginComponent)
   },
@@ -10,7 +15,6 @@ export const routes: Routes = [
     path: '',
     component: ShellComponent,
     children: [
-      { path: '', redirectTo: 'reunioes', pathMatch: 'full' },
       { path: 'reunioes', loadComponent: () => import('./features/reunioes/pages/reunioes/reunioes.component').then(m => m.ReunioesComponent) },
       { path: 'reunioes/novo', loadComponent: () => import('./features/reunioes/pages/reuniao-form/reuniao-form.component').then(m => m.ReuniaoFormComponent) },
       { path: 'reunioes/:id', loadComponent: () => import('./features/reunioes/pages/reuniao-detalhe/reuniao-detalhe.component').then(m => m.ReuniaoDetalheComponent) },
