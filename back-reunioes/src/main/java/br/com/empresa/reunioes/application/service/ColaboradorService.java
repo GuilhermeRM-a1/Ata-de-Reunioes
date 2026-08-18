@@ -3,6 +3,7 @@ package br.com.empresa.reunioes.application.service;
 import br.com.empresa.reunioes.domain.model.Colaborador;
 import br.com.empresa.reunioes.domain.repository.ColaboradorRepository;
 import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorDTO;
+import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorPatchRequest;
 import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorRequest;
 import br.com.empresa.reunioes.web.controller.dto.PaginaResponse;
 import br.com.empresa.reunioes.web.exception.RecursoNaoEncontradoException;
@@ -55,7 +56,7 @@ public class ColaboradorService {
         return ColaboradorDTO.de(colaboradorRepository.save(colaborador));
     }
 
-    public ColaboradorDTO atualizarParcial(Long id, ColaboradorRequest request) {
+    public ColaboradorDTO atualizarParcial(Long id, ColaboradorPatchRequest request) {
 
          Colaborador colaborador = buscarEntidade(id);
 

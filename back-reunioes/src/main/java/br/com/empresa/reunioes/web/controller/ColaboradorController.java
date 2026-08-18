@@ -2,6 +2,7 @@ package br.com.empresa.reunioes.web.controller;
 
 import br.com.empresa.reunioes.application.service.ColaboradorService;
 import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorDTO;
+import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorPatchRequest;
 import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorRequest;
 import br.com.empresa.reunioes.web.controller.dto.PaginaResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -68,13 +69,16 @@ public class ColaboradorController {
     }
 
     @Operation(summary = "Atualiza parcialmente um colaborador",
-            description = "Campo ausente ou nulo é ignorado — só o que vier no corpo é alterado.")
+            description = "Campo ausente ou nulo é ignorado — só o que vier no corpo é alterado. "
+                    + "O campo que vier preenchido não pode ser vazio.")
     @ApiResponses({
             @ApiResponse(responseCode = "202", description = "Colaborador atualizado"),
+            @ApiResponse(responseCode = "400", description = "Campo enviado veio vazio"),
             @ApiResponse(responseCode = "404", description = "Nenhum colaborador com esse id")
     })
     @PatchMapping("/{id}")
-    public ResponseEntity<ColaboradorDTO> atualizarParcial (@PathVariable Long id, @RequestBody ColaboradorRequest request) {
+    public ResponseEntity<ColaboradorDTO> atualizarParcial (@PathVariable Long id,
+                                                            @Valid @RequestBody ColaboradorPatchRequest request) {
 
         return new ResponseEntity<>(this.service.atualizarParcial(id, request), HttpStatus.ACCEPTED);
     }
