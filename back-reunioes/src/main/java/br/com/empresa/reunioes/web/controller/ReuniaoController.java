@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/reunioes")
 @Tag(name = "Reuniões", description = "CRUD de reuniões e suas ações")
 public class ReuniaoController {
 

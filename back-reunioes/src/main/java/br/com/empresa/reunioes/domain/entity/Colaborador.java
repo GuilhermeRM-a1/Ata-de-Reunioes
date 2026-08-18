@@ -1,4 +1,4 @@
-package br.com.empresa.reunioes.domain.model;
+package br.com.empresa.reunioes.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

@@ -24,9 +24,6 @@ public record ReuniaoRequest(@NotBlank(message = "O título é obrigatório")
                              List<String> areas,
                              List<String> pontosChaves,
                              List<Long> participantes,
-                             List<Long> acoes,
-
-                             @PositiveOrZero(message = "O total de ações não pode ser negativo")
-                             Integer totalAcoes){
+                             List<Long> acoes){
 
 }

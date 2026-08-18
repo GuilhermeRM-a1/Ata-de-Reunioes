@@ -1,8 +1,8 @@
 package br.com.empresa.reunioes.application.service;
 
-import br.com.empresa.reunioes.domain.model.Acao;
-import br.com.empresa.reunioes.domain.model.Colaborador;
-import br.com.empresa.reunioes.domain.model.Reuniao;
+import br.com.empresa.reunioes.domain.entity.Acao;
+import br.com.empresa.reunioes.domain.entity.Colaborador;
+import br.com.empresa.reunioes.domain.entity.Reuniao;
 import br.com.empresa.reunioes.domain.repository.AcaoRepository;
 import br.com.empresa.reunioes.domain.repository.ColaboradorRepository;
 import br.com.empresa.reunioes.domain.repository.ReuniaoRepository;
