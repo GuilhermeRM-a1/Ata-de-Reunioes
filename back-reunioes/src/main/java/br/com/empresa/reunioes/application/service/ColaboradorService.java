@@ -1,6 +1,6 @@
 package br.com.empresa.reunioes.application.service;
 
-import br.com.empresa.reunioes.domain.model.Colaborador;
+import br.com.empresa.reunioes.domain.entity.Colaborador;
 import br.com.empresa.reunioes.domain.repository.ColaboradorRepository;
 import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorDTO;
 import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorRequest;

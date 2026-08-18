@@ -1,6 +1,6 @@
 package br.com.empresa.reunioes.domain.repository;
 
-import br.com.empresa.reunioes.domain.model.Reuniao;
+import br.com.empresa.reunioes.domain.entity.Reuniao;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

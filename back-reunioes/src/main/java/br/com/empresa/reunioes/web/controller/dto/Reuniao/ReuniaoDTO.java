@@ -1,7 +1,7 @@
 package br.com.empresa.reunioes.web.controller.dto.Reuniao;
 
-import br.com.empresa.reunioes.domain.model.Colaborador;
-import br.com.empresa.reunioes.domain.model.Reuniao;
+import br.com.empresa.reunioes.domain.entity.Colaborador;
+import br.com.empresa.reunioes.domain.entity.Reuniao;
 
 import java.util.List;
 

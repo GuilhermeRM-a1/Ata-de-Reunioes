@@ -1,8 +1,6 @@
 package br.com.empresa.reunioes.web.controller.dto.Colaborador;
 
-import br.com.empresa.reunioes.domain.model.Colaborador;
-
-import java.util.List;
+import br.com.empresa.reunioes.domain.entity.Colaborador;
 
 public record ColaboradorDTO(
         Long id,

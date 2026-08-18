@@ -1,8 +1,8 @@
 package br.com.empresa.reunioes.application.service;
 
-import br.com.empresa.reunioes.domain.model.Acao;
-import br.com.empresa.reunioes.domain.model.Colaborador;
-import br.com.empresa.reunioes.domain.model.Reuniao;
+import br.com.empresa.reunioes.domain.entity.Acao;
+import br.com.empresa.reunioes.domain.entity.Colaborador;
+import br.com.empresa.reunioes.domain.entity.Reuniao;
 import br.com.empresa.reunioes.domain.repository.AcaoRepository;
 import br.com.empresa.reunioes.domain.repository.ColaboradorRepository;
 import br.com.empresa.reunioes.domain.repository.ReuniaoRepository;
@@ -97,8 +97,6 @@ public class ReuniaoService{
             reuniao.setAcoes(buscarAcoes(request.acoes()));
             reuniao.setTotalAcoes(reuniao.getAcoes().size());
         }
-        if(request.totalAcoes() != null)
-            reuniao.setTotalAcoes(request.totalAcoes());
 
         return ReuniaoDTO.de(this.reuniaoRepository.save(reuniao));
     }
@@ -160,7 +158,11 @@ public class ReuniaoService{
             return acoes.size();
         }
 
-        return request.totalAcoes() != null ? request.totalAcoes() : 0;
+        if (request.acoes() == null) {
+            return 0;
+        }
+
+        return request.acoes().size();
     }
 
 }
