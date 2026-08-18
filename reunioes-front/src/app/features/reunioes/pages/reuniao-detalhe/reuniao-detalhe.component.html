@@ -1,19 +1,21 @@
 @if (reuniaoNaoEncontrada) {
   <div class="container py-5 text-center">
-    <div class="alert alert-warning">
-      Reunião não encontrada.
-    </div>
-    <a routerLink="/reunioes" class="btn btn-primary mt-2">Voltar para a listagem</a>
+    <div class="alert alert-warning">Reunião não encontrada.</div>
+    <a routerLink="/reunioes" class="btn btn-primary mt-2"
+      >Voltar para a listagem</a
+    >
   </div>
 } @else if (reuniao) {
   <div class="container-fluid py-4">
-
     <div class="d-flex justify-content-between align-items-center mb-4">
       <a routerLink="/reunioes" class="btn btn-outline-secondary">
         <i class="fas fa-arrow-left me-1"></i> Voltar
       </a>
       <div>
-        <a [routerLink]="['/reunioes', reuniao.id, 'editar']" class="btn btn-outline-primary me-2">
+        <a
+          [routerLink]="['/reunioes', reuniao.id, 'editar']"
+          class="btn btn-outline-primary me-2"
+        >
           <i class="fas fa-pen me-1"></i> Editar
         </a>
         <button class="btn btn-outline-danger" (click)="abrirModalExclusao()">
@@ -25,10 +27,14 @@
     <div class="d-flex justify-content-between align-items-start mb-3">
       <div>
         <h2>{{ reuniao.tituloReuniao }}</h2>
-        <p class="text-muted mb-1">{{ reuniao.dataProcessamento | date:'dd/MM/yyyy HH:mm' }}</p>
+        <p class="text-muted mb-1">
+          {{ reuniao.dataProcessamento | date: "dd/MM/yyyy HH:mm" }}
+        </p>
         <div>
           @for (area of reuniao.areas; track area) {
-            <span class="badge rounded-pill bg-light text-dark border me-1">{{ area }}</span>
+            <span class="badge rounded-pill bg-light text-dark border me-1">{{
+              area
+            }}</span>
           }
         </div>
       </div>
@@ -72,8 +78,10 @@
               <tr>
                 <td>{{ acao.descricao }}</td>
                 <td>{{ acao.tipo }}</td>
-                <td>{{ acao.prazo ? (acao.prazo | date:'dd/MM/yyyy') : '—' }}</td>
-                <td>{{ acao.responsavel ?? '—' }}</td>
+                <td>
+                  {{ acao.prazo ? (acao.prazo | date: "dd/MM/yyyy") : "—" }}
+                </td>
+                <td>{{ acao.responsavel ?? "—" }}</td>
               </tr>
             }
           </tbody>
@@ -88,7 +96,9 @@
       @if (reuniao.participantes.length > 0) {
         <div class="mb-2">
           @for (participante of reuniao.participantes; track participante) {
-            <span class="badge rounded-pill bg-secondary me-1">{{ participante }}</span>
+            <span class="badge rounded-pill bg-secondary me-1">{{
+              participante
+            }}</span>
           }
         </div>
         <p class="text-muted small">
@@ -105,19 +115,31 @@
       <div class="accordion" id="accordionTranscricao">
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-mdb-collapse-init data-mdb-target="#collapseTranscricao">
-              Ver transcrição completa
+            <button
+              class="accordion-button"
+              [class.collapsed]="!transcricaoAberta"
+              type="button"
+              (click)="alternarTranscricao()"
+            >
+              {{
+                transcricaoAberta
+                  ? "Ocultar transcrição completa"
+                  : "Ver transcrição completa"
+              }}
             </button>
           </h2>
-          <div id="collapseTranscricao" class="accordion-collapse collapse" data-mdb-parent="#accordionTranscricao">
-            <div class="accordion-body" style="white-space: pre-line;">
-              {{ reuniao.transcricaoPura || 'Transcrição não disponível.' }}
+          <div
+            id="collapseTranscricao"
+            class="accordion-collapse collapse"
+            [class.show]="transcricaoAberta"
+          >
+            <div class="accordion-body" style="white-space: pre-line">
+              {{ reuniao.transcricaoPura || "Transcrição não disponível." }}
             </div>
           </div>
         </div>
       </div>
     </div>
-
   </div>
 }
 
@@ -129,11 +151,17 @@
           <h5 class="modal-title">Confirmar exclusão</h5>
         </div>
         <div class="modal-body">
-          Tem certeza que deseja excluir a reunião <strong>{{ reuniao.tituloReuniao }}</strong>? Essa ação não pode ser desfeita.
+          Tem certeza que deseja excluir a reunião
+          <strong>{{ reuniao.tituloReuniao }}</strong
+          >? Essa ação não pode ser desfeita.
         </div>
         <div class="modal-footer border-0">
-          <button class="btn btn-secondary" (click)="cancelarExclusao()">Cancelar</button>
-          <button class="btn btn-danger" (click)="confirmarExclusao()">Excluir</button>
+          <button class="btn btn-secondary" (click)="cancelarExclusao()">
+            Cancelar
+          </button>
+          <button class="btn btn-danger" (click)="confirmarExclusao()">
+            Excluir
+          </button>
         </div>
       </div>
     </div>

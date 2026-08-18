@@ -1,8 +1,6 @@
-package br.com.empresa.reunioes.domain.model;
+package br.com.empresa.reunioes.domain.entity;
 
-import br.com.empresa.reunioes.domain.enums.StatusReuniao;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
