@@ -14,6 +14,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.net.URI;
 
 @RestController
 @RequiredArgsConstructor
@@ -54,7 +57,15 @@ public class ReuniaoController {
     @PostMapping()
     public ResponseEntity<ReuniaoDTO> salvar (@Valid @RequestBody ReuniaoRequest request) {
 
-        return new ResponseEntity<>(reuniaoService.salvar(request), HttpStatus.CREATED);
+        ReuniaoDTO criada = reuniaoService.salvar(request);
+
+        // 201 sem Location obriga o cliente a adivinhar a URL do que ele acabou de criar.
+        URI endereco = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(criada.id())
+                .toUri();
+
+        return ResponseEntity.created(endereco).body(criada);
     }
 
     @Operation(summary = "Substitui uma reunião por completo")

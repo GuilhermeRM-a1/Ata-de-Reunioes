@@ -43,7 +43,10 @@ public class ReuniaoService{
         reuniao.setAcoes(buscarAcoes(request.acoes()));
         reuniao.setTotalAcoes(calcularTotalAcoes(request, reuniao.getAcoes()));
 
-        return ReuniaoDTO.de(reuniaoRepository.save(reuniao));
+        Reuniao salva = reuniaoRepository.save(reuniao);
+        vincularAcoes(salva);
+
+        return ReuniaoDTO.de(salva);
     }
 
     public ReuniaoDTO buscarPorId(Long id) {
@@ -74,7 +77,10 @@ public class ReuniaoService{
         reuniao.setAcoes(buscarAcoes(request.acoes()));
         reuniao.setTotalAcoes(calcularTotalAcoes(request, reuniao.getAcoes()));
 
-        return ReuniaoDTO.de(reuniaoRepository.save(reuniao));
+        Reuniao salva = reuniaoRepository.save(reuniao);
+        vincularAcoes(salva);
+
+        return ReuniaoDTO.de(salva);
     }
 
     public ReuniaoDTO atualizarParcial(Long id, ReuniaoRequest request) {
@@ -98,7 +104,10 @@ public class ReuniaoService{
             reuniao.setTotalAcoes(reuniao.getAcoes().size());
         }
 
-        return ReuniaoDTO.de(this.reuniaoRepository.save(reuniao));
+        Reuniao salva = this.reuniaoRepository.save(reuniao);
+        vincularAcoes(salva);
+
+        return ReuniaoDTO.de(salva);
     }
 
     public void deletar(Long id) {
@@ -106,6 +115,23 @@ public class ReuniaoService{
         Reuniao reuniao = buscarEntidade(id);
 
         reuniaoRepository.delete(reuniao);
+    }
+
+    /**
+     * Grava o lado dono do vinculo. A coluna reuniao_id mora na tabela acao,
+     * entao mexer so em Reuniao.acoes nao chega ao banco: o Hibernate ignora a
+     * ponta inversa. Sem isto a reuniao salva e as acoes ficam soltas.
+     */
+    private void vincularAcoes(Reuniao reuniao) {
+
+        List<Acao> acoes = reuniao.getAcoes();
+
+        if (acoes == null || acoes.isEmpty()) {
+            return;
+        }
+
+        acoes.forEach(acao -> acao.setReuniao(reuniao));
+        acaoRepository.saveAll(acoes);
     }
 
     /** Uso interno da propria camada de servico — a web recebe DTO. */
