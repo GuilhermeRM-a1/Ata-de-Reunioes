@@ -19,7 +19,11 @@ public class Acao {
     private String tipo;
     private String prazo;
 
+    /** Nomes fixados na mao: o padrao do Hibernate nao bate com a migration. */
     @ManyToMany
+    @JoinTable(name = "acao_responsavel",
+            joinColumns = @JoinColumn(name = "acao_id"),
+            inverseJoinColumns = @JoinColumn(name = "responsavel_id"))
     private List<Colaborador> responsavel;
 
     @ManyToOne

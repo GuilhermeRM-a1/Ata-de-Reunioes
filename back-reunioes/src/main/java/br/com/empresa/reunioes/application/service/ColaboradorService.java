@@ -26,6 +26,7 @@ public class ColaboradorService {
     public ColaboradorDTO salvar(ColaboradorRequest request) {
         Colaborador colaborador = new Colaborador();
         colaborador.setNome(request.nome());
+        colaborador.setEmail(request.email());
         colaborador.setSenha(request.senha());
         colaborador.setMonitorarReunioes(request.monitorarReunioes());
         colaborador.setDataCadastro(request.dataCadastro());
@@ -50,6 +51,7 @@ public class ColaboradorService {
     public ColaboradorDTO atualizar(Long id, ColaboradorRequest request) {
         Colaborador colaborador = buscarEntidade(id);
         colaborador.setNome(request.nome());
+        colaborador.setEmail(request.email());
         colaborador.setMonitorarReunioes(request.monitorarReunioes());
         colaborador.setDataCadastro(request.dataCadastro());
 
@@ -62,6 +64,8 @@ public class ColaboradorService {
 
         if(request.nome() != null)
             colaborador.setNome(request.nome());
+        if(request.email() != null)
+            colaborador.setEmail(request.email());
         if(request.monitorarReunioes() != null)
             colaborador.setMonitorarReunioes(request.monitorarReunioes());
         if(request.dataCadastro() != null)
