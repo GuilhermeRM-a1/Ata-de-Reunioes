@@ -1,6 +1,8 @@
 package br.com.empresa.reunioes.web.controller;
 
+import br.com.empresa.reunioes.application.mapper.AcaoMapper;
 import br.com.empresa.reunioes.application.service.AcaoService;
+import br.com.empresa.reunioes.domain.entity.Acao;
 import br.com.empresa.reunioes.web.controller.dto.Acao.AcaoDTO;
 import br.com.empresa.reunioes.web.controller.dto.Acao.AcaoRequest;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,27 +24,7 @@ import java.util.List;
 public class AcaoController {
 
     private final AcaoService service;
-
-    @Operation(summary = "Lista ações",
-            description = "Devolve a lista de ações cadastradas.")
-    @ApiResponse(responseCode = "200", description = "Lista de ações devolvida")
-    @GetMapping()
-    public ResponseEntity<List<AcaoDTO>> listar() {
-
-        return ResponseEntity.ok(service.listar());
-    }
-
-    @Operation(summary = "Busca uma ação pelo id")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Ação encontrada"),
-            @ApiResponse(responseCode = "404", description = "Nenhuma ação com esse id"),
-            @ApiResponse(responseCode = "400", description = "Id em formato inválido")
-    })
-    @GetMapping("/{id}")
-    public ResponseEntity<AcaoDTO> buscarPorId(@PathVariable Long id) {
-
-        return ResponseEntity.ok(service.buscarPorId(id));
-    }
+    private final AcaoMapper mapper;
 
     @Operation(summary = "Cria uma ação",
             description = "Os ids dos responsáveis e da reunião são resolvidos para as entidades correspondentes.")
@@ -53,8 +35,38 @@ public class AcaoController {
     })
     @PostMapping()
     public ResponseEntity<AcaoDTO> salvar(@Valid @RequestBody AcaoRequest request) {
+        Acao acao = service.salvar(request);
+        AcaoDTO dto = mapper.toDTO(acao);
 
-        return new ResponseEntity<>(service.salvar(request), HttpStatus.CREATED);
+        return new ResponseEntity<>(dto, HttpStatus.CREATED);
+    }
+
+    @Operation(summary = "Lista ações",
+            description = "Devolve a lista de ações cadastradas.")
+    @ApiResponse(responseCode = "200", description = "Lista de ações devolvida")
+    @GetMapping()
+    public ResponseEntity<List<AcaoDTO>> listar() {
+
+        List<AcaoDTO> dto = service.listar()
+                .stream()
+                .map(mapper::toDTO)
+                .toList();
+
+        return ResponseEntity.ok(dto);
+    }
+
+    @Operation(summary = "Busca uma ação pelo id")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Ação encontrada"),
+            @ApiResponse(responseCode = "404", description = "Nenhuma ação com esse id"),
+            @ApiResponse(responseCode = "400", description = "Id em formato inválido")
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<AcaoDTO> buscarPorId(@PathVariable Long id) {
+        Acao acao = service.buscarPorId(id);
+        AcaoDTO dto = mapper.toDTO(acao);
+
+        return ResponseEntity.ok(dto);
     }
 
     // PUT dando 500 por algum motivo
@@ -67,8 +79,10 @@ public class AcaoController {
     @PutMapping("/{id}")
     public ResponseEntity<AcaoDTO> atualizar(@PathVariable Long id,
                                              @Valid @RequestBody AcaoRequest request) {
+        Acao acao = service.atualizar(id, request);
+        AcaoDTO dto = mapper.toDTO(acao);
 
-        return new ResponseEntity<>(service.atualizar(id, request), HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(dto, HttpStatus.ACCEPTED);
     }
 
     @Operation(summary = "Atualiza parcialmente uma ação",
@@ -80,8 +94,10 @@ public class AcaoController {
     @PatchMapping("/{id}")
     public ResponseEntity<AcaoDTO> atualizarParcial(@PathVariable Long id,
                                                     @RequestBody AcaoRequest request) {
+        Acao acao = service.atualizarParcial(id, request);
+        AcaoDTO dto = mapper.toDTO(acao);
 
-        return new ResponseEntity<>(service.atualizarParcial(id, request), HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(dto, HttpStatus.ACCEPTED);
     }
 
     @Operation(summary = "Exclui uma ação")

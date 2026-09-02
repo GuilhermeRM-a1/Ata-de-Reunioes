@@ -7,7 +7,8 @@ import lombok.Setter;
 import java.util.List;
 
 @Entity
-@Getter @Setter
+@Getter
+@Setter
 public class Colaborador {
 
     @Id
@@ -18,6 +19,7 @@ public class Colaborador {
     private String senha;
     private Boolean monitorarReunioes;
     private String dataCadastro;
+    private Boolean admin;
 
     @OneToMany
     private List<Acao> acoes;
