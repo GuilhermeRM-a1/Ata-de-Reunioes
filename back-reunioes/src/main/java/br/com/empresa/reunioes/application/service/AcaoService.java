@@ -1,5 +1,6 @@
 package br.com.empresa.reunioes.application.service;
 
+import br.com.empresa.reunioes.application.mapper.AcaoMapper;
 import br.com.empresa.reunioes.domain.entity.Acao;
 import br.com.empresa.reunioes.domain.entity.Colaborador;
 import br.com.empresa.reunioes.domain.entity.Reuniao;
@@ -15,7 +16,9 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Todo metodo publico devolve DTO — a camada web nao ve entidade JPA. */
+/**
+ * Todo metodo publico devolve DTO — a camada web nao ve entidade JPA.
+ */
 @Service
 @RequiredArgsConstructor
 public class AcaoService {
@@ -23,121 +26,90 @@ public class AcaoService {
     private final AcaoRepository repository;
     private final ColaboradorRepository colaboradorRepository;
     private final ReuniaoRepository reuniaoRepository;
+    private final AcaoMapper mapper;
 
-    public AcaoDTO salvar(AcaoRequest request) {
+    public Acao salvar(AcaoRequest request) {
 
-            Acao acao = new Acao();
+        Acao acao = mapper.toEntity(request);
 
-            acao.setTitulo(request.titulo());
-            acao.setDescricao(request.descricao());
-            acao.setTipo(request.tipo());
-            acao.setPrazo(request.prazo());
+        acao.setResponsavel(buscarResponsaveis(request.responsavel()));
+        acao.setReuniao(buscarReuniao(request.reuniao()));
 
+        return repository.save(acao);
+    }
+
+    public Acao buscarPorId(Long id) {
+
+        return repository.findById(id)
+                .orElseThrow(() -> RecursoNaoEncontradoException.de("Ação", id));
+    }
+
+    public List<Acao> listar() {
+
+        return repository.findAll();
+    }
+
+    public Acao atualizar(Long id, AcaoRequest request) {
+
+        Acao acao = buscarPorId(id);
+
+        mapper.updateEntity(acao, request);
+
+        acao.setResponsavel(buscarResponsaveis(request.responsavel()));
+
+        acao.setReuniao(buscarReuniao(request.reuniao()));
+
+        return repository.save(acao);
+    }
+
+    public Acao atualizarParcial(Long id, AcaoRequest request) {
+
+        Acao acao = buscarPorId(id);
+
+        mapper.updateParsiEntity(acao, request);
+
+        if (request.responsavel() != null) {
             acao.setResponsavel(buscarResponsaveis(request.responsavel()));
+        }
 
+        if (request.reuniao() != null) {
             acao.setReuniao(buscarReuniao(request.reuniao()));
-
-            return AcaoDTO.de(repository.save(acao));
         }
 
-        public AcaoDTO buscarPorId(Long id) {
+        return repository.save(acao);
+    }
 
-            return AcaoDTO.de(buscarEntidade(id));
+    public void deletar(Long id) {
+
+        Acao acao = buscarPorId(id);
+        repository.delete(acao);
+    }
+
+    private Reuniao buscarReuniao(Long id) {
+
+        return reuniaoRepository.findById(id)
+                .orElseThrow(() -> RecursoNaoEncontradoException.de("Reunião", id));
+    }
+
+    /**
+     * Troca os ids da request pelas entidades do banco. findAllById descarta
+     * id inexistente em silencio, entao a contagem e conferida para o cliente
+     * receber 404 em vez de uma acao salva sem o responsavel pedido.
+     */
+    private List<Colaborador> buscarResponsaveis(List<Long> ids) {
+
+        if (ids == null || ids.isEmpty()) {
+            return new ArrayList<>();
         }
 
-        public List<AcaoDTO> listar() {
+        List<Colaborador> colaboradores = colaboradorRepository.findAllById(ids);
 
-            return repository.findAll().stream()
-                    .map(AcaoDTO::de)
-                    .toList();
+        if (colaboradores.size() != ids.stream().distinct().count()) {
+            throw new RecursoNaoEncontradoException(
+                    "Colaborador não encontrado entre os responsáveis informados");
         }
 
-        public AcaoDTO atualizar(Long id, AcaoRequest request) {
-
-            Acao acao = buscarEntidade(id);
-
-            acao.setTitulo(request.titulo());
-            acao.setDescricao(request.descricao());
-            acao.setTipo(request.tipo());
-            acao.setPrazo(request.prazo());
-
-            acao.setResponsavel(buscarResponsaveis(request.responsavel()));
-
-            acao.setReuniao(buscarReuniao(request.reuniao()));
-
-            return AcaoDTO.de(repository.save(acao));
-        }
-
-        public AcaoDTO atualizarParcial(Long id, AcaoRequest request) {
-
-            Acao acao = buscarEntidade(id);
-
-            if (request.titulo() != null) {
-                acao.setTitulo(request.titulo());
-            }
-
-            if (request.descricao() != null) {
-                acao.setDescricao(request.descricao());
-            }
-
-            if (request.tipo() != null) {
-                acao.setTipo(request.tipo());
-            }
-
-            if (request.prazo() != null) {
-                acao.setPrazo(request.prazo());
-            }
-
-            if (request.responsavel() != null) {
-                acao.setResponsavel(buscarResponsaveis(request.responsavel()));
-            }
-
-            if (request.reuniao() != null) {
-                acao.setReuniao(buscarReuniao(request.reuniao()));
-            }
-
-            return AcaoDTO.de(repository.save(acao));
-        }
-
-        public void deletar(Long id) {
-
-            Acao acao = buscarEntidade(id);
-
-            repository.delete(acao);
-        }
-
-        /** Uso interno da propria camada de servico — a web recebe DTO. */
-        private Acao buscarEntidade(Long id) {
-
-            return repository.findById(id)
-                    .orElseThrow(() -> RecursoNaoEncontradoException.de("Ação", id));
-        }
-
-        private Reuniao buscarReuniao(Long id) {
-
-            return reuniaoRepository.findById(id)
-                    .orElseThrow(() -> RecursoNaoEncontradoException.de("Reunião", id));
-        }
-
-        /**
-         * Troca os ids da request pelas entidades do banco. findAllById descarta
-         * id inexistente em silencio, entao a contagem e conferida para o cliente
-         * receber 404 em vez de uma acao salva sem o responsavel pedido.
-         */
-        private List<Colaborador> buscarResponsaveis(List<Long> ids) {
-
-            if (ids == null || ids.isEmpty()) {
-                return new ArrayList<>();
-            }
-
-            List<Colaborador> colaboradores = colaboradorRepository.findAllById(ids);
-
-            if (colaboradores.size() != ids.stream().distinct().count()) {
-                throw new RecursoNaoEncontradoException(
-                        "Colaborador não encontrado entre os responsáveis informados");
-            }
-
-            return colaboradores;
-        }
+        return colaboradores;
+    }
 
 }
