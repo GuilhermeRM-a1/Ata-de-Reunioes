@@ -28,12 +28,12 @@ public class AcaoService {
     private final ReuniaoRepository reuniaoRepository;
     private final AcaoMapper mapper;
 
-    public Acao salvar(AcaoRequest request) {
+    public Acao salvar(Long reuniaoId, AcaoRequest request) {
 
         Acao acao = mapper.toEntity(request);
 
         acao.setResponsavel(buscarResponsaveis(request.responsavel()));
-        acao.setReuniao(buscarReuniao(request.reuniao()));
+        acao.setReuniao(buscarReuniao(reuniaoId));
 
         return repository.save(acao);
     }
@@ -44,9 +44,20 @@ public class AcaoService {
                 .orElseThrow(() -> RecursoNaoEncontradoException.de("Ação", id));
     }
 
+    // traz todas as acoes independente de reuniao, para fins de dashboard
     public List<Acao> listar() {
-
         return repository.findAll();
+    }
+
+    // traz acoes filtradas por reuniao, para fins de dashboard
+    public List<Acao> listarPorReuniao(Long reuniaoId) {
+
+        if (!reuniaoRepository.existsById(reuniaoId)) {
+            throw RecursoNaoEncontradoException.de("Reunião", reuniaoId);
+        } else {
+            return repository.findAllByReuniaoId(reuniaoId);
+        }
+
     }
 
     public Acao atualizar(Long id, AcaoRequest request) {
@@ -57,7 +68,7 @@ public class AcaoService {
 
         acao.setResponsavel(buscarResponsaveis(request.responsavel()));
 
-        acao.setReuniao(buscarReuniao(request.reuniao()));
+        // nunca atualiza a reuniao
 
         return repository.save(acao);
     }
@@ -72,9 +83,7 @@ public class AcaoService {
             acao.setResponsavel(buscarResponsaveis(request.responsavel()));
         }
 
-        if (request.reuniao() != null) {
-            acao.setReuniao(buscarReuniao(request.reuniao()));
-        }
+        // nunca atualiza a reuniao
 
         return repository.save(acao);
     }

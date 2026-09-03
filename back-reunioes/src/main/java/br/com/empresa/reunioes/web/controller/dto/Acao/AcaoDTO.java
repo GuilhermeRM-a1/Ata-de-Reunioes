@@ -11,5 +11,6 @@ public record AcaoDTO(
         String titulo,
         String descricao,
         List<String> responsavel,
-        String prazo) {
+        String prazo,
+        Long reuniaoId) {
 }
