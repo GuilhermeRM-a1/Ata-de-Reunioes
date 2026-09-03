@@ -57,7 +57,8 @@ public class AcaoMapper {
                 acao.getTitulo(),
                 acao.getDescricao(),
                 responsavelNomes,
-                acao.getPrazo()
+                acao.getPrazo(),
+                acao.getReuniao().getId()
         );
     }
 }

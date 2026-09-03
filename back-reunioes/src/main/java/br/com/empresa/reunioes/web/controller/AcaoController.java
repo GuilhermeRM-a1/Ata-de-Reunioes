@@ -33,9 +33,10 @@ public class AcaoController {
             @ApiResponse(responseCode = "400", description = "Dados inválidos"),
             @ApiResponse(responseCode = "404", description = "Responsável ou reunião informada não existe")
     })
-    @PostMapping()
-    public ResponseEntity<AcaoDTO> salvar(@Valid @RequestBody AcaoRequest request) {
-        Acao acao = service.salvar(request);
+    @PostMapping("/{reuniaoId}")
+    public ResponseEntity<AcaoDTO> salvar(@PathVariable Long reuniaoId,
+                                          @Valid @RequestBody AcaoRequest request) {
+        Acao acao = service.salvar(reuniaoId, request);
         AcaoDTO dto = mapper.toDTO(acao);
 
         return new ResponseEntity<>(dto, HttpStatus.CREATED);
@@ -48,6 +49,20 @@ public class AcaoController {
     public ResponseEntity<List<AcaoDTO>> listar() {
 
         List<AcaoDTO> dto = service.listar()
+                .stream()
+                .map(mapper::toDTO)
+                .toList();
+
+        return ResponseEntity.ok(dto);
+    }
+
+    @Operation(summary = "Lista ações",
+            description = "Devolve a lista de ações cadastradas por reunião.")
+    @ApiResponse(responseCode = "200", description = "Lista de ações devolvida")
+    @GetMapping("/reuniao/{reuniaoId}")
+    public ResponseEntity<List<AcaoDTO>> listarPorReuniao(@PathVariable Long reuniaoId) {
+
+        List<AcaoDTO> dto = service.listarPorReuniao(reuniaoId)
                 .stream()
                 .map(mapper::toDTO)
                 .toList();
@@ -69,7 +84,6 @@ public class AcaoController {
         return ResponseEntity.ok(dto);
     }
 
-    // PUT dando 500 por algum motivo
     @Operation(summary = "Substitui uma ação por completo")
     @ApiResponses({
             @ApiResponse(responseCode = "202", description = "Ação atualizada"),
@@ -92,8 +106,9 @@ public class AcaoController {
             @ApiResponse(responseCode = "404", description = "Nenhuma ação com esse id")
     })
     @PatchMapping("/{id}")
-    public ResponseEntity<AcaoDTO> atualizarParcial(@PathVariable Long id,
-                                                    @RequestBody AcaoRequest request) {
+    public ResponseEntity<AcaoDTO> atualizarParcial(
+            @PathVariable Long id,
+            @Valid @RequestBody AcaoRequest request) {
         Acao acao = service.atualizarParcial(id, request);
         AcaoDTO dto = mapper.toDTO(acao);
 
@@ -105,8 +120,9 @@ public class AcaoController {
             @ApiResponse(responseCode = "204", description = "Ação excluída"),
             @ApiResponse(responseCode = "404", description = "Nenhuma ação com esse id")
     })
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+    @DeleteMapping("/{reuniaoId}/{id}")
+    public ResponseEntity<Void> deletar(
+            @PathVariable Long id) {
 
         service.deletar(id);
 
