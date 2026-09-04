@@ -10,6 +10,7 @@ import br.com.empresa.reunioes.domain.repository.ReuniaoRepository;
 import br.com.empresa.reunioes.web.controller.dto.Acao.AcaoDTO;
 import br.com.empresa.reunioes.web.controller.dto.Acao.AcaoRequest;
 import br.com.empresa.reunioes.web.exception.RecursoNaoEncontradoException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +29,7 @@ public class AcaoService {
     private final ReuniaoRepository reuniaoRepository;
     private final AcaoMapper mapper;
 
+    @Transactional
     public Acao salvar(Long reuniaoId, AcaoRequest request) {
 
         Acao acao = mapper.toEntity(request);
@@ -60,6 +62,7 @@ public class AcaoService {
 
     }
 
+    @Transactional
     public Acao atualizar(Long id, AcaoRequest request) {
 
         Acao acao = buscarPorId(id);
@@ -73,6 +76,7 @@ public class AcaoService {
         return repository.save(acao);
     }
 
+    @Transactional
     public Acao atualizarParcial(Long id, AcaoRequest request) {
 
         Acao acao = buscarPorId(id);
@@ -88,6 +92,7 @@ public class AcaoService {
         return repository.save(acao);
     }
 
+    @Transactional
     public void deletar(Long id) {
 
         Acao acao = buscarPorId(id);
