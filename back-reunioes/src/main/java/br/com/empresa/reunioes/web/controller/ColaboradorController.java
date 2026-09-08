@@ -6,8 +6,6 @@ import br.com.empresa.reunioes.domain.entity.Colaborador;
 import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorDTO;
 import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorPatchRequest;
 import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorRequest;
-import br.com.empresa.reunioes.web.controller.dto.PaginaResponse;
-import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -19,12 +17,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/reunioes/colaboradores")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 @Tag(name = "Colaboradores", description = "CRUD de colaboradores")
 public class ColaboradorController {
 

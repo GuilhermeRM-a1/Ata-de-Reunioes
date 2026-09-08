@@ -11,6 +11,7 @@ import br.com.empresa.reunioes.web.controller.dto.PaginaResponse;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoDTO;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoRequest;
 import br.com.empresa.reunioes.web.exception.RecursoNaoEncontradoException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ public class ReuniaoService {
     private final AcaoRepository acaoRepository;
     private final ReuniaoMapper mapper;
 
+    @Transactional
     public Reuniao salvar(ReuniaoRequest request) {
         Reuniao reuniao = mapper.toEntity(request);
 
@@ -42,6 +44,7 @@ public class ReuniaoService {
         return this.reuniaoRepository.save(reuniao);
     }
 
+    @Transactional
     public Reuniao buscarPorId(Long id) {
         return this.reuniaoRepository.findById(id)
                 .orElseThrow(() -> RecursoNaoEncontradoException.de("Reunião", id));
@@ -51,6 +54,7 @@ public class ReuniaoService {
         return reuniaoRepository.findAll();
     }
 
+    @Transactional
     public Reuniao atualizar(Long id, ReuniaoRequest request) {
 
         Reuniao reuniao = buscarPorId(id);
@@ -64,6 +68,7 @@ public class ReuniaoService {
         return this.reuniaoRepository.save(reuniao);
     }
 
+    @Transactional
     public Reuniao atualizarParcial(Long id, ReuniaoRequest request) {
 
         Reuniao reuniao = buscarPorId(id);
@@ -80,6 +85,7 @@ public class ReuniaoService {
         return this.reuniaoRepository.save(reuniao);
     }
 
+    @Transactional
     public void deletar(Long id) {
 
         Reuniao reuniao = buscarPorId(id);

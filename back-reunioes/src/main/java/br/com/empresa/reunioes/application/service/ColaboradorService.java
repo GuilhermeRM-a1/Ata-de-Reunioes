@@ -8,6 +8,7 @@ import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorPatchRe
 import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorRequest;
 import br.com.empresa.reunioes.web.controller.dto.PaginaResponse;
 import br.com.empresa.reunioes.web.exception.RecursoNaoEncontradoException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ public class ColaboradorService {
     private final ColaboradorRepository colaboradorRepository;
     private final ColaboradorMapper mapper;
 
+    @Transactional
     public Colaborador salvar(ColaboradorRequest request) {
         Colaborador colaborador = mapper.toEntity(request);
 
@@ -39,6 +41,7 @@ public class ColaboradorService {
         return colaboradorRepository.findAll();
     }
 
+    @Transactional
     public Colaborador atualizar(Long id, ColaboradorRequest request) {
         Colaborador colaborador = buscarEntidade(id);
         mapper.updateEntity(colaborador, request);
@@ -46,6 +49,7 @@ public class ColaboradorService {
         return this.colaboradorRepository.save(colaborador);
     }
 
+    @Transactional
     public Colaborador atualizarParcial(Long id, ColaboradorPatchRequest request) {
 
         Colaborador colaborador = buscarEntidade(id);
@@ -54,6 +58,7 @@ public class ColaboradorService {
         return this.colaboradorRepository.save(colaborador);
     }
 
+    @Transactional
     public void deletar(Long id) {
         Colaborador colaborador = buscarEntidade(id);
         colaboradorRepository.delete(colaborador);
