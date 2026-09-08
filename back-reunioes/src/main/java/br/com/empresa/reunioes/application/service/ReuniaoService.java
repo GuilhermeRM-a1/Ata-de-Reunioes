@@ -1,5 +1,6 @@
 package br.com.empresa.reunioes.application.service;
 
+import br.com.empresa.reunioes.application.mapper.ReuniaoMapper;
 import br.com.empresa.reunioes.domain.entity.Acao;
 import br.com.empresa.reunioes.domain.entity.Colaborador;
 import br.com.empresa.reunioes.domain.entity.Reuniao;
@@ -10,6 +11,7 @@ import br.com.empresa.reunioes.web.controller.dto.PaginaResponse;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoDTO;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoRequest;
 import br.com.empresa.reunioes.web.exception.RecursoNaoEncontradoException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,120 +26,71 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
-public class ReuniaoService{
+public class ReuniaoService {
 
     private final ReuniaoRepository reuniaoRepository;
     private final ColaboradorRepository colaboradorRepository;
     private final AcaoRepository acaoRepository;
+    private final ReuniaoMapper mapper;
 
-    public ReuniaoDTO salvar(ReuniaoRequest request) {
-        Reuniao reuniao = new Reuniao();
-
-        reuniao.setTitulo(request.titulo());
-        reuniao.setData(request.data());
-        reuniao.setStatus(request.status());
-        reuniao.setAreas(request.areas());
-        reuniao.setPontosChaves(request.pontosChaves());
+    @Transactional
+    public Reuniao salvar(ReuniaoRequest request) {
+        Reuniao reuniao = mapper.toEntity(request);
 
         reuniao.setParticipantes(buscarColaboradores(request.participantes()));
         reuniao.setAcoes(buscarAcoes(request.acoes()));
         reuniao.setTotalAcoes(calcularTotalAcoes(request, reuniao.getAcoes()));
 
-        Reuniao salva = reuniaoRepository.save(reuniao);
-        vincularAcoes(salva);
-
-        return ReuniaoDTO.de(salva);
+        return this.reuniaoRepository.save(reuniao);
     }
 
-    public ReuniaoDTO buscarPorId(Long id) {
-        return ReuniaoDTO.de(buscarEntidade(id));
+    @Transactional
+    public Reuniao buscarPorId(Long id) {
+        return this.reuniaoRepository.findById(id)
+                .orElseThrow(() -> RecursoNaoEncontradoException.de("Reunião", id));
     }
 
-    public List<ReuniaoDTO> listar() {
-        return reuniaoRepository.findAll().stream()
-                .map(ReuniaoDTO::de)
-                .toList();
+    public List<Reuniao> listar() {
+        return reuniaoRepository.findAll();
     }
 
-    public PaginaResponse<ReuniaoDTO> listar(Pageable paginacao) {
-        return PaginaResponse.de(reuniaoRepository.findAll(paginacao).map(ReuniaoDTO::de));
-    }
+    @Transactional
+    public Reuniao atualizar(Long id, ReuniaoRequest request) {
 
-    public ReuniaoDTO atualizar(Long id, ReuniaoRequest request) {
+        Reuniao reuniao = buscarPorId(id);
 
-        Reuniao reuniao = buscarEntidade(id);
-
-        reuniao.setTitulo(request.titulo());
-        reuniao.setData(request.data());
-        reuniao.setStatus(request.status());
-        reuniao.setAreas(request.areas());
-        reuniao.setPontosChaves(request.pontosChaves());
+        mapper.updateEntity(reuniao, request);
 
         reuniao.setParticipantes(buscarColaboradores(request.participantes()));
         reuniao.setAcoes(buscarAcoes(request.acoes()));
         reuniao.setTotalAcoes(calcularTotalAcoes(request, reuniao.getAcoes()));
 
-        Reuniao salva = reuniaoRepository.save(reuniao);
-        vincularAcoes(salva);
-
-        return ReuniaoDTO.de(salva);
+        return this.reuniaoRepository.save(reuniao);
     }
 
-    public ReuniaoDTO atualizarParcial(Long id, ReuniaoRequest request) {
+    @Transactional
+    public Reuniao atualizarParcial(Long id, ReuniaoRequest request) {
 
-        Reuniao reuniao = buscarEntidade(id);
+        Reuniao reuniao = buscarPorId(id);
 
-        if(request.titulo() != null)
-            reuniao.setTitulo(request.titulo());
-        if(request.data() != null)
-            reuniao.setData(request.data());
-        if(request.status() != null)
-            reuniao.setStatus(request.status());
-        if(request.areas() != null)
-            reuniao.setAreas(request.areas());
-        if(request.pontosChaves() != null)
-            reuniao.setPontosChaves(request.pontosChaves());
-        if(request.participantes() != null)
+        mapper.updateParsiEntity(reuniao, request);
+
+        if (request.participantes() != null)
             reuniao.setParticipantes(buscarColaboradores(request.participantes()));
-        if(request.acoes() != null) {
+        if (request.acoes() != null) {
             reuniao.setAcoes(buscarAcoes(request.acoes()));
             reuniao.setTotalAcoes(reuniao.getAcoes().size());
         }
 
-        Reuniao salva = this.reuniaoRepository.save(reuniao);
-        vincularAcoes(salva);
-
-        return ReuniaoDTO.de(salva);
+        return this.reuniaoRepository.save(reuniao);
     }
 
+    @Transactional
     public void deletar(Long id) {
 
-        Reuniao reuniao = buscarEntidade(id);
+        Reuniao reuniao = buscarPorId(id);
 
         reuniaoRepository.delete(reuniao);
-    }
-
-    /**
-     * Grava o lado dono do vinculo. A coluna reuniao_id mora na tabela acao,
-     * entao mexer so em Reuniao.acoes nao chega ao banco: o Hibernate ignora a
-     * ponta inversa. Sem isto a reuniao salva e as acoes ficam soltas.
-     */
-    private void vincularAcoes(Reuniao reuniao) {
-
-        List<Acao> acoes = reuniao.getAcoes();
-
-        if (acoes == null || acoes.isEmpty()) {
-            return;
-        }
-
-        acoes.forEach(acao -> acao.setReuniao(reuniao));
-        acaoRepository.saveAll(acoes);
-    }
-
-    /** Uso interno da propria camada de servico — a web recebe DTO. */
-    private Reuniao buscarEntidade(Long id) {
-        return this.reuniaoRepository.findById(id)
-                .orElseThrow(() -> RecursoNaoEncontradoException.de("Reunião", id));
     }
 
     /**
@@ -177,7 +130,9 @@ public class ReuniaoService{
         return acoes;
     }
 
-    /** O total informado na request so vale quando nenhuma acao foi enviada. */
+    /**
+     * O total informado na request so vale quando nenhuma acao foi enviada.
+     */
     private Integer calcularTotalAcoes(ReuniaoRequest request, List<Acao> acoes) {
 
         if (!acoes.isEmpty()) {

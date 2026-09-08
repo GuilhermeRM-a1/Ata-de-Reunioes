@@ -9,16 +9,6 @@ public record ColaboradorDTO(
         String email,
         Papel papel,
         Boolean monitorarReunioes,
-        String dataCadastro){
-    public static ColaboradorDTO de(Colaborador colaborador) {
-        return new ColaboradorDTO(
-                colaborador.getId(),
-                colaborador.getNome(),
-                colaborador.getEmail(),
-                colaborador.getPapel(),
-                colaborador.getMonitorarReunioes(),
-                colaborador.getDataCadastro()
-        );
-
-    }
+        String dataCadastro) {
 }
+

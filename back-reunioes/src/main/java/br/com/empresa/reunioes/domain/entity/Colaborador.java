@@ -8,31 +8,33 @@ import lombok.Setter;
 import java.util.List;
 
 @Entity
-@Getter @Setter
+@Getter
+@Setter
+@Table(name = "")
 public class Colaborador {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "")
     private String nome;
 
-    /** Identifica o colaborador no login. Unico no banco. */
-    @Column(nullable = false, unique = true)
-    private String email;
-
+    @Column(name = "")
     private String senha;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Papel papel = Papel.USUARIO;
-
+    @Column(name = "")
     private Boolean monitorarReunioes;
+
+    @Column(name = "")
     private String dataCadastro;
 
-    /** Acoes das quais este colaborador e responsavel. Lado inverso: quem manda e Acao. */
-    @ManyToMany(mappedBy = "responsavel")
+    @Column(name = "")
+    private Boolean admin;
+
+    @OneToMany
     private List<Acao> acoes;
+
 
     @ManyToMany(mappedBy = "participantes")
     private List<Reuniao> reunioes;

@@ -7,16 +7,25 @@ import lombok.Setter;
 import java.util.List;
 
 @Entity
-@Getter @Setter
+@Getter
+@Setter
+@Table(name = "")
 public class Acao {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "")
     private String titulo;
+
+    @Column(name = "")
     private String descricao;
+
+    @Column(name = "")
     private String tipo;
+
+    @Column(name = "")
     private String prazo;
 
     /** Nomes fixados na mao: o padrao do Hibernate nao bate com a migration. */
