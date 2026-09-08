@@ -20,6 +20,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/reunioes/acoes")
+@CrossOrigin(origins = "*")
 @Tag(name = "Ações", description = "CRUD de ações")
 public class AcaoController {
 
