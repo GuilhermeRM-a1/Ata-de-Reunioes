@@ -1,5 +1,6 @@
 package br.com.empresa.reunioes.domain.entity;
 
+import br.com.empresa.reunioes.domain.enums.Papel;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

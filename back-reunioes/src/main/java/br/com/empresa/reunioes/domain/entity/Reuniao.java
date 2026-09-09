@@ -44,6 +44,7 @@ public class Reuniao {
     @Column(name = "pontos_chaves")
     private List<String> pontosChaves;
 
+    /** Lado inverso: a coluna reuniao_id mora na tabela acao. */
     @OneToMany(mappedBy = "reuniao")
     private List<Acao> acoes;
 
