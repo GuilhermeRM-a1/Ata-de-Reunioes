@@ -10,29 +10,29 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@Table(name = "")
+@Table(name = "colaborador")
 public class Colaborador {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "")
+    @Column(name = "nome")
     private String nome;
 
-    @Column(name = "")
+    @Column(name = "email")
+    private String email;
+
+    @Column(name = "senha")
     private String senha;
 
-    @Column(name = "")
+    @Column(name = "monitoramento_reunioes")
     private Boolean monitorarReunioes;
 
-    @Column(name = "")
+    @Column(name = "data_cadastro")
     private String dataCadastro;
 
-    @Column(name = "")
-    private Boolean admin;
-
-    @OneToMany
+    @ManyToMany(mappedBy = "responsavel")
     private List<Acao> acoes;
 
 

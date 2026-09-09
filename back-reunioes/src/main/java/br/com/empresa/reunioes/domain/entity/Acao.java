@@ -9,23 +9,23 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@Table(name = "")
+@Table(name = "acao")
 public class Acao {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "")
+    @Column(name = "titulo")
     private String titulo;
 
-    @Column(name = "")
+    @Column(name = "descricao")
     private String descricao;
 
-    @Column(name = "")
+    @Column(name = "tipo")
     private String tipo;
 
-    @Column(name = "")
+    @Column(name = "prazo")
     private String prazo;
 
     /** Nomes fixados na mao: o padrao do Hibernate nao bate com a migration. */

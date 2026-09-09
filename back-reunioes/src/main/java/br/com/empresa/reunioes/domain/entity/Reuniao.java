@@ -9,23 +9,23 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@Table(name = "")
+@Table(name = "reuniao")
 public class Reuniao {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "")
+    @Column(name = "titulo")
     private String titulo;
 
-    @Column(name = "")
+    @Column(name = "data")
     private String data;
 
-    @Column(name = "")
+    @Column(name = "resumo")
     private String resumo;
 
-    @Column(name = "")
+    @Column(name = "status")
     private String status;
 
     @ManyToMany
@@ -48,6 +48,7 @@ public class Reuniao {
     @OneToMany(mappedBy = "reuniao")
     private List<Acao> acoes;
 
+    @Column(name = "total_acoes")
     private Integer totalAcoes;
 
 }
