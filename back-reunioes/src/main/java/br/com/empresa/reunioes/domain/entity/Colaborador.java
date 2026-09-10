@@ -26,7 +26,7 @@ public class Colaborador {
     @Column(name = "senha")
     private String senha;
 
-    @Column(name = "monitoramento_reunioes")
+    @Column(name = "monitorar_reunioes")
     private Boolean monitorarReunioes;
 
     @Column(name = "data_cadastro")

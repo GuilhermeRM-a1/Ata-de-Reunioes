@@ -14,6 +14,7 @@ public class ColaboradorMapper {
         Colaborador colaborador = new Colaborador();
 
         colaborador.setNome(request.nome());
+        colaborador.setEmail(request.email());
         colaborador.setSenha(request.senha());
         colaborador.setMonitorarReunioes(request.monitorarReunioes());
         colaborador.setDataCadastro(request.dataCadastro());
@@ -26,6 +27,7 @@ public class ColaboradorMapper {
         return new ColaboradorDTO(
                 colaborador.getId(),
                 colaborador.getNome(),
+                colaborador.getEmail(),
                 colaborador.getMonitorarReunioes(),
                 colaborador.getDataCadastro()
         );
@@ -33,6 +35,7 @@ public class ColaboradorMapper {
 
     public void updateEntity(Colaborador colaborador, ColaboradorRequest request) {
         colaborador.setNome(request.nome());
+        colaborador.setEmail(request.email());
         colaborador.setMonitorarReunioes(request.monitorarReunioes());
         colaborador.setDataCadastro(request.dataCadastro());
     }
@@ -41,6 +44,8 @@ public class ColaboradorMapper {
 
         if (request.nome() != null)
             colaborador.setNome(request.nome());
+        if (request.email() != null)
+            colaborador.setEmail(request.email());
         if (request.monitorarReunioes() != null)
             colaborador.setMonitorarReunioes(request.monitorarReunioes());
         if (request.dataCadastro() != null)
