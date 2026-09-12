@@ -10,5 +10,6 @@ public record AcaoRequest(@NotBlank
                           String descricao,
                           String tipo,
                           String prazo,
+                          Boolean concluida,
                           List<Long> responsavel) {
 }

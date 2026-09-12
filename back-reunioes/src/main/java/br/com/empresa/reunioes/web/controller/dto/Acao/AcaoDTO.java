@@ -12,5 +12,6 @@ public record AcaoDTO(
         String descricao,
         List<String> responsavel,
         String prazo,
+        Boolean concluida,
         Long reuniaoId) {
 }

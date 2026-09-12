@@ -106,31 +106,31 @@ insert into reuniao_participantes (reuniao_id, participantes_id) values
   (13, 2), (13, 3), (13, 7);
 
 -- ----------------------------------------------------------------------- acao
-insert into acao (id, titulo, descricao, tipo, prazo, reuniao_id) values
-  (1,  'Escala do fim de semana',     'Publicar a escala revisada do fim de semana',                 'TAREFA', '2026-06-06', 1),
-  (2,  'Checklist de abertura',       'Distribuir o novo checklist de abertura às equipes',          'ACAO',   '2026-06-09', 1),
-  (3,  'Esforço da migração',         'Levantar o esforço de migração do ambiente legado',           'ACAO',   '2026-06-20', 2),
-  (4,  'Monitoramento dos serviços',  'Estender o monitoramento aos serviços novos',                 'TAREFA', '2026-06-30', 2),
-  (5,  'Dono do backlog',             'Definir responsável pelo backlog de segurança',               'ACAO',   null,         2),
-  (6,  'Desvio da manutenção',        'Detalhar o desvio da manutenção predial por centro de custo', 'ACAO',   '2026-06-22', 3),
-  (7,  'Provisões do trimestre',      'Revisar as provisões do próximo trimestre',                   'TAREFA', '2026-07-05', 3),
-  (8,  'Comparativo de propostas',    'Montar comparativo de propostas dos fornecedores críticos',   'ACAO',   '2026-07-18', 5),
-  (9,  'Cláusula de reajuste',        'Padronizar a cláusula de reajuste nos novos contratos',       'TAREFA', null,         5),
-  (10, 'Módulo de procedimentos',     'Reescrever o módulo de procedimentos da trilha',              'TAREFA', '2026-07-25', 6),
-  (11, 'Indicadores consolidados',    'Consolidar indicadores das quatro áreas em formato único',    'ACAO',   '2026-08-01', 7),
-  (12, 'Acompanhamento do ciclo',     'Criar rotina de acompanhamento dos compromissos do ciclo',    'TAREFA', '2026-07-28', 7),
-  (13, 'Requisitos do painel',        'Levantar requisitos do painel único de indicadores',          'ACAO',   '2026-08-10', 7),
-  (14, 'Cadência de comunicação',     'Definir cadência de comunicação entre áreas',                 'TAREFA', null,         7),
-  (15, 'Formato da retrospectiva',    'Revisar o formato da retrospectiva para o próximo trimestre', 'ACAO',   '2026-09-30', 7),
-  (16, 'Procedimento de rollback',    'Documentar o procedimento de rollback do ambiente',           'TAREFA', '2026-07-31', 8),
-  (17, 'Alerta de indisponibilidade', 'Antecipar o disparo do alerta de indisponibilidade',          'ACAO',   null,         8),
-  (18, 'Meta de volume',              'Recalcular a meta de volume por área',                        'ACAO',   '2026-08-08', 9),
-  (19, 'Escopo da primeira entrega',  'Publicar o escopo fechado da primeira entrega',               'TAREFA', '2026-08-07', 10),
-  (20, 'Integrações da fase dois',    'Mapear as integrações previstas para a fase dois',            'ACAO',   '2026-08-21', 10),
-  (21, 'Registro de fornecedores',    'Atualizar o registro de fornecedores ativos',                 'TAREFA', '2026-08-29', 11),
-  (22, 'Simulado de resposta',        'Agendar simulado do plano de resposta a incidentes',          'ACAO',   '2026-09-15', 12),
-  (23, 'Vagas prioritárias',          'Abrir as duas vagas prioritárias de operações',               'TAREFA', '2026-08-25', 13),
-  (24, 'Etapa redundante',            'Remover a etapa redundante do fluxo de aprovação',            'ACAO',   null,         13);
+insert into acao (id, titulo, descricao, tipo, prazo, concluida, reuniao_id) values
+  (1,  'Escala do fim de semana',     'Publicar a escala revisada do fim de semana',                 'TAREFA', '2026-06-06', true, 1),
+  (2,  'Checklist de abertura',       'Distribuir o novo checklist de abertura às equipes',          'ACAO',   '2026-06-09',true, 1),
+  (3,  'Esforço da migração',         'Levantar o esforço de migração do ambiente legado',           'ACAO',   '2026-06-20',true, 2),
+  (4,  'Monitoramento dos serviços',  'Estender o monitoramento aos serviços novos',                 'TAREFA', '2026-06-30',true, 2),
+  (5,  'Dono do backlog',             'Definir responsável pelo backlog de segurança',               'ACAO',   null,true,         2),
+  (6,  'Desvio da manutenção',        'Detalhar o desvio da manutenção predial por centro de custo', 'ACAO',   '2026-06-22',true, 3),
+  (7,  'Provisões do trimestre',      'Revisar as provisões do próximo trimestre',                   'TAREFA', '2026-07-05',true, 3),
+  (8,  'Comparativo de propostas',    'Montar comparativo de propostas dos fornecedores críticos',   'ACAO',   '2026-07-18',true, 5),
+  (9,  'Cláusula de reajuste',        'Padronizar a cláusula de reajuste nos novos contratos',       'TAREFA', null,    true,     5),
+  (10, 'Módulo de procedimentos',     'Reescrever o módulo de procedimentos da trilha',              'TAREFA', '2026-07-25',true, 6),
+  (11, 'Indicadores consolidados',    'Consolidar indicadores das quatro áreas em formato único',    'ACAO',   '2026-08-01',true, 7),
+  (12, 'Acompanhamento do ciclo',     'Criar rotina de acompanhamento dos compromissos do ciclo',    'TAREFA', '2026-07-28',true, 7),
+  (13, 'Requisitos do painel',        'Levantar requisitos do painel único de indicadores',          'ACAO',   '2026-08-10',true, 7),
+  (14, 'Cadência de comunicação',     'Definir cadência de comunicação entre áreas',                 'TAREFA', null,true,         7),
+  (15, 'Formato da retrospectiva',    'Revisar o formato da retrospectiva para o próximo trimestre', 'ACAO',   '2026-09-30',true, 7),
+  (16, 'Procedimento de rollback',    'Documentar o procedimento de rollback do ambiente',           'TAREFA', '2026-07-31',true, 8),
+  (17, 'Alerta de indisponibilidade', 'Antecipar o disparo do alerta de indisponibilidade',          'ACAO',   null,true,         8),
+  (18, 'Meta de volume',              'Recalcular a meta de volume por área',                        'ACAO',   '2026-08-08',true, 9),
+  (19, 'Escopo da primeira entrega',  'Publicar o escopo fechado da primeira entrega',               'TAREFA', '2026-08-07',true, 10),
+  (20, 'Integrações da fase dois',    'Mapear as integrações previstas para a fase dois',            'ACAO',   '2026-08-21',true, 10),
+  (21, 'Registro de fornecedores',    'Atualizar o registro de fornecedores ativos',                 'TAREFA', '2026-08-29',true, 11),
+  (22, 'Simulado de resposta',        'Agendar simulado do plano de resposta a incidentes',          'ACAO',   '2026-09-15',true, 12),
+  (23, 'Vagas prioritárias',          'Abrir as duas vagas prioritárias de operações',               'TAREFA', '2026-08-25',true, 13),
+  (24, 'Etapa redundante',            'Remover a etapa redundante do fluxo de aprovação',            'ACAO',   null,true,         13);
 
 -- ------------------------------------------------------------ acao_responsavel
 -- As acoes 5, 15 e 17 ficam de fora de proposito: sao os casos sem responsavel.

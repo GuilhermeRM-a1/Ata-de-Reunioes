@@ -28,6 +28,9 @@ public class Acao {
     @Column(name = "prazo")
     private String prazo;
 
+    @Column(name = "concluida")
+    private Boolean concluida;
+
     /** Nomes fixados na mao: o padrao do Hibernate nao bate com a migration. */
     @ManyToMany
     @JoinTable(name = "acao_responsavel",
