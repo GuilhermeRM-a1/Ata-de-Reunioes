@@ -20,6 +20,7 @@ export const routes: Routes = [
       { path: 'reunioes/:id', loadComponent: () => import('./features/reunioes/pages/reuniao-detalhe/reuniao-detalhe.component').then(m => m.ReuniaoDetalheComponent) },
       { path: 'reunioes/:id/editar', loadComponent: () => import('./features/reunioes/pages/reuniao-form/reuniao-form.component').then(m => m.ReuniaoFormComponent) },
       { path: 'colaboradores', loadComponent: () => import('./features/colaboradores/pages/colaboradores/colaboradores.component').then(m => m.ColaboradoresComponent) },
+      { path: 'acoes', loadComponent: () => import('./features/acao/pages/acao/acao.component').then(m => m.AcaoComponent) }
     ]
   }
 ];
