@@ -1,0 +1,611 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-08-17T00:00:00.000Z",
+  "__export_source": "insomnia.desktop.app:v9.0.0",
+  "resources": [
+    {
+      "_id": "wrk_reunioes",
+      "_type": "workspace",
+      "parentId": null,
+      "name": "API Atas de Reuniao",
+      "description": "Colecao de testes do back-reunioes (Spring Boot 4 + H2 em memoria).",
+      "scope": "collection"
+    },
+    {
+      "_id": "env_local",
+      "_type": "environment",
+      "parentId": "wrk_reunioes",
+      "name": "Local",
+      "data": {
+        "base_url": "http://localhost:8080",
+        "id_colaborador": "1",
+        "id_reuniao": "1"
+      },
+      "metaSortKey": 1
+    },
+
+    {
+      "_id": "fld_00",
+      "_type": "request_group",
+      "parentId": "wrk_reunioes",
+      "name": "00 - Sanidade",
+      "metaSortKey": -400
+    },
+    {
+      "_id": "req_0001",
+      "_type": "request",
+      "parentId": "fld_00",
+      "name": "OpenAPI (lista todas as rotas reais)",
+      "method": "GET",
+      "url": "{{ _.base_url }}/v3/api-docs",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -1000
+    },
+    {
+      "_id": "req_0002",
+      "_type": "request",
+      "parentId": "fld_00",
+      "name": "Swagger UI (abrir no navegador)",
+      "method": "GET",
+      "url": "{{ _.base_url }}/swagger-ui.html",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -999
+    },
+
+    {
+      "_id": "fld_01",
+      "_type": "request_group",
+      "parentId": "wrk_reunioes",
+      "name": "01 - Colaboradores (caminho felizes)",
+      "metaSortKey": -300
+    },
+    {
+      "_id": "req_0101",
+      "_type": "request",
+      "parentId": "fld_01",
+      "name": "C1 - POST criar colaborador -> 201",
+      "method": "POST",
+      "url": "{{ _.base_url }}/api/reunioes/colaboradores",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"Ana Beatriz Fontes\",\n  \"senha\": \"123456\",\n  \"monitorarReunioes\": true,\n  \"dataCadastro\": \"2026-08-17\"\n}"
+      },
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -900
+    },
+    {
+      "_id": "req_0102",
+      "_type": "request",
+      "parentId": "fld_01",
+      "name": "C2 - POST segundo colaborador -> 201",
+      "method": "POST",
+      "url": "{{ _.base_url }}/api/reunioes/colaboradores",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"Carlos Eduardo Prado\",\n  \"senha\": \"abc123\",\n  \"monitorarReunioes\": false,\n  \"dataCadastro\": \"2026-08-17\"\n}"
+      },
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -890
+    },
+    {
+      "_id": "req_0103",
+      "_type": "request",
+      "parentId": "fld_01",
+      "name": "C3 - GET listar paginado -> 200",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/reunioes/colaboradores",
+      "body": {},
+      "headers": [],
+      "parameters": [
+        { "name": "page", "value": "0" },
+        { "name": "size", "value": "10" },
+        { "name": "sort", "value": "nome,asc" }
+      ],
+      "authentication": {},
+      "metaSortKey": -880
+    },
+    {
+      "_id": "req_0104",
+      "_type": "request",
+      "parentId": "fld_01",
+      "name": "C4 - GET por id -> 200",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/reunioes/colaboradores/{{ _.id_colaborador }}",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -870
+    },
+    {
+      "_id": "req_0105",
+      "_type": "request",
+      "parentId": "fld_01",
+      "name": "C5 - PUT substituir -> 202",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/api/reunioes/colaboradores/{{ _.id_colaborador }}",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"Ana Beatriz Fontes Silva\",\n  \"senha\": \"123456\",\n  \"monitorarReunioes\": false,\n  \"dataCadastro\": \"2026-08-17\"\n}"
+      },
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -860
+    },
+    {
+      "_id": "req_0106",
+      "_type": "request",
+      "parentId": "fld_01",
+      "name": "C6 - PATCH so um campo -> 202",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/api/reunioes/colaboradores/{{ _.id_colaborador }}",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"monitorarReunioes\": true\n}"
+      },
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -850
+    },
+    {
+      "_id": "req_0107",
+      "_type": "request",
+      "parentId": "fld_01",
+      "name": "C7 - DELETE -> 204 (use um id SEM reuniao)",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/api/reunioes/colaboradores/2",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -840
+    },
+
+    {
+      "_id": "fld_02",
+      "_type": "request_group",
+      "parentId": "wrk_reunioes",
+      "name": "02 - Reunioes (caminho felizes)",
+      "metaSortKey": -200
+    },
+    {
+      "_id": "req_0201",
+      "_type": "request",
+      "parentId": "fld_02",
+      "name": "R1 - POST criar reuniao -> 201",
+      "method": "POST",
+      "url": "{{ _.base_url }}/",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"titulo\": \"Alinhamento semanal de Operacoes\",\n  \"data\": \"2026-08-17T09:00:00\",\n  \"status\": \"CONCLUIDA\",\n  \"areas\": [\"Operacoes\", \"Financeiro\"],\n  \"pontosChaves\": [\"Fila de atendimento acima da meta\", \"Escala de fim de semana precisa reforco\"],\n  \"participantes\": [1],\n  \"acoes\": [],\n  \"totalAcoes\": 2\n}"
+      },
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -700
+    },
+    {
+      "_id": "req_0202",
+      "_type": "request",
+      "parentId": "fld_02",
+      "name": "R2 - POST reuniao sem participante -> 201",
+      "method": "POST",
+      "url": "{{ _.base_url }}/",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"titulo\": \"Cafe com RH - escuta de clima\",\n  \"data\": \"2026-08-18T16:00:00\",\n  \"status\": \"RECEBIDA\",\n  \"areas\": [\"Recursos Humanos\"],\n  \"pontosChaves\": [],\n  \"participantes\": [],\n  \"acoes\": [],\n  \"totalAcoes\": 0\n}"
+      },
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -690
+    },
+    {
+      "_id": "req_0203",
+      "_type": "request",
+      "parentId": "fld_02",
+      "name": "R3 - GET listar paginado -> 200",
+      "method": "GET",
+      "url": "{{ _.base_url }}/",
+      "body": {},
+      "headers": [],
+      "parameters": [
+        { "name": "page", "value": "0" },
+        { "name": "size", "value": "10" },
+        { "name": "sort", "value": "titulo,asc" }
+      ],
+      "authentication": {},
+      "metaSortKey": -680
+    },
+    {
+      "_id": "req_0204",
+      "_type": "request",
+      "parentId": "fld_02",
+      "name": "R4 - GET por id -> 200",
+      "method": "GET",
+      "url": "{{ _.base_url }}/{{ _.id_reuniao }}",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -670
+    },
+    {
+      "_id": "req_0205",
+      "_type": "request",
+      "parentId": "fld_02",
+      "name": "R5 - PUT substituir -> 202",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/{{ _.id_reuniao }}",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"titulo\": \"Alinhamento semanal revisado\",\n  \"data\": \"2026-08-19T09:00:00\",\n  \"status\": \"ANALISANDO\",\n  \"areas\": [\"Operacoes\"],\n  \"pontosChaves\": [\"Novo checklist aprovado\"],\n  \"participantes\": [1],\n  \"acoes\": [],\n  \"totalAcoes\": 3\n}"
+      },
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -660
+    },
+    {
+      "_id": "req_0206",
+      "_type": "request",
+      "parentId": "fld_02",
+      "name": "R6 - PATCH so o status -> 202",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/{{ _.id_reuniao }}",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"status\": \"ERRO\"\n}"
+      },
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -650
+    },
+    {
+      "_id": "req_0207",
+      "_type": "request",
+      "parentId": "fld_02",
+      "name": "R7 - PATCH corpo vazio -> 202 (nada muda)",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/{{ _.id_reuniao }}",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{}"
+      },
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -640
+    },
+    {
+      "_id": "req_0208",
+      "_type": "request",
+      "parentId": "fld_02",
+      "name": "R8 - DELETE -> 204",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/{{ _.id_reuniao }}",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -630
+    },
+
+    {
+      "_id": "fld_03",
+      "_type": "request_group",
+      "parentId": "wrk_reunioes",
+      "name": "03 - Erros e casos de borda",
+      "metaSortKey": -100
+    },
+    {
+      "_id": "req_0301",
+      "_type": "request",
+      "parentId": "fld_03",
+      "name": "E1 - POST reuniao 4 campos invalidos -> 400",
+      "method": "POST",
+      "url": "{{ _.base_url }}/",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"titulo\": \"abc\",\n  \"data\": \"\",\n  \"status\": \"\",\n  \"totalAcoes\": -1\n}"
+      },
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -500
+    },
+    {
+      "_id": "req_0302",
+      "_type": "request",
+      "parentId": "fld_03",
+      "name": "E2 - POST colaborador nome/senha vazios -> 400",
+      "method": "POST",
+      "url": "{{ _.base_url }}/api/reunioes/colaboradores",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"\",\n  \"senha\": \"\"\n}"
+      },
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -490
+    },
+    {
+      "_id": "req_0303",
+      "_type": "request",
+      "parentId": "fld_03",
+      "name": "E3 - GET reuniao id inexistente -> 404",
+      "method": "GET",
+      "url": "{{ _.base_url }}/999",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -480
+    },
+    {
+      "_id": "req_0304",
+      "_type": "request",
+      "parentId": "fld_03",
+      "name": "E4 - GET colaborador id inexistente -> 404",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/reunioes/colaboradores/999",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -470
+    },
+    {
+      "_id": "req_0305",
+      "_type": "request",
+      "parentId": "fld_03",
+      "name": "E5 - GET id nao numerico -> 400",
+      "method": "GET",
+      "url": "{{ _.base_url }}/abc",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -460
+    },
+    {
+      "_id": "req_0306",
+      "_type": "request",
+      "parentId": "fld_03",
+      "name": "E6 - POST participante inexistente -> 404",
+      "method": "POST",
+      "url": "{{ _.base_url }}/",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"titulo\": \"Reuniao com participante fantasma\",\n  \"data\": \"2026-08-20\",\n  \"status\": \"RECEBIDA\",\n  \"participantes\": [999]\n}"
+      },
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -450
+    },
+    {
+      "_id": "req_0307",
+      "_type": "request",
+      "parentId": "fld_03",
+      "name": "E7 - POST acao inexistente -> 404",
+      "method": "POST",
+      "url": "{{ _.base_url }}/",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"titulo\": \"Reuniao com acao fantasma\",\n  \"data\": \"2026-08-20\",\n  \"status\": \"RECEBIDA\",\n  \"acoes\": [99]\n}"
+      },
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -440
+    },
+    {
+      "_id": "req_0308",
+      "_type": "request",
+      "parentId": "fld_03",
+      "name": "E8 - POST JSON malformado -> 400",
+      "method": "POST",
+      "url": "{{ _.base_url }}/",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"titulo\": \"json quebrado\""
+      },
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -430
+    },
+    {
+      "_id": "req_0309",
+      "_type": "request",
+      "parentId": "fld_03",
+      "name": "E9 - POST status inexistente no enum -> 201 (BUG)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"titulo\": \"Status que nao existe\",\n  \"data\": \"2026-08-20\",\n  \"status\": \"BANANA\"\n}"
+      },
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -420
+    },
+    {
+      "_id": "req_0310",
+      "_type": "request",
+      "parentId": "fld_03",
+      "name": "E10 - DELETE colaborador que participa de reuniao -> 500 (BUG)",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/api/reunioes/colaboradores/1",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -410
+    },
+    {
+      "_id": "req_0311",
+      "_type": "request",
+      "parentId": "fld_03",
+      "name": "E11 - PUT colaborador id inexistente -> 404",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/api/reunioes/colaboradores/999",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"Fulano Inexistente\",\n  \"senha\": \"123456\"\n}"
+      },
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": -400
+    },
+    {
+      "_id": "req_0312",
+      "_type": "request",
+      "parentId": "fld_03",
+      "name": "E12 - GET pagina fora do range -> 200 content vazio",
+      "method": "GET",
+      "url": "{{ _.base_url }}/",
+      "body": {},
+      "headers": [],
+      "parameters": [
+        { "name": "page", "value": "50" },
+        { "name": "size", "value": "10" }
+      ],
+      "authentication": {},
+      "metaSortKey": -390
+    },
+
+    {
+      "_id": "fld_04",
+      "_type": "request_group",
+      "parentId": "wrk_reunioes",
+      "name": "04 - Vinculo colaborador x reuniao",
+      "description": "Rode na ordem, com a API recem-iniciada. V1 cria o colaborador, V2 cria a reuniao vazia, V3 injeta o colaborador nela, V4 confirma. V5 e V6 sao os casos negativos.",
+      "metaSortKey": 0
+    },
+    {
+      "_id": "req_0401",
+      "_type": "request",
+      "parentId": "fld_04",
+      "name": "V1 - POST colaborador (anote o id da resposta) -> 201",
+      "method": "POST",
+      "url": "{{ _.base_url }}/api/reunioes/colaboradores",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"Ana Beatriz Fontes\",\n  \"senha\": \"123456\",\n  \"monitorarReunioes\": true,\n  \"dataCadastro\": \"2026-08-17\"\n}"
+      },
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 100
+    },
+    {
+      "_id": "req_0402",
+      "_type": "request",
+      "parentId": "fld_04",
+      "name": "V2 - POST reuniao VAZIA (anote o id) -> 201",
+      "method": "POST",
+      "url": "{{ _.base_url }}/",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"titulo\": \"Alinhamento semanal de Operacoes\",\n  \"data\": \"2026-08-18T09:00:00\",\n  \"status\": \"RECEBIDA\",\n  \"areas\": [\"Operacoes\"],\n  \"pontosChaves\": [],\n  \"participantes\": [],\n  \"acoes\": [],\n  \"totalAcoes\": 0\n}"
+      },
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 110
+    },
+    {
+      "_id": "req_0403",
+      "_type": "request",
+      "parentId": "fld_04",
+      "name": "V3 - PATCH injeta o colaborador na reuniao -> 202",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/{{ _.id_reuniao }}",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"participantes\": [1]\n}"
+      },
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 120
+    },
+    {
+      "_id": "req_0404",
+      "_type": "request",
+      "parentId": "fld_04",
+      "name": "V4 - GET por id confirma o vinculo -> 200",
+      "method": "GET",
+      "url": "{{ _.base_url }}/{{ _.id_reuniao }}",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 130
+    },
+    {
+      "_id": "req_0405",
+      "_type": "request",
+      "parentId": "fld_04",
+      "name": "V5 - PATCH colaborador inexistente -> 404",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/{{ _.id_reuniao }}",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"participantes\": [999]\n}"
+      },
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 140
+    },
+    {
+      "_id": "req_0406",
+      "_type": "request",
+      "parentId": "fld_04",
+      "name": "V6 - GET confirma que o 404 nao apagou o vinculo -> 200",
+      "method": "GET",
+      "url": "{{ _.base_url }}/{{ _.id_reuniao }}",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 150
+    },
+    {
+      "_id": "req_0407",
+      "_type": "request",
+      "parentId": "fld_04",
+      "name": "V7 - PATCH lista vazia desvincula -> 202",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/{{ _.id_reuniao }}",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"participantes\": []\n}"
+      },
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 160
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 package br.com.empresa.reunioes.web.controller.dto.Colaborador;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 /**
@@ -9,6 +10,10 @@ import jakarta.validation.constraints.NotBlank;
  */
 public record ColaboradorRequest(@NotBlank(message = "O nome é obrigatório")
                                  String nome,
+
+                                 @NotBlank(message = "O e-mail é obrigatório")
+                                 @Email(message = "E-mail inválido")
+                                 String email,
 
                                  @NotBlank(message = "A senha é obrigatória")
                                  String senha,

@@ -1,5 +1,6 @@
 package br.com.empresa.reunioes.web.controller.dto.Colaborador;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
 
 /**
@@ -10,6 +11,9 @@ import jakarta.validation.constraints.Pattern;
  */
 public record ColaboradorPatchRequest(@Pattern(regexp = ".*\\S.*", message = "O nome não pode ser vazio")
                                       String nome,
+
+                                      @Email(message = "E-mail inválido")
+                                      String email,
 
                                       String senha,
 
