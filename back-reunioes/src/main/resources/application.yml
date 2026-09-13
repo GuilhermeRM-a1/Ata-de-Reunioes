@@ -3,7 +3,7 @@ spring:
     name: reunioes
 
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:55432/reunioes_dev}
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/reunioes_dev}
     username: ${DB_USER:postgres}
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver

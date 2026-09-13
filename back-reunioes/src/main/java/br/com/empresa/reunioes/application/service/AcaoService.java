@@ -96,6 +96,8 @@ public class AcaoService {
     public void deletar(Long id) {
 
         Acao acao = buscarPorId(id);
+        Reuniao reuniao = acao.getReuniao();
+        reuniao.getAcoes().remove(acao);
         repository.delete(acao);
     }
 

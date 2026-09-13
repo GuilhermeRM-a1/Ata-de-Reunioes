@@ -45,7 +45,8 @@ public class Reuniao {
     private List<String> pontosChaves;
 
     /** Lado inverso: a coluna reuniao_id mora na tabela acao. */
-    @OneToMany(mappedBy = "reuniao")
+    /** Lado inverso: a coluna reuniao_id mora na tabela acao. */
+    @OneToMany(mappedBy = "reuniao", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Acao> acoes;
 
     @Column(name = "total_acoes")
