@@ -1,6 +1,6 @@
 <div class="container-fluid py-5">
   <div class="d-flex justify-content-between align-items-center mb-5">
-    <h2 class="fw-bold">Ações da Reunião</h2>
+    <h2 class="fw-bold">Ações</h2>
   </div>
 
   @if (carregando) {
@@ -12,7 +12,7 @@
     </div>
   } @else {
     
-    <!-- SEÇÃO: Ações Pendentes -->
+    <!-- Ações Pendentes -->
     <div class="mb-5 pb-3">
       <h4 class="text-uppercase text-muted fs-6 mb-3 fw-semibold tracking-wide">Ações Pendentes</h4>
       
@@ -58,7 +58,7 @@
       }
     </div>
 
-    <!-- SEÇÃO: Ações Concluídas -->
+    <!-- Ações Concluídas -->
     <div class="mb-5 pb-3">
       <h4 class="text-uppercase text-muted fs-6 mb-3 fw-semibold tracking-wide">Ações Concluídas</h4>
       
@@ -91,7 +91,7 @@
                       {{ acao.prazo ? (acao.prazo | date: 'dd/MM/yyyy') : '—' }}
                     </td>
                     <td class="text-end pe-3 text-decoration-none" (click)="$event.stopPropagation()">
-                      <button class="btn btn-sm btn-link text-secondary p-0 text-decoration-none" (click)="mudarStatus(acao)" title="Reverter">
+                      <button class="btn btn-sm btn-link text-secondary p-0 text-decoration-none" (click)="mudarStatus(acao)" title="reverter">
                         <i class="fas fa-undo-alt fs-5"></i>
                       </button>
                     </td>

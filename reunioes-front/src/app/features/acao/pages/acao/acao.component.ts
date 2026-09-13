@@ -47,17 +47,35 @@ export class AcaoComponent implements OnInit {
     });
   }
 
-  atualizarPagina(): void {
-    const inicio = (this.paginaAtual - 1) * this.limite;
-    const fim = inicio + this.limite;
-    
-    const acoesPaginadas = this.todasAcoes.slice(inicio, fim);
-    
-    this.acoesPendentes = acoesPaginadas.filter((a: Acao) => !a.concluida);
-    this.acoesConcluidas = acoesPaginadas.filter((a: Acao) => a.concluida);
-    
-    this.totalPaginas = Math.ceil(this.todasAcoes.length / this.limite) || 1;
-  }
+ atualizarPagina(): void {
+  const pendentes = this.todasAcoes
+    .filter(a => !a.concluida)
+    .sort((a, b) => {
+      if (a.prazo === null) return 1;
+      if (b.prazo === null) return -1;
+      return a.prazo.localeCompare(b.prazo);
+    });
+
+  const concluidas = this.todasAcoes
+    .filter(a => a.concluida)
+    .sort((a, b) => {
+      if (a.prazo === null) return 1;
+      if (b.prazo === null) return -1;
+      return a.prazo.localeCompare(b.prazo);
+    });
+
+  const inicio = (this.paginaAtual - 1) * this.limite;
+  const fim = inicio + this.limite;
+
+  this.acoesPendentes = pendentes.slice(inicio, fim);
+  this.acoesConcluidas = concluidas.slice(inicio, fim);
+
+  this.totalPaginas = Math.max(
+    Math.ceil(pendentes.length / this.limite),
+    Math.ceil(concluidas.length / this.limite),
+    1
+  );
+}
 
   mudarStatus(acao: Acao): void {
     const novoStatus = !acao.concluida;
@@ -67,7 +85,7 @@ export class AcaoComponent implements OnInit {
       descricao: acao.descricao,
       tipo: acao.tipo,
       prazo: acao.prazo,
-      status: novoStatus
+      concluida: novoStatus
     };
 
     this.acaoService.atualizarParcial(acao.id, request).subscribe({
@@ -85,14 +103,14 @@ export class AcaoComponent implements OnInit {
   proximaPagina(): void {
     if (this.paginaAtual < this.totalPaginas) {
       this.paginaAtual++;
-      this.atualizarPagina(); // Corrigido de atualizarFatiamentoPagina para atualizarPagina
+      this.atualizarPagina(); 
     }
   }
 
   paginaAnterior(): void {
     if (this.paginaAtual > 1) {
       this.paginaAtual--;
-      this.atualizarPagina(); // Corrigido de atualizarFatiamentoPagina para atualizarPagina
+      this.atualizarPagina(); 
     }
   }
 }
