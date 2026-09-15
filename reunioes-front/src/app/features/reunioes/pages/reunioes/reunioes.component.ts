@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { MdbModalService } from 'mdb-angular-ui-kit/modal';
 import { ReuniaoFormComponent } from '../reuniao-form/reuniao-form.component';
@@ -7,6 +7,9 @@ import { StatusBadgeComponent } from '../../../../shared/components/status-badge
 import { Reuniao } from '../../../../core/models';
 import { Router } from '@angular/router'; 
 import { MdbModalModule } from 'mdb-angular-ui-kit/modal';
+import { ReuniaoService } from '../../../../core/services/reuniao.service';
+import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
+import { ReuniaoApiDTO } from '../../../../core/models/api/reuniao-api.model';
 
 @Component({
   selector: 'app-reunioes',
@@ -20,8 +23,38 @@ export class ReunioesComponent {
   private modalService = inject(MdbModalService);
   private router = inject(Router); 
   readonly reunioes = this.store.listar;
+export class ReunioesComponent implements OnInit {
+  readonly reunioes = signal<ReuniaoApiDTO[]>([]);
+  readonly carregando = signal(true);
+  readonly erro = signal<string | null>(null);
 
-  reuniaoParaExcluir: Reuniao | null = null;
+  reuniaoParaExcluir: ReuniaoApiDTO | null = null;
+
+  constructor(
+    private readonly reuniaoService: ReuniaoService,
+    private readonly router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.carregarReunioes();
+  }
+
+  private carregarReunioes(): void {
+    this.carregando.set(true);
+    this.erro.set(null);
+
+    this.reuniaoService.listar().subscribe({
+      next: (dados) => {
+        this.reunioes.set(dados);
+        this.carregando.set(false);
+      },
+      error: (err) => {
+        console.error('Erro ao carregar reuniões:', err);
+        this.erro.set('Não foi possível carregar as reuniões. Tente novamente em instantes.');
+        this.carregando.set(false);
+      }
+    });
+  }
 
   novaReuniao(): void {
     this.modalService.open(ReuniaoFormComponent);
@@ -37,7 +70,7 @@ export class ReunioesComponent {
   });
   }
 
-  abrirConfirmacaoExclusao(reuniao: Reuniao, event: Event): void {
+  abrirConfirmacaoExclusao(reuniao: ReuniaoApiDTO, event: Event): void {
     event.stopPropagation();
     this.reuniaoParaExcluir = reuniao;
   }
@@ -47,14 +80,20 @@ export class ReunioesComponent {
   }
 
   confirmarExclusao(): void {
-    if (this.reuniaoParaExcluir) {
-      this.store.remover(this.reuniaoParaExcluir.id);
-      this.reuniaoParaExcluir = null;
-    }
-  }
+    if (!this.reuniaoParaExcluir) return;
 
-  resumoTruncado(resumo: string): string {
-    const limite = 80;
-    return resumo.length > limite ? resumo.slice(0, limite) + '…' : resumo;
+    const id = this.reuniaoParaExcluir.id;
+
+    this.reuniaoService.deletar(id).subscribe({
+      next: () => {
+        this.reunioes.update(lista => lista.filter(r => r.id !== id));
+        this.reuniaoParaExcluir = null;
+      },
+      error: (err) => {
+        console.error('Erro ao excluir reunião:', err);
+        this.erro.set('Não foi possível excluir a reunião. Tente novamente.');
+        this.reuniaoParaExcluir = null;
+      }
+    });
   }
 }

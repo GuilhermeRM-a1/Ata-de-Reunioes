@@ -6,7 +6,18 @@
     </button>
   </div>
 
-  @if (reunioes().length === 0) {
+  @if (carregando()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Carregando...</span>
+      </div>
+      <p class="text-muted mt-2">Carregando reuniões...</p>
+    </div>
+  } @else if (erro()) {
+    <div class="alert alert-danger text-center">
+      {{ erro() }}
+    </div>
+  } @else if (reunioes().length === 0) {
     <div class="alert alert-info text-center">
       Nenhuma reunião cadastrada ainda.
     </div>
@@ -16,7 +27,6 @@
         <tr>
           <th>Título</th>
           <th>Data</th>
-          <th>Resumo</th>
           <th>Áreas</th>
           <th>Ações</th>
           <th>Status</th>
@@ -26,9 +36,8 @@
       <tbody>
         @for (reuniao of reunioes(); track reuniao.id) {
           <tr (click)="verReuniao(reuniao.id)" style="cursor: pointer;">
-            <td>{{ reuniao.tituloReuniao }}</td>
-            <td>{{ reuniao.dataProcessamento | date:'dd/MM/yyyy HH:mm' }}</td>
-            <td>{{ resumoTruncado(reuniao.resumoExecutivo) }}</td>
+            <td>{{ reuniao.titulo }}</td>
+            <td>{{ reuniao.data | date:'dd/MM/yyyy HH:mm' }}</td>
             <td>
               @for (area of reuniao.areas; track area) {
                 <span class="badge rounded-pill bg-light text-dark border me-1">{{ area }}</span>
@@ -59,7 +68,7 @@
           <h5 class="modal-title">Confirmar exclusão</h5>
         </div>
         <div class="modal-body">
-          Tem certeza que deseja excluir a reunião <strong>{{ reuniaoParaExcluir.tituloReuniao }}</strong>? Essa ação não pode ser desfeita.
+          Tem certeza que deseja excluir a reunião <strong>{{ reuniaoParaExcluir.titulo }}</strong>? Essa ação não pode ser desfeita.
         </div>
         <div class="modal-footer border-0">
           <button class="btn btn-secondary" (click)="cancelarExclusao()">Cancelar</button>

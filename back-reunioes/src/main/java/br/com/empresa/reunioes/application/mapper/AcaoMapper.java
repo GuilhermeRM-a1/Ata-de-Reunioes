@@ -18,6 +18,7 @@ public class AcaoMapper {
         acao.setDescricao(request.descricao());
         acao.setTipo(request.tipo());
         acao.setPrazo(request.prazo());
+        acao.setConcluida(request.concluida() != null ? request.concluida() : false);
 
         return acao;
     }
@@ -27,6 +28,7 @@ public class AcaoMapper {
         acao.setDescricao(request.descricao());
         acao.setTipo(request.tipo());
         acao.setPrazo(request.prazo());
+        acao.setConcluida(request.concluida() != null ? request.concluida() : false);
     }
 
     public void updateParsiEntity(Acao acao, AcaoRequest request) {
@@ -45,6 +47,10 @@ public class AcaoMapper {
         if (request.prazo() != null) {
             acao.setPrazo(request.prazo());
         }
+
+        if (request.concluida() != null) {
+            acao.setConcluida(request.concluida());
+        }
     }
 
     public AcaoDTO toDTO(Acao acao) {
@@ -58,6 +64,7 @@ public class AcaoMapper {
                 acao.getDescricao(),
                 responsavelNomes,
                 acao.getPrazo(),
+                acao.getConcluida(),
                 acao.getReuniao().getId()
         );
     }
