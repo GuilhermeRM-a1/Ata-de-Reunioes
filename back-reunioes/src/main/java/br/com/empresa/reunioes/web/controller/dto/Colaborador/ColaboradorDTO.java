@@ -4,6 +4,7 @@ public record ColaboradorDTO(
         Long id,
         String nome,
         String email,
+        String papel,
         Boolean monitorarReunioes,
         String dataCadastro) {
 }

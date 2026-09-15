@@ -28,6 +28,7 @@ public class ColaboradorMapper {
                 colaborador.getId(),
                 colaborador.getNome(),
                 colaborador.getEmail(),
+                colaborador.getPapel(),
                 colaborador.getMonitorarReunioes(),
                 colaborador.getDataCadastro()
         );
