@@ -34,3 +34,8 @@ springdoc:
     operationsSorter: method
   api-docs:
     path: /v3/api-docs
+
+# Configuracoes de log
+logging:
+  level:
+    com.seuprojeto.api: DEBUG

@@ -7,23 +7,17 @@ import br.com.empresa.reunioes.domain.entity.Reuniao;
 import br.com.empresa.reunioes.domain.repository.AcaoRepository;
 import br.com.empresa.reunioes.domain.repository.ColaboradorRepository;
 import br.com.empresa.reunioes.domain.repository.ReuniaoRepository;
-import br.com.empresa.reunioes.web.controller.dto.PaginaResponse;
-import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoDTO;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoRequest;
 import br.com.empresa.reunioes.web.exception.RecursoNaoEncontradoException;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+
 import java.util.List;
 
-/**
- * A camada web nunca recebe entidade JPA: todo metodo publico devolve DTO.
- * Isso evita vazar campo interno na resposta e serializacao de relacionamento
- * preguicoso fora da transacao.
- */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReuniaoService {
@@ -35,23 +29,52 @@ public class ReuniaoService {
 
     @Transactional
     public Reuniao salvar(ReuniaoRequest request) {
+        log.info("Iniciando salvamento da reunião.");
+
+        log.debug("Requisição recebida: {}", request);
+
         Reuniao reuniao = mapper.toEntity(request);
+        log.debug("requisição covertida para entidade");
 
+        log.debug("Buscando e setando colaboradores.");
         reuniao.setParticipantes(buscarColaboradores(request.participantes()));
+
+        log.debug("Buscando e stando ações.");
         reuniao.setAcoes(buscarAcoes(request.acoes()));
-        reuniao.setTotalAcoes(calcularTotalAcoes(request, reuniao.getAcoes()));
 
-        return this.reuniaoRepository.save(reuniao);
+        log.debug("Calculando e setando o total de ações numericamente.");
+        reuniao.setTotalAcoes(reuniao.getAcoes().size());
+
+        log.debug("Reunião com colaboradores, ações e total de ações setados: {}", reuniao);
+
+        Reuniao reuniaoSalva = reuniaoRepository.save(reuniao);
+
+        log.info("Reunião salva com sucesso");
+
+        return reuniaoSalva;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Reuniao buscarPorId(Long id) {
-        return this.reuniaoRepository.findById(id)
+        log.info("Iniciando busca por reunião pelo id.");
+
+        log.debug("Buscando reunião por id.");
+        Reuniao reuniaoEncontrada = reuniaoRepository.findById(id)
                 .orElseThrow(() -> RecursoNaoEncontradoException.de("Reunião", id));
+
+        log.debug("Reunião encontrada: {}", reuniaoEncontrada);
+
+        return reuniaoEncontrada;
     }
 
+    @Transactional(readOnly = true)
     public List<Reuniao> listar() {
-        return reuniaoRepository.findAll();
+        log.info("Iniciando listagem de reuniões.");
+
+        List<Reuniao> lista = reuniaoRepository.findAll();
+        log.debug("Listagem de reuniões concluída. Total encontrado: {}", lista.size());
+
+        return lista;
     }
 
     @Transactional
@@ -63,34 +86,51 @@ public class ReuniaoService {
 
         reuniao.setParticipantes(buscarColaboradores(request.participantes()));
         reuniao.setAcoes(buscarAcoes(request.acoes()));
-        reuniao.setTotalAcoes(calcularTotalAcoes(request, reuniao.getAcoes()));
+        reuniao.setTotalAcoes(reuniao.getAcoes().size());
 
         return this.reuniaoRepository.save(reuniao);
     }
 
     @Transactional
     public Reuniao atualizarParcial(Long id, ReuniaoRequest request) {
+        log.info("Iniciando atualização parcial da reunião com id: {}", id);
 
+        log.debug("Buscando reunião existente.");
         Reuniao reuniao = buscarPorId(id);
 
+        log.debug("Atualizando com mapper");
         mapper.updateParsiEntity(reuniao, request);
 
-        if (request.participantes() != null)
+        if (request.participantes() != null) {
+            log.debug("buscando participantes");
             reuniao.setParticipantes(buscarColaboradores(request.participantes()));
+        }
+
+
         if (request.acoes() != null) {
+            log.debug("buscando ações");
             reuniao.setAcoes(buscarAcoes(request.acoes()));
+            log.debug("calculando total de ações");
             reuniao.setTotalAcoes(reuniao.getAcoes().size());
         }
 
-        return this.reuniaoRepository.save(reuniao);
+        log.debug("Salvando reunião atualizada.");
+        Reuniao reuniaoAtualizada = reuniaoRepository.save(reuniao);
+
+        log.info("Reunião atualizada salva com sucesso.");
+
+        return reuniaoAtualizada;
     }
 
     @Transactional
     public void deletar(Long id) {
+        log.info("Iniciando processo de remover reunião");
 
+        log.debug("Buscando reunião existente por id");
         Reuniao reuniao = buscarPorId(id);
 
         reuniaoRepository.delete(reuniao);
+        log.info("Reunião removida com sucesso: ID: {}", id);
     }
 
     /**
@@ -101,7 +141,7 @@ public class ReuniaoService {
     private List<Colaborador> buscarColaboradores(List<Long> ids) {
 
         if (ids == null || ids.isEmpty()) {
-            return new ArrayList<>();
+            return List.of();
         }
 
         List<Colaborador> colaboradores = colaboradorRepository.findAllById(ids);
@@ -117,7 +157,7 @@ public class ReuniaoService {
     private List<Acao> buscarAcoes(List<Long> ids) {
 
         if (ids == null || ids.isEmpty()) {
-            return new ArrayList<>();
+            return List.of();
         }
 
         List<Acao> acoes = acaoRepository.findAllById(ids);
@@ -129,21 +169,4 @@ public class ReuniaoService {
 
         return acoes;
     }
-
-    /**
-     * O total informado na request so vale quando nenhuma acao foi enviada.
-     */
-    private Integer calcularTotalAcoes(ReuniaoRequest request, List<Acao> acoes) {
-
-        if (!acoes.isEmpty()) {
-            return acoes.size();
-        }
-
-        if (request.acoes() == null) {
-            return 0;
-        }
-
-        return request.acoes().size();
-    }
-
 }
