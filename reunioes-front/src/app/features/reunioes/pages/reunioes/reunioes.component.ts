@@ -1,36 +1,40 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { Router } from '@angular/router';
+import { MdbModalService } from 'mdb-angular-ui-kit/modal';
+import { ReuniaoFormComponent } from '../reuniao-form/reuniao-form.component';
 import { ReuniaoStoreService } from '../../../../core/services/reuniao-store.service';
 import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
 import { Reuniao } from '../../../../core/models';
+import { Router } from '@angular/router'; 
+import { MdbModalModule } from 'mdb-angular-ui-kit/modal';
 
 @Component({
   selector: 'app-reunioes',
   standalone: true,
-  imports: [CommonModule, DatePipe, StatusBadgeComponent],
+  imports: [CommonModule, DatePipe, StatusBadgeComponent, MdbModalModule  ],
   templateUrl: './reunioes.component.html',
   styleUrl: './reunioes.component.scss'
 })
 export class ReunioesComponent {
   private readonly store = inject(ReuniaoStoreService);
-  private readonly router = inject(Router);
-
+  private modalService = inject(MdbModalService);
+  private router = inject(Router); 
   readonly reunioes = this.store.listar;
 
   reuniaoParaExcluir: Reuniao | null = null;
 
   novaReuniao(): void {
-    this.router.navigate(['/reunioes/novo']);
+    this.modalService.open(ReuniaoFormComponent);
   }
 
   verReuniao(id: number): void {
     this.router.navigate(['/reunioes', id]);
   }
 
-  editarReuniao(id: number, event: Event): void {
-    event.stopPropagation();
-    this.router.navigate(['/reunioes', id, 'editar']);
+  editarReuniao(id: number): void {
+     this.modalService.open(ReuniaoFormComponent, {
+    data: { idEditando: id }
+  });
   }
 
   abrirConfirmacaoExclusao(reuniao: Reuniao, event: Event): void {
