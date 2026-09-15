@@ -50,7 +50,7 @@ export class ReunioesComponent implements OnInit {
   }
 
   verReuniao(id: number): void {
-    this.router.navigate(['/reunioes', id]);
+    this.router.navigate(['/usuario/reunioes', id]);
   }
 
   editarReuniao(id: number, event: Event): void {

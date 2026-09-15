@@ -106,11 +106,11 @@ export class ReuniaoFormComponent implements OnInit {
       this.store.criar(dados);
     }
 
-    this.router.navigate(['/reunioes']);
+    this.router.navigate(['/admin/reunioes']);
   }
 
   cancelar(): void {
-    this.router.navigate(['/reunioes']);
+    this.router.navigate(['/admin/reunioes']);
   }
 
   private textoParaLista(texto: string): string[] {
