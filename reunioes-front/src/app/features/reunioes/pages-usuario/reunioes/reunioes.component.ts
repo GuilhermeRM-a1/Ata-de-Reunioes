@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
-import { ReuniaoService } from '../../../../core/services/reuniao.service';
+import { ReuniaoStoreService } from '../../../../core/services/reuniao.service';
 import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
 import { ReuniaoApiDTO } from '../../../../core/models/api/reuniao-api.model';
 
@@ -20,7 +20,7 @@ export class ReunioesComponent implements OnInit {
   reuniaoParaExcluir: ReuniaoApiDTO | null = null;
 
   constructor(
-    private readonly reuniaoService: ReuniaoService,
+    private readonly reuniaoService: ReuniaoStoreService,
     private readonly router: Router
   ) {}
 
@@ -72,7 +72,7 @@ export class ReunioesComponent implements OnInit {
 
     const id = this.reuniaoParaExcluir.id;
 
-    this.reuniaoService.deletar(id).subscribe({
+    this.reuniaoService.remover(id).subscribe({
       next: () => {
         this.reunioes.update(lista => lista.filter(r => r.id !== id));
         this.reuniaoParaExcluir = null;

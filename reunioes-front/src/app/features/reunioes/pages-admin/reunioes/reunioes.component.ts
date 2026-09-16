@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
-import { ReuniaoService } from '../../../../core/services/reuniao.service';
+import { ReuniaoStoreService } from '../../../../core/services/reuniao.service';
 import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
 import { ReuniaoApiDTO } from '../../../../core/models/api/reuniao-api.model';
 
@@ -20,7 +20,7 @@ export class ReunioesComponent implements OnInit {
   reuniaoParaExcluir: ReuniaoApiDTO | null = null;
 
   constructor(
-    private readonly reuniaoService: ReuniaoService,
+    private readonly reuniaoService: ReuniaoStoreService,
     private readonly router: Router
   ) {}
 
@@ -32,12 +32,13 @@ export class ReunioesComponent implements OnInit {
     this.carregando.set(true);
     this.erro.set(null);
 
+    // Tipado explicitamente (dados: ReuniaoApiDTO[]) e (err: any)
     this.reuniaoService.listar().subscribe({
-      next: (dados) => {
+      next: (dados: ReuniaoApiDTO[]) => {
         this.reunioes.set(dados);
         this.carregando.set(false);
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Erro ao carregar reuniões:', err);
         this.erro.set('Não foi possível carregar as reuniões. Tente novamente em instantes.');
         this.carregando.set(false);
@@ -72,12 +73,13 @@ export class ReunioesComponent implements OnInit {
 
     const id = this.reuniaoParaExcluir.id;
 
-    this.reuniaoService.deletar(id).subscribe({
+    // Tipado explicitamente (err: any)
+    this.reuniaoService.remover(id).subscribe({
       next: () => {
         this.reunioes.update(lista => lista.filter(r => r.id !== id));
         this.reuniaoParaExcluir = null;
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Erro ao excluir reunião:', err);
         this.erro.set('Não foi possível excluir a reunião. Tente novamente.');
         this.reuniaoParaExcluir = null;

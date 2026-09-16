@@ -1,9 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { ReuniaoStoreService } from '../../../../core/services/reuniao-store.service';
+import { ReuniaoStoreService } from '../../../../core/services/reuniao.service';
 import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
-import { ReuniaoDetalhe } from '../../../../core/models/reuniao.model';
+import { ReuniaoApiDTO } from '../../../../core/models/api/reuniao-api.model'; // Ajuste para o seu DTO da API
 
 @Component({
   selector: 'app-reuniao-detalhe',
@@ -12,36 +12,45 @@ import { ReuniaoDetalhe } from '../../../../core/models/reuniao.model';
   templateUrl: './reuniao-detalhe.component.html',
   styleUrl: './reuniao-detalhe.component.scss'
 })
-export class ReuniaoDetalheComponent {
+export class ReuniaoDetalheComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly store = inject(ReuniaoStoreService);
 
   mensagemSucessoVisivel = false;
-  reuniao: ReuniaoDetalhe | undefined;
+  reuniao: ReuniaoApiDTO | undefined; // Ajustado para o DTO do backend
   reuniaoNaoEncontrada = false;
   modalExclusaoAberto = false;
   transcricaoAberta = false;
+  carregando = true; // Útil para exibir um indicador de loading no HTML se quiser
 
-
-  constructor() {
+  ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
     const id = idParam ? Number(idParam) : NaN;
 
-    // Garanta que o método buscarPorId no service retorne ReuniaoDetalhe | undefined
-    this.reuniao = this.store.buscarPorId(id) as ReuniaoDetalhe | undefined;
-    this.reuniaoNaoEncontrada = !this.reuniao;
+    if (isNaN(id)) {
+      this.reuniaoNaoEncontrada = true;
+      this.carregando = false;
+      return;
+    }
+
+    // Como agora é HTTP, usamos subscribe para escutar a resposta da API
+    this.store.buscarPorId(id).subscribe({
+      next: (dados) => {
+        this.reuniao = dados;
+        this.reuniaoNaoEncontrada = !dados;
+        this.carregando = false;
+      },
+      error: () => {
+        this.reuniaoNaoEncontrada = true;
+        this.carregando = false;
+      }
+    });
   }
 
-  
-
   get pontosChaveLista(): string[] {
-    if (!this.reuniao?.pontosChave) return [];
-    
-    return this.reuniao.pontosChave
-      .split('\n')
-      .map((linha: string) => linha.trim())
-      .filter((linha: string) => linha.length > 0);
+    // Como no backend já é uma lista (array), basta retornar ela ou um array vazio
+    return this.reuniao?.pontosChaves || [];
   }
 
   abrirModalExclusao(): void {
@@ -53,22 +62,27 @@ export class ReuniaoDetalheComponent {
   }
 
   confirmarExclusao(): void {
-    if (this.reuniao) {
-      this.store.remover(this.reuniao.id);
-      this.router.navigate(['/usuario/reunioes']);
+    if (this.reuniao?.id) {
+      this.store.remover(this.reuniao.id).subscribe({
+        next: () => {
+          this.router.navigate(['/admin/reunioes']);
+        },
+        error: (err) => console.error('Erro ao excluir reunião', err)
+      });
     }
   }
 
   alternarTranscricao(): void {
-  this.transcricaoAberta = !this.transcricaoAberta;
-}
+    this.transcricaoAberta = !this.transcricaoAberta;
+  }
+
   salvarAlteracoes(): void {
     if (this.reuniao) { 
-  this.mensagemSucessoVisivel = true;
+      this.mensagemSucessoVisivel = true;
       
       setTimeout(() => {
         this.mensagemSucessoVisivel = false;
-        this.router.navigate([`/usuario/reunioes/${this.reuniao?.id}`]);
+        this.router.navigate([`/admin/reunioes/${this.reuniao?.id}`]);
       }, 1500);
     }
   }
