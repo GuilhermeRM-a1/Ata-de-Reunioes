@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormArray, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ReuniaoStoreService, ReuniaoInput } from '../../../../core/services/reuniao-store.service';
+import { ReuniaoStoreService } from '../../../../core/services/reuniao.service';
 
 @Component({
   selector: 'app-reuniao-form',
@@ -40,26 +40,35 @@ export class ReuniaoFormComponent implements OnInit {
 
     if (idParam) {
       this.idEditando = Number(idParam);
-      const reuniao = this.store.buscarPorId(this.idEditando);
+      
+      // buscarPorId retorna Observable, por isso  subscribe
+      this.store.buscarPorId(this.idEditando).subscribe({
+        next: (reuniao) => {
+          if (reuniao) {
+            this.form.patchValue({
+              ...reuniao,
+              areas: Array.isArray(reuniao.areas) ? reuniao.areas.join(', ') : reuniao.areas,
+              participantes: Array.isArray(reuniao.participantes) ? reuniao.participantes.join(', ') : reuniao.participantes
+            });
 
-      if (reuniao) {
-        this.form.patchValue({
-          ...reuniao,
-          areas: reuniao.areas.join(', '),
-          participantes: reuniao.participantes.join(', ')
-        });
-
-        reuniao.acoes.forEach(acao => {
-          this.acoes.push(this.fb.group({
-            descricao: [acao.descricao, Validators.required],
-            tipo: [acao.tipo, Validators.required],
-            prazo: [acao.prazo],
-            responsavel: [acao.responsavel]
-          }));
-        });
-      } else {
-        this.idNaoEncontrado = true;
-      }
+            if (reuniao.acoes) {
+              reuniao.acoes.forEach((acao: any) => {
+                this.acoes.push(this.fb.group({
+                  descricao: [acao.descricao, Validators.required],
+                  tipo: [acao.tipo, Validators.required],
+                  prazo: [acao.prazo],
+                  responsavel: [acao.responsavel]
+                }));
+              });
+            }
+          } else {
+            this.idNaoEncontrado = true;
+          }
+        },
+        error: () => {
+          this.idNaoEncontrado = true;
+        }
+      });
     }
   }
 
@@ -89,7 +98,7 @@ export class ReuniaoFormComponent implements OnInit {
 
     const bruto = this.form.value;
 
-    const dados: ReuniaoInput = {
+    const dados = {
       ...bruto,
       areas: this.textoParaLista(bruto.areas),
       participantes: this.textoParaLista(bruto.participantes),
@@ -100,13 +109,19 @@ export class ReuniaoFormComponent implements OnInit {
       }))
     };
 
-    if (this.idEditando !== null) {
-      this.store.atualizar(this.idEditando, dados);
-    } else {
-      this.store.criar(dados);
-    }
+    // Define se vai atualizar ou criar e se inscreve para aguardar o backend responder
+    const operacao$ = this.idEditando !== null
+      ? this.store.atualizar(this.idEditando, dados)
+      : this.store.criar(dados);
 
-    this.router.navigate(['/admin/reunioes']);
+    operacao$.subscribe({
+      next: () => {
+        this.router.navigate(['/admin/reunioes']);
+      },
+      error: (err) => {
+        console.error('Erro ao salvar reunião:', err);
+      }
+    });
   }
 
   cancelar(): void {
@@ -114,7 +129,8 @@ export class ReuniaoFormComponent implements OnInit {
   }
 
   private textoParaLista(texto: string): string[] {
-    return texto
+    if (!texto) return [];
+    return String(texto)
       .split(',')
       .map(item => item.trim())
       .filter(item => item.length > 0);

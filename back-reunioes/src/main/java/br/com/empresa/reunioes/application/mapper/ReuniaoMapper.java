@@ -2,6 +2,7 @@ package br.com.empresa.reunioes.application.mapper;
 
 import br.com.empresa.reunioes.domain.entity.Colaborador;
 import br.com.empresa.reunioes.domain.entity.Reuniao;
+import br.com.empresa.reunioes.web.controller.dto.Acao.AcaoDTO;
 import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorDTO;
 import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorRequest;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoDTO;
@@ -34,12 +35,25 @@ public class ReuniaoMapper {
 
         List<String> areas = reuniao.getAreas() == null ? List.of() : reuniao.getAreas();
 
+        List<String> pontosChaves = reuniao.getPontosChaves() == null ? List.of() : reuniao.getPontosChaves();
+
+        List<AcaoDTO> acoes = reuniao.getAcoes() != null
+                ? reuniao.getAcoes().stream()
+                .map(acao -> new AcaoMapper().toDTO(acao))
+                .toList()
+                : List.of();
+
+        String resumo = reuniao.getResumo();
+
         return new ReuniaoDTO(reuniao.getId(),
                 reuniao.getTitulo(),
                 reuniao.getData(),
                 reuniao.getStatus(),
                 participantes,
+                pontosChaves,
+                acoes,
                 areas,
+                resumo,
                 reuniao.getTotalAcoes());
     }
 

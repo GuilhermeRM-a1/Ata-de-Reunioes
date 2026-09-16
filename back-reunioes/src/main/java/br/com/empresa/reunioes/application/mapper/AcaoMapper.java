@@ -53,7 +53,7 @@ public class AcaoMapper {
         }
     }
 
-    public AcaoDTO toDTO(Acao acao) {
+    public  AcaoDTO toDTO(Acao acao) {
         List<String> responsavelNomes = acao.getResponsavel() == null
                 ? List.of()
                 : acao.getResponsavel().stream().map(Colaborador::getNome).toList();
@@ -61,6 +61,7 @@ public class AcaoMapper {
         return new AcaoDTO(
                 acao.getId() == null ? null : String.valueOf(acao.getId()),
                 acao.getTitulo(),
+                acao.getTipo(),
                 acao.getDescricao(),
                 responsavelNomes,
                 acao.getPrazo(),

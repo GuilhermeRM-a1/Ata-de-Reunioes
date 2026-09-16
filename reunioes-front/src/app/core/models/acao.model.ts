@@ -1,4 +1,3 @@
-export type TipoAcao = 'ACAO' | 'TAREFA';
 
 export interface Acao {
   id: number;
