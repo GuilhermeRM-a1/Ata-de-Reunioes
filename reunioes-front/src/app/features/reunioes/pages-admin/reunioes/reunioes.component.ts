@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { ReuniaoStoreService } from '../../../../core/services/reuniao.service';
 import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
 import { ReuniaoApiDTO } from '../../../../core/models/api/reuniao-api.model';
+import { AlertaService } from '../../../../core/services/alerta.service';
 
 @Component({
   selector: 'app-reunioes',
@@ -21,7 +22,8 @@ export class ReunioesComponent implements OnInit {
 
   constructor(
     private readonly reuniaoService: ReuniaoStoreService,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly alerta: AlertaService
   ) {}
 
   ngOnInit(): void {
@@ -72,16 +74,16 @@ export class ReunioesComponent implements OnInit {
     if (!this.reuniaoParaExcluir) return;
 
     const id = this.reuniaoParaExcluir.id;
+    const titulo = this.reuniaoParaExcluir.titulo;
 
-    // Tipado explicitamente (err: any)
     this.reuniaoService.remover(id).subscribe({
       next: () => {
         this.reunioes.update(lista => lista.filter(r => r.id !== id));
         this.reuniaoParaExcluir = null;
+        this.alerta.sucesso('Reunião excluída', titulo);
       },
-      error: (err: any) => {
-        console.error('Erro ao excluir reunião:', err);
-        this.erro.set('Não foi possível excluir a reunião. Tente novamente.');
+      // O aviso de falha vem do interceptor; aqui so fechamos o modal.
+      error: () => {
         this.reuniaoParaExcluir = null;
       }
     });
