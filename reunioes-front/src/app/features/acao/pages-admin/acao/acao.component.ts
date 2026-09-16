@@ -96,7 +96,7 @@ export class AcaoComponent implements OnInit {
 
   verReuniao(reuniaoId: number): void {
     if (reuniaoId) {
-      this.router.navigate(['/reunioes', reuniaoId]);
+      this.router.navigate(['/admin/reunioes', reuniaoId]);
     }
   }
 

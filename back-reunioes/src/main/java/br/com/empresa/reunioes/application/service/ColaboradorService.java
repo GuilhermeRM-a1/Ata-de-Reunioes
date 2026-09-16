@@ -11,6 +11,7 @@ import br.com.empresa.reunioes.web.exception.RecursoNaoEncontradoException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.core.support.RepositoryMethodInvocationListener;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,7 +35,18 @@ public class ColaboradorService {
     }
 
     public Colaborador buscarPorId(Long id) {
-        return this.buscarEntidade(id);
+        return colaboradorRepository.findById(id)
+                .orElseThrow(() -> RecursoNaoEncontradoException.de("Colaborador", id));
+    }
+
+    public Colaborador buscarPorEmail(String email) {
+        Colaborador colaboradorEncontrado = colaboradorRepository.findByEmail(email);
+
+        if (colaboradorEncontrado == null) {
+            throw RecursoNaoEncontradoException.de("Colaborador", email);
+        }
+
+        return colaboradorEncontrado;
     }
 
     public List<Colaborador> listar() {
@@ -43,7 +55,7 @@ public class ColaboradorService {
 
     @Transactional
     public Colaborador atualizar(Long id, ColaboradorRequest request) {
-        Colaborador colaborador = buscarEntidade(id);
+        Colaborador colaborador = buscarPorId(id);
         mapper.updateEntity(colaborador, request);
 
         return this.colaboradorRepository.save(colaborador);
@@ -52,7 +64,7 @@ public class ColaboradorService {
     @Transactional
     public Colaborador atualizarParcial(Long id, ColaboradorPatchRequest request) {
 
-        Colaborador colaborador = buscarEntidade(id);
+        Colaborador colaborador = buscarPorId(id);
         mapper.updateParsiEntity(colaborador, request);
 
         return this.colaboradorRepository.save(colaborador);
@@ -60,16 +72,8 @@ public class ColaboradorService {
 
     @Transactional
     public void deletar(Long id) {
-        Colaborador colaborador = buscarEntidade(id);
+        Colaborador colaborador = buscarPorId(id);
         colaboradorRepository.delete(colaborador);
-    }
-
-    /**
-     * Uso interno da propria camada de servico
-     */
-    private Colaborador buscarEntidade(Long id) {
-        return colaboradorRepository.findById(id)
-                .orElseThrow(() -> RecursoNaoEncontradoException.de("Colaborador", id));
     }
 
 }

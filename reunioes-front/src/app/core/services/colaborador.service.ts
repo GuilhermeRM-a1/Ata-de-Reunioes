@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 
-export class ColaboradorServiceService {
+export class ColaboradorService {
 
   http = inject(HttpClient);
 
@@ -27,6 +27,10 @@ export class ColaboradorServiceService {
 
   buscarPorId(id: number): Observable<Colaborador>{
     return this.http.get<Colaborador>(`${this.API}/${id}`);
+  }
+
+  buscarPorEmail(email: string): Observable<Colaborador> {
+    return this.http.get<Colaborador>(`${this.API}/email/${email}`);
   }
 
   atualizar(id: number, colaborador: Colaborador): Observable<Colaborador>{

@@ -55,7 +55,7 @@ export class ReuniaoDetalheComponent {
   confirmarExclusao(): void {
     if (this.reuniao) {
       this.store.remover(this.reuniao.id);
-      this.router.navigate(['/reunioes']);
+      this.router.navigate(['/usuario/reunioes']);
     }
   }
 
@@ -68,7 +68,7 @@ export class ReuniaoDetalheComponent {
       
       setTimeout(() => {
         this.mensagemSucessoVisivel = false;
-        this.router.navigate([`/reunioes/${this.reuniao?.id}`]);
+        this.router.navigate([`/usuario/reunioes/${this.reuniao?.id}`]);
       }, 1500);
     }
   }
