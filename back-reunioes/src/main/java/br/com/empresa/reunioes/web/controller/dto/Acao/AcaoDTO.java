@@ -9,6 +9,7 @@ import java.util.List;
 public record AcaoDTO(
         String id,
         String titulo,
+        String tipo,
         String descricao,
         List<String> responsavel,
         String prazo,

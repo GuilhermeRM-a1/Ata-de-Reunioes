@@ -2,6 +2,7 @@ package br.com.empresa.reunioes.web.controller.dto.Reuniao;
 
 import br.com.empresa.reunioes.domain.entity.Colaborador;
 import br.com.empresa.reunioes.domain.entity.Reuniao;
+import br.com.empresa.reunioes.web.controller.dto.Acao.AcaoDTO;
 
 import java.util.List;
 
@@ -10,6 +11,9 @@ public record ReuniaoDTO(Long id,
                          String data,
                          String status,
                          List<String> participantes,
+                         List<String> pontosChaves,
+                         List<AcaoDTO> acoes,
                          List<String> areas,
+                         String reusmo,
                          Integer totalAcoes) {
 }
