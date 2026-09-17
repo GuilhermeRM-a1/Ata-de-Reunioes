@@ -1,10 +1,14 @@
 package br.com.empresa.reunioes.web.controller;
 
 import br.com.empresa.reunioes.application.mapper.ReuniaoMapper;
+import br.com.empresa.reunioes.application.service.IngestaoService;
+import br.com.empresa.reunioes.application.service.RelatorioService;
 import br.com.empresa.reunioes.application.service.ReuniaoService;
 import br.com.empresa.reunioes.domain.entity.Reuniao;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoDTO;
+import br.com.empresa.reunioes.web.controller.dto.Reuniao.RelatorioReuniaoResponse;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoRequest;
+import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoResumoRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -29,6 +33,8 @@ public class ReuniaoController {
 
     private final ReuniaoService reuniaoService;
     private final ReuniaoMapper mapper;
+    private final IngestaoService ingestaoService;
+    private final RelatorioService relatorioService;
 
     @Operation(summary = "Lista reuniões ",
             description = "Devolve o listagem no formato dto das reunioes.")
@@ -103,6 +109,39 @@ public class ReuniaoController {
         ReuniaoDTO dto = mapper.toDTO(reuniao);
 
         return new ResponseEntity<>(dto, HttpStatus.ACCEPTED);
+    }
+
+    @Operation(summary = "Recebe a análise da IA (ingestão)",
+            description = "Grava o resumo executivo e a transcrição pura na reunião. "
+                    + "São os únicos textos que entram de fora — participantes, ações e "
+                    + "responsáveis continuam sendo o que o administrador registrou.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "202", description = "Análise recebida e gravada"),
+            @ApiResponse(responseCode = "400", description = "Resumo executivo ausente ou vazio"),
+            @ApiResponse(responseCode = "404", description = "Nenhuma reunião com esse id")
+    })
+    @PatchMapping("/{id}/ingestao")
+    public ResponseEntity<ReuniaoDTO> receberAnalise(@PathVariable Long id,
+                                                     @Valid @RequestBody ReuniaoResumoRequest request) {
+
+        Reuniao reuniao = ingestaoService.receberAnalise(id, request);
+
+        return new ResponseEntity<>(mapper.toDTO(reuniao), HttpStatus.ACCEPTED);
+    }
+
+    @Operation(summary = "Gera o relatório consolidado da reunião",
+            description = "Monta o relatório com base no que está no banco: participantes, "
+                    + "ações, responsáveis, áreas e pontos-chave vêm do registro operacional; "
+                    + "da IA entra apenas o resumo executivo.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Relatório gerado"),
+            @ApiResponse(responseCode = "404", description = "Nenhuma reunião com esse id"),
+            @ApiResponse(responseCode = "409", description = "A reunião ainda não recebeu o resumo da IA")
+    })
+    @GetMapping("/{id}/relatorio")
+    public ResponseEntity<RelatorioReuniaoResponse> gerarRelatorio(@PathVariable Long id) {
+
+        return ResponseEntity.ok(relatorioService.gerar(id));
     }
 
     @Operation(summary = "Exclui uma reunião")

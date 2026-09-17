@@ -34,6 +34,18 @@ public class RestExceptionHandler {
                 "recurso-nao-encontrado");
     }
 
+    /**
+     * O recurso existe, mas o estado dele nao permite a operacao ainda.
+     * 409 e nao 404: dizer "nao encontrado" aqui mandaria o cliente procurar
+     * um id que existe.
+     */
+    @ExceptionHandler(RelatorioIndisponivelException.class)
+    public ProblemDetail tratarRelatorioIndisponivel(RelatorioIndisponivelException e) {
+
+        return montar(HttpStatus.CONFLICT, "Relatório indisponível", e.getMessage(),
+                "relatorio-indisponivel");
+    }
+
     /** Corpo reprovado na validacao — devolve a lista de campos rejeitados. */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail tratarValidacao(MethodArgumentNotValidException e) {
