@@ -51,6 +51,7 @@ public class ReuniaoController {
         return ResponseEntity.ok(listagemDTO);
     }
 
+
     @Operation(summary = "Busca uma reunião pelo id")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Reunião encontrada"),
