@@ -6,6 +6,8 @@ import br.com.empresa.reunioes.domain.repository.ColaboradorRepository;
 import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorPatchRequest;
 import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorRequest;
 import br.com.empresa.reunioes.web.exception.RecursoNaoEncontradoException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -66,13 +68,13 @@ public class ColaboradorService {
     }
 
     @Transactional(readOnly = true)
-    public List<Colaborador> listar() {
+    public Page<Colaborador> listar(Pageable paginacao) {
         log.info("Iniciando listagem de Colaboradores.");
 
-        List<Colaborador> lista = colaboradorRepository.findAll();
-        log.debug("Listagem de colaboradores concluída. Total encontrado: {}", lista.size());
+        Page<Colaborador> listaPaginada = colaboradorRepository.findAll(paginacao);
+        log.debug("Listagem de colaboradores concluída. Total encontrado: {}", listaPaginada.getTotalElements());
 
-        return lista;
+        return listaPaginada;
     }
 
     @Transactional

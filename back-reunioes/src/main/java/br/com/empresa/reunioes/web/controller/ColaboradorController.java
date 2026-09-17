@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,15 +46,13 @@ public class ColaboradorController {
     }
 
     @Operation(summary = "Lista colaboradores paginados",
-            description = "Devolve a lista de colaboradores.")
+            description = "Devolve o envelope padrão com content, page, size, totalElements e totalPages.")
     @ApiResponse(responseCode = "200", description = "Página de colaboradores devolvida")
     @GetMapping()
-    public ResponseEntity<List<ColaboradorDTO>> listar() {
+    public ResponseEntity<Page<ColaboradorDTO>> listar(Pageable paginacao) {
 
-        List<ColaboradorDTO> listagemDTO = service.listar()
-                .stream()
-                .map(mapper::toDTO)
-                .toList();
+        Page<ColaboradorDTO> listagemDTO = service.listar(paginacao)
+                .map(mapper::toDTO);
 
         return ResponseEntity.ok(listagemDTO);
     }
