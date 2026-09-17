@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormArray, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReuniaoStoreService } from '../../../../core/services/reuniao.service';
+import { AlertaService } from '../../../../core/services/alerta.service';
 
 @Component({
   selector: 'app-reuniao-form',
@@ -20,7 +21,8 @@ export class ReuniaoFormComponent implements OnInit {
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private store: ReuniaoStoreService,
-    private router: Router
+    private router: Router,
+    private alerta: AlertaService
   ) {
     this.form = this.fb.group({
       tituloReuniao: ['', [Validators.required, Validators.minLength(5)]],
@@ -114,12 +116,13 @@ export class ReuniaoFormComponent implements OnInit {
       ? this.store.atualizar(this.idEditando, dados)
       : this.store.criar(dados);
 
+    const editando = this.idEditando !== null;
+
     operacao$.subscribe({
+      // O aviso de falha vem do interceptor; aqui so o caminho feliz.
       next: () => {
+        this.alerta.sucesso(editando ? 'Reunião atualizada' : 'Reunião criada');
         this.router.navigate(['/admin/reunioes']);
-      },
-      error: (err) => {
-        console.error('Erro ao salvar reunião:', err);
       }
     });
   }
