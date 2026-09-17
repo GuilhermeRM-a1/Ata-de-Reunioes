@@ -17,6 +17,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,14 +41,12 @@ public class ReuniaoController {
     private final FeriadoService feriadoService;
 
     @Operation(summary = "Lista reuniões ",
-            description = "Devolve o listagem no formato dto das reunioes.")
+            description = "Devolve o envelope padrão com content, page, size, totalElements e totalPages.")
     @ApiResponse(responseCode = "200", description = "Página de reuniões devolvida")
     @GetMapping()
-    public ResponseEntity<List<ReuniaoDTO>> listar() {
-        List<ReuniaoDTO> listagemDTO = reuniaoService.listar()
-                .stream()
-                .map(mapper::toDTO)
-                .toList();
+    public ResponseEntity<Page<ReuniaoDTO>> listar(Pageable paginacao) {
+        Page<ReuniaoDTO> listagemDTO = reuniaoService.listar(paginacao)
+                .map(mapper::toDTO);
 
         return ResponseEntity.ok(listagemDTO);
     }

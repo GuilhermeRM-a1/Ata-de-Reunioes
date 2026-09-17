@@ -11,6 +11,8 @@ import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoRequest;
 import br.com.empresa.reunioes.web.exception.RecursoNaoEncontradoException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -74,13 +76,13 @@ public class ReuniaoService {
     }
 
     @Transactional(readOnly = true)
-    public List<Reuniao> listar() {
+    public Page<Reuniao> listar(Pageable paginacao) {
         log.info("Iniciando listagem de reuniões.");
 
-        List<Reuniao> lista = reuniaoRepository.findAll();
-        log.debug("Listagem de reuniões concluída. Total encontrado: {}", lista.size());
+        Page<Reuniao> listaPaginada = reuniaoRepository.findAll(paginacao);
+        log.debug("Listagem de reuniões concluída. Total encontrado: {}", listaPaginada.getTotalElements());
 
-        return lista;
+        return listaPaginada;
     }
 
     @Transactional

@@ -34,10 +34,9 @@ export class ReunioesComponent implements OnInit {
     this.carregando.set(true);
     this.erro.set(null);
 
-    // Tipado explicitamente (dados: ReuniaoApiDTO[]) e (err: any)
     this.reuniaoService.listar().subscribe({
-      next: (dados: ReuniaoApiDTO[]) => {
-        this.reunioes.set(dados);
+      next: (dados: any) => { 
+        this.reunioes.set(dados.content);
         this.carregando.set(false);
       },
       error: (err: any) => {
