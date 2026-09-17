@@ -36,7 +36,7 @@ export class AcaoComponent implements OnInit {
     
     this.acaoService.listarAcoes().subscribe({
       next: (dados: any) => {
-        this.todasAcoes = Array.isArray(dados) ? dados : (dados.content || dados.itens || []);
+        this.todasAcoes = dados.content;
         this.atualizarPagina();
         this.carregando = false;
       },
