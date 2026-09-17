@@ -3,23 +3,21 @@ package br.com.empresa.reunioes.application.service;
 import br.com.empresa.reunioes.application.mapper.ColaboradorMapper;
 import br.com.empresa.reunioes.domain.entity.Colaborador;
 import br.com.empresa.reunioes.domain.repository.ColaboradorRepository;
-import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorDTO;
 import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorPatchRequest;
 import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorRequest;
-import br.com.empresa.reunioes.web.controller.dto.PaginaResponse;
 import br.com.empresa.reunioes.web.exception.RecursoNaoEncontradoException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.core.support.RepositoryMethodInvocationListener;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 /**
- * Todo metodo publico devolve ENTIDADE. O campo senha fica na entidade e nunca
+ * Todo metodo publico devolve ENTIDADE.
  *
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ColaboradorService {
@@ -29,28 +27,52 @@ public class ColaboradorService {
 
     @Transactional
     public Colaborador salvar(ColaboradorRequest request) {
+        log.info ("Iniciando processo de salvar colaborador.");
+
         Colaborador colaborador = mapper.toEntity(request);
+        log.debug("Requisição convertida para entidade.");
 
-        return this.colaboradorRepository.save(colaborador);
+        Colaborador colaboradorSalvo = this.colaboradorRepository.save(colaborador);
+        log.debug("Colaborador salvo com sucesso.");
+
+        return colaboradorSalvo;
     }
 
+    @Transactional(readOnly = true)
     public Colaborador buscarPorId(Long id) {
-        return colaboradorRepository.findById(id)
+        log.info("Iniciando busca por Colaborador pelo id.");
+
+        log.debug("Buscando Colaborador por id.");
+        Colaborador colaboradorEncontrado = colaboradorRepository.findById(id)
                 .orElseThrow(() -> RecursoNaoEncontradoException.de("Colaborador", id));
+        log.debug("Colaborador encontrado: {}", colaboradorEncontrado);
+
+        return colaboradorEncontrado;
     }
 
+    @Transactional(readOnly = true)
     public Colaborador buscarPorEmail(String email) {
+        log.info("Iniciando busca por Colaborador por email.");
+
+        log.debug("Buscando Colaborador por email.");
         Colaborador colaboradorEncontrado = colaboradorRepository.findByEmail(email);
 
         if (colaboradorEncontrado == null) {
+            log.error("Colaborador não encontrado por email");
             throw RecursoNaoEncontradoException.de("Colaborador", email);
         }
 
         return colaboradorEncontrado;
     }
 
+    @Transactional(readOnly = true)
     public List<Colaborador> listar() {
-        return colaboradorRepository.findAll();
+        log.info("Iniciando listagem de Colaboradores.");
+
+        List<Colaborador> lista = colaboradorRepository.findAll();
+        log.debug("Listagem de colaboradores concluída. Total encontrado: {}", lista.size());
+
+        return lista;
     }
 
     @Transactional
@@ -63,17 +85,29 @@ public class ColaboradorService {
 
     @Transactional
     public Colaborador atualizarParcial(Long id, ColaboradorPatchRequest request) {
+        log.info("Iniciando atualização parcial do Colaborador com id: {}", id);
 
+        log.debug("Buscando Colaborador existente por id.");
         Colaborador colaborador = buscarPorId(id);
+
+        log.debug("Atualizando com mapper");
         mapper.updateParsiEntity(colaborador, request);
 
-        return this.colaboradorRepository.save(colaborador);
+        Colaborador colaboradorAtualizado = colaboradorRepository.save(colaborador);
+        log.info("Colaborador atualizado salvo com sucesso.");
+
+        return colaboradorAtualizado;
     }
 
     @Transactional
     public void deletar(Long id) {
+        log.info("Iniciando processo de deletar Colaborador.");
+
+        log.debug("Buscando Colaborador existente por id");
         Colaborador colaborador = buscarPorId(id);
+
         colaboradorRepository.delete(colaborador);
+        log.info("Colaborador Removido com sucesso: ID: {}", id);
     }
 
 }

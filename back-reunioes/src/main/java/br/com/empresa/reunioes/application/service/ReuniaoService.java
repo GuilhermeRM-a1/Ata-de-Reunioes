@@ -17,6 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+
+/**
+ * Todo metodo publico devolve Entidade
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -39,13 +43,15 @@ public class ReuniaoService {
         log.debug("Buscando e setando colaboradores.");
         reuniao.setParticipantes(buscarColaboradores(request.participantes()));
 
-        log.debug("Buscando e stando ações.");
+        log.debug("Buscando e setando ações.");
         reuniao.setAcoes(buscarAcoes(request.acoes()));
 
         log.debug("Calculando e setando o total de ações numericamente.");
         reuniao.setTotalAcoes(reuniao.getAcoes().size());
 
-        log.debug("Reunião com colaboradores, ações e total de ações setados: {}", reuniao);
+        log.debug("Reunião com colaboradores, ações e total de ações setados: {}", reuniao.getParticipantes(),
+                reuniao.getAcoes(),
+                reuniao.getTotalAcoes());
 
         Reuniao reuniaoSalva = reuniaoRepository.save(reuniao);
 
@@ -170,3 +176,15 @@ public class ReuniaoService {
         return acoes;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
