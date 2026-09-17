@@ -22,8 +22,13 @@ public class Reuniao {
     @Column(name = "data")
     private String data;
 
+    /** Resumo executivo vindo da IA. E o texto que entra no relatorio. */
     @Column(name = "resumo")
     private String resumo;
+
+    /** Transcricao pura vinda da IA. Guardada para consulta, fora do relatorio. */
+    @Column(name = "transcricao")
+    private String transcricao;
 
     @Column(name = "status")
     private String status;
