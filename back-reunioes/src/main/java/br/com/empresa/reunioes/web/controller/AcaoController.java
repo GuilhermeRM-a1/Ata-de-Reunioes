@@ -57,11 +57,14 @@ public class AcaoController {
         return ResponseEntity.ok(dto);
     }
 
+    /**
+     * Para uso do Insomnia
+     * */
     @Operation(summary = "Lista ações",
             description = "Devolve a lista de ações cadastradas por reunião.")
     @ApiResponse(responseCode = "200", description = "Lista de ações devolvida")
-    @GetMapping("/reuniao/{reuniaoId}")
-    public ResponseEntity<List<AcaoDTO>> listarPorReuniao(@PathVariable Long reuniaoId) {
+    @GetMapping("/reuniao")
+    public ResponseEntity<List<AcaoDTO>> listarPorReuniao(@RequestParam Long reuniaoId) {
 
         List<AcaoDTO> dto = service.listarPorReuniao(reuniaoId)
                 .stream()

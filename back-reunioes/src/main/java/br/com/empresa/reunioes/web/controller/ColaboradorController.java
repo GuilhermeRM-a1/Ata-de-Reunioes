@@ -84,6 +84,19 @@ public class ColaboradorController {
         return ResponseEntity.ok(dto);
     }
 
+    @Operation(summary = "Busca um colaborador pelo email")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Colaborador encontrado"),
+            @ApiResponse(responseCode = "404", description = "Nenhum colaborador com esse email")
+    })
+    @GetMapping("/email")
+    public ResponseEntity<ColaboradorDTO> buscarPorEmailRequestParam(@RequestParam String email) {
+        Colaborador colaborador = service.buscarPorEmail(email);
+        ColaboradorDTO dto = mapper.toDTO(colaborador);
+
+        return ResponseEntity.ok(dto);
+    }
+
     @Operation(summary = "Substitui um colaborador por completo")
     @ApiResponses({
             @ApiResponse(responseCode = "202", description = "Colaborador atualizado"),
