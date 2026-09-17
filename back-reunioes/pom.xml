@@ -28,6 +28,8 @@
 	</scm>
 	<properties>
 		<java.version>17</java.version>
+		<!-- Trem de release do Spring Cloud correspondente ao Spring Boot 4. -->
+		<spring-cloud.version>2025.1.3</spring-cloud.version>
 	</properties>
 	<dependencies>
 		<!-- Swagger UI. A linha 3.x e a compativel com Spring Boot 4. -->
@@ -35,6 +37,11 @@
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>3.1.0</version>
+		</dependency>
+		<!-- Cliente declarativo para a API externa de feriados. -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-openfeign</artifactId>
 		</dependency>
 		<dependency>
 		<groupId>com.h2database</groupId>
@@ -108,6 +115,19 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+	<!-- Quem fixa a versao do openfeign; por isso a dependencia acima nao declara version. -->
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<build>
 		<plugins>

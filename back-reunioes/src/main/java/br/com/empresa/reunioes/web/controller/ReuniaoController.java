@@ -7,6 +7,11 @@ import br.com.empresa.reunioes.application.service.ReuniaoService;
 import br.com.empresa.reunioes.domain.entity.Reuniao;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoDTO;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.RelatorioReuniaoResponse;
+import br.com.empresa.reunioes.application.service.FeriadoService;
+import br.com.empresa.reunioes.application.service.ReuniaoService;
+import br.com.empresa.reunioes.domain.entity.Reuniao;
+import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoDTO;
+import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoFeriadoDTO;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoRequest;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoResumoRequest;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,6 +40,7 @@ public class ReuniaoController {
     private final ReuniaoMapper mapper;
     private final IngestaoService ingestaoService;
     private final RelatorioService relatorioService;
+    private final FeriadoService feriadoService;
 
     @Operation(summary = "Lista reuniões ",
             description = "Devolve o listagem no formato dto das reunioes.")
@@ -142,6 +148,18 @@ public class ReuniaoController {
     public ResponseEntity<RelatorioReuniaoResponse> gerarRelatorio(@PathVariable Long id) {
 
         return ResponseEntity.ok(relatorioService.gerar(id));
+    @Operation(summary = "Verifica se a reunião caiu em feriado nacional",
+            description = "Cruza a data da reunião com o calendário de feriados da BrasilAPI, "
+                    + "consumida via Feign Client.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Verificação concluída"),
+            @ApiResponse(responseCode = "404", description = "Nenhuma reunião com esse id, ou reunião sem data válida"),
+            @ApiResponse(responseCode = "503", description = "A API externa de feriados está indisponível")
+    })
+    @GetMapping("/{id}/feriado")
+    public ResponseEntity<ReuniaoFeriadoDTO> verificarFeriado(@PathVariable Long id) {
+
+        return ResponseEntity.ok(feriadoService.verificarReuniao(id));
     }
 
     @Operation(summary = "Exclui uma reunião")

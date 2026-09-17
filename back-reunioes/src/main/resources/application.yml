@@ -39,3 +39,14 @@ springdoc:
 logging:
   level:
     com.seuprojeto.api: DEBUG
+
+# API externa de feriados nacionais, consumida por Feign.
+api:
+  feriados:
+    url: https://brasilapi.com.br/api/feriados/v1
+
+# Timeout curto: a consulta de feriado nao pode segurar a requisicao do usuario
+# se a API de terceiro estiver lenta.
+spring.cloud.openfeign.client.config.default:
+  connectTimeout: 3000
+  readTimeout: 5000
