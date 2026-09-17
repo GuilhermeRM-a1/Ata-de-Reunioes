@@ -9,6 +9,8 @@ import br.com.empresa.reunioes.domain.repository.ColaboradorRepository;
 import br.com.empresa.reunioes.domain.repository.ReuniaoRepository;
 import br.com.empresa.reunioes.web.controller.dto.Acao.AcaoRequest;
 import br.com.empresa.reunioes.web.exception.RecursoNaoEncontradoException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -64,20 +66,18 @@ public class AcaoService {
     }
 
     @Transactional(readOnly = true)
-    // traz todas as acoes independente de reuniao, para fins de dashboard
-    public List<Acao> listar() {
-        log.info("Listando ações.");
+    public Page<Acao> listar(Pageable paginacao) {
+        log.info("Listando ações paginadas.");
 
         log.debug("Listando...");
-        List<Acao> lista = repository.findAll();
+        Page<Acao> pagina = repository.findAll(paginacao);
 
         log.debug("Lista gerada.");
 
-        return lista;
+        return pagina;
     }
 
     @Transactional(readOnly = true)
-    // traz acoes filtradas por reuniao, para fins de dashboard
     public List<Acao> listarPorReuniao(Long reuniaoId) {
         log.info("Listando ações por reunião");
 

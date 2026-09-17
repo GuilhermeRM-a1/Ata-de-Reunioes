@@ -45,10 +45,10 @@ public class ColaboradorController {
     }
 
     @Operation(summary = "Lista colaboradores paginados",
-            description = "Devolve o envelope padrão com content, page, size, totalElements e totalPages.")
+            description = "Devolve a lista de colaboradores.")
     @ApiResponse(responseCode = "200", description = "Página de colaboradores devolvida")
     @GetMapping()
-    public ResponseEntity<List<ColaboradorDTO>> listar(Pageable paginacao) {
+    public ResponseEntity<List<ColaboradorDTO>> listar() {
 
         List<ColaboradorDTO> listagemDTO = service.listar()
                 .stream()
