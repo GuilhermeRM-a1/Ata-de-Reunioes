@@ -1,16 +1,13 @@
 package br.com.empresa.reunioes.web.controller;
 
 import br.com.empresa.reunioes.application.mapper.ReuniaoMapper;
+import br.com.empresa.reunioes.application.service.FeriadoService;
 import br.com.empresa.reunioes.application.service.IngestaoService;
 import br.com.empresa.reunioes.application.service.RelatorioService;
 import br.com.empresa.reunioes.application.service.ReuniaoService;
 import br.com.empresa.reunioes.domain.entity.Reuniao;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoDTO;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.RelatorioReuniaoResponse;
-import br.com.empresa.reunioes.application.service.FeriadoService;
-import br.com.empresa.reunioes.application.service.ReuniaoService;
-import br.com.empresa.reunioes.domain.entity.Reuniao;
-import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoDTO;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoFeriadoDTO;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoRequest;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoResumoRequest;
@@ -26,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-
 import java.util.List;
 
 @RestController
@@ -148,6 +144,8 @@ public class ReuniaoController {
     public ResponseEntity<RelatorioReuniaoResponse> gerarRelatorio(@PathVariable Long id) {
 
         return ResponseEntity.ok(relatorioService.gerar(id));
+    }
+
     @Operation(summary = "Verifica se a reunião caiu em feriado nacional",
             description = "Cruza a data da reunião com o calendário de feriados da BrasilAPI, "
                     + "consumida via Feign Client.")
