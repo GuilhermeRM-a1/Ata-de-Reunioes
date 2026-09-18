@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { ReuniaoStoreService } from '../../../../core/services/reuniao.service';
 import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
 import { ReuniaoApiDTO } from '../../../../core/models/api/reuniao-api.model';
+import { AlertaService } from '../../../../core/services/alerta.service';
 
 @Component({
   selector: 'app-reunioes',
@@ -17,11 +18,10 @@ export class ReunioesComponent implements OnInit {
   readonly carregando = signal(true);
   readonly erro = signal<string | null>(null);
 
-  reuniaoParaExcluir: ReuniaoApiDTO | null = null;
-
   constructor(
     private readonly reuniaoService: ReuniaoStoreService,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly alerta: AlertaService
   ) {}
 
   ngOnInit(): void {
@@ -33,20 +33,20 @@ export class ReunioesComponent implements OnInit {
     this.erro.set(null);
 
     this.reuniaoService.listar().subscribe({
-      next: (dados) => {
-        this.reunioes.set(dados);
+      next: (dados: any) => {
+        this.reunioes.set(dados.content);
         this.carregando.set(false);
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Erro ao carregar reuniões:', err);
         this.erro.set('Não foi possível carregar as reuniões. Tente novamente em instantes.');
         this.carregando.set(false);
       }
-    });
-  }
+  });
+}
 
   novaReuniao(): void {
-    this.router.navigate(['/reunioes/novo']);
+    this.router.navigate(['/usuario/reunioes/novo']);
   }
 
   verReuniao(id: number): void {
@@ -55,33 +55,25 @@ export class ReunioesComponent implements OnInit {
 
   editarReuniao(id: number, event: Event): void {
     event.stopPropagation();
-    this.router.navigate(['/reunioes', id, 'editar']);
+    this.router.navigate(['/usuario/reunioes', id, 'editar']);
   }
 
-  abrirConfirmacaoExclusao(reuniao: ReuniaoApiDTO, event: Event): void {
+  async excluir(reuniao: ReuniaoApiDTO, event: Event): Promise<void> {
     event.stopPropagation();
-    this.reuniaoParaExcluir = reuniao;
-  }
 
-  cancelarExclusao(): void {
-    this.reuniaoParaExcluir = null;
-  }
+    const confirmado = await this.alerta.confirmar(
+      'Excluir reunião',
+      `Tem certeza que deseja excluir a reunião "${reuniao.titulo}"? Essa ação não pode ser desfeita.`
+    );
 
-  confirmarExclusao(): void {
-    if (!this.reuniaoParaExcluir) return;
+    if (!confirmado) return;
 
-    const id = this.reuniaoParaExcluir.id;
-
-    this.reuniaoService.remover(id).subscribe({
+    this.reuniaoService.remover(reuniao.id).subscribe({
       next: () => {
-        this.reunioes.update(lista => lista.filter(r => r.id !== id));
-        this.reuniaoParaExcluir = null;
+        this.reunioes.update(lista => lista.filter(r => r.id !== reuniao.id));
+        this.alerta.sucesso('Reunião excluída', reuniao.titulo);
       },
-      error: (err) => {
-        console.error('Erro ao excluir reunião:', err);
-        this.erro.set('Não foi possível excluir a reunião. Tente novamente.');
-        this.reuniaoParaExcluir = null;
-      }
+      error: () => {}
     });
   }
 }
