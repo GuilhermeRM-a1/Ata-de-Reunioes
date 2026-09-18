@@ -41,7 +41,7 @@ public class ColaboradorMapper {
         colaborador.setDataCadastro(request.dataCadastro());
     }
 
-    public void updateParsiEntity(Colaborador colaborador, ColaboradorPatchRequest request) {
+    public void updateParcialEntity(Colaborador colaborador, ColaboradorPatchRequest request) {
 
         if (request.nome() != null)
             colaborador.setNome(request.nome());

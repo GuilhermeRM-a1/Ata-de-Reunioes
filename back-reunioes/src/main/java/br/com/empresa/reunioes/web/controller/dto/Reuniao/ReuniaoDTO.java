@@ -14,6 +14,6 @@ public record ReuniaoDTO(Long id,
                          List<String> pontosChaves,
                          List<AcaoDTO> acoes,
                          List<String> areas,
-                         String reusmo,
+                         String resumo,
                          Integer totalAcoes) {
 }

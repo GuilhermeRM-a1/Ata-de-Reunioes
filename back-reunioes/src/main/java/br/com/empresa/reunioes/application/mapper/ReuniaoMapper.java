@@ -67,7 +67,7 @@ public class ReuniaoMapper {
 
     }
 
-    public void updateParsiEntity(Reuniao reuniao, ReuniaoRequest request) {
+    public void updateParcialEntity(Reuniao reuniao, ReuniaoRequest request) {
 
         if (request.titulo() != null)
             reuniao.setTitulo(request.titulo());
