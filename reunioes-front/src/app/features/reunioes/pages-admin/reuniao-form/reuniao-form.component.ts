@@ -40,15 +40,19 @@ export class ReuniaoFormComponent implements OnInit {
 
     if (idParam) {
       this.idEditando = Number(idParam);
-      
+
       // buscarPorId retorna Observable, por isso  subscribe
       this.store.buscarPorId(this.idEditando).subscribe({
-        next: (reuniao) => {
+        next: (reuniao: any) => {
           if (reuniao) {
             this.form.patchValue({
-              ...reuniao,
+              tituloReuniao: reuniao.titulo,
+              dataProcessamento: reuniao.data ? reuniao.data.split('T')[0] : '',
+              resumoExecutivo: reuniao.reusmo,
+              status: reuniao.status,
               areas: Array.isArray(reuniao.areas) ? reuniao.areas.join(', ') : reuniao.areas,
-              participantes: Array.isArray(reuniao.participantes) ? reuniao.participantes.join(', ') : reuniao.participantes
+              participantes: Array.isArray(reuniao.participantes) ? reuniao.participantes.join(', ') : reuniao.participantes,
+              pontosChave: Array.isArray(reuniao.pontosChaves) ? reuniao.pontosChaves.join('\n') : reuniao.pontosChaves
             });
 
             if (reuniao.acoes) {

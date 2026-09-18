@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Acao } from '../../../../core/models/acao.model';
 import { AcaoService } from '../../../../core/services/acao.service';
+import { AlertaService } from '../../../../core/services/alerta.service';
 
 @Component({
   selector: 'app-acao',
@@ -16,7 +17,7 @@ export class AcaoComponent implements OnInit {
   todasAcoes: Acao[] = [];
   acoesPendentes: Acao[] = [];
   acoesConcluidas: Acao[] = [];
-  
+
   carregando: boolean = true;
   paginaAtual: number = 1;
   limite: number = 10;
@@ -24,6 +25,7 @@ export class AcaoComponent implements OnInit {
 
   constructor(
     private acaoService: AcaoService,
+    private alertaService: AlertaService,
     private router: Router
   ) {}
 
@@ -33,10 +35,10 @@ export class AcaoComponent implements OnInit {
 
   carregarAcoes(): void {
     this.carregando = true;
-    
+
     this.acaoService.listarAcoes().subscribe({
       next: (dados: any) => {
-        this.todasAcoes = dados.content;
+        this.todasAcoes = Array.isArray(dados) ? dados : (dados.content || dados.itens || []);
         this.atualizarPagina();
         this.carregando = false;
       },
@@ -47,35 +49,35 @@ export class AcaoComponent implements OnInit {
     });
   }
 
- atualizarPagina(): void {
-  const pendentes = this.todasAcoes
-    .filter(a => !a.concluida)
-    .sort((a, b) => {
-      if (a.prazo === null) return 1;
-      if (b.prazo === null) return -1;
-      return a.prazo.localeCompare(b.prazo);
-    });
+  atualizarPagina(): void {
+    const pendentes = this.todasAcoes
+      .filter(a => !a.concluida)
+      .sort((a, b) => {
+        if (a.prazo === null) return 1;
+        if (b.prazo === null) return -1;
+        return a.prazo.localeCompare(b.prazo);
+      });
 
-  const concluidas = this.todasAcoes
-    .filter(a => a.concluida)
-    .sort((a, b) => {
-      if (a.prazo === null) return 1;
-      if (b.prazo === null) return -1;
-      return a.prazo.localeCompare(b.prazo);
-    });
+    const concluidas = this.todasAcoes
+      .filter(a => a.concluida)
+      .sort((a, b) => {
+        if (a.prazo === null) return 1;
+        if (b.prazo === null) return -1;
+        return a.prazo.localeCompare(b.prazo);
+      });
 
-  const inicio = (this.paginaAtual - 1) * this.limite;
-  const fim = inicio + this.limite;
+    const inicio = (this.paginaAtual - 1) * this.limite;
+    const fim = inicio + this.limite;
 
-  this.acoesPendentes = pendentes.slice(inicio, fim);
-  this.acoesConcluidas = concluidas.slice(inicio, fim);
+    this.acoesPendentes = pendentes.slice(inicio, fim);
+    this.acoesConcluidas = concluidas.slice(inicio, fim);
 
-  this.totalPaginas = Math.max(
-    Math.ceil(pendentes.length / this.limite),
-    Math.ceil(concluidas.length / this.limite),
-    1
-  );
-}
+    this.totalPaginas = Math.max(
+      Math.ceil(pendentes.length / this.limite),
+      Math.ceil(concluidas.length / this.limite),
+      1
+    );
+  }
 
   mudarStatus(acao: Acao): void {
     const novoStatus = !acao.concluida;
@@ -94,6 +96,28 @@ export class AcaoComponent implements OnInit {
     });
   }
 
+  async excluir(acao: Acao, event: Event): Promise<void> {
+    event.stopPropagation();
+
+    const confirmado = await this.alertaService.confirmar(
+      'Excluir ação',
+      `Tem certeza que deseja excluir "${acao.titulo}"? Essa ação não pode ser desfeita.`
+    );
+
+    if (!confirmado) return;
+
+    this.acaoService.remover(acao.reuniaoId, acao.id).subscribe({
+      next: () => {
+        this.alertaService.sucesso('Ação excluída');
+        this.carregarAcoes();
+      },
+      error: (err) => {
+        console.error('Erro ao excluir ação', err);
+        this.alertaService.erro('Erro ao excluir', 'Não foi possível excluir a ação.');
+      }
+    });
+  }
+
   verReuniao(reuniaoId: number): void {
     if (reuniaoId) {
       this.router.navigate(['/admin/reunioes', reuniaoId]);
@@ -103,14 +127,14 @@ export class AcaoComponent implements OnInit {
   proximaPagina(): void {
     if (this.paginaAtual < this.totalPaginas) {
       this.paginaAtual++;
-      this.atualizarPagina(); 
+      this.atualizarPagina();
     }
   }
 
   paginaAnterior(): void {
     if (this.paginaAtual > 1) {
       this.paginaAtual--;
-      this.atualizarPagina(); 
+      this.atualizarPagina();
     }
   }
 }

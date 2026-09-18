@@ -18,8 +18,6 @@ export class ReunioesComponent implements OnInit {
   readonly carregando = signal(true);
   readonly erro = signal<string | null>(null);
 
-  reuniaoParaExcluir: ReuniaoApiDTO | null = null;
-
   constructor(
     private readonly reuniaoService: ReuniaoStoreService,
     private readonly router: Router,
@@ -35,7 +33,7 @@ export class ReunioesComponent implements OnInit {
     this.erro.set(null);
 
     this.reuniaoService.listar().subscribe({
-      next: (dados: any) => { 
+      next: (dados: any) => {
         this.reunioes.set(dados.content);
         this.carregando.set(false);
       },
@@ -60,31 +58,22 @@ export class ReunioesComponent implements OnInit {
     this.router.navigate(['/admin/reunioes', id, 'editar']);
   }
 
-  abrirConfirmacaoExclusao(reuniao: ReuniaoApiDTO, event: Event): void {
+  async excluir(reuniao: ReuniaoApiDTO, event: Event): Promise<void> {
     event.stopPropagation();
-    this.reuniaoParaExcluir = reuniao;
-  }
 
-  cancelarExclusao(): void {
-    this.reuniaoParaExcluir = null;
-  }
+    const confirmado = await this.alerta.confirmar(
+      'Excluir reunião',
+      `Tem certeza que deseja excluir a reunião "${reuniao.titulo}"? Essa ação não pode ser desfeita.`
+    );
 
-  confirmarExclusao(): void {
-    if (!this.reuniaoParaExcluir) return;
+    if (!confirmado) return;
 
-    const id = this.reuniaoParaExcluir.id;
-    const titulo = this.reuniaoParaExcluir.titulo;
-
-    this.reuniaoService.remover(id).subscribe({
+    this.reuniaoService.remover(reuniao.id).subscribe({
       next: () => {
-        this.reunioes.update(lista => lista.filter(r => r.id !== id));
-        this.reuniaoParaExcluir = null;
-        this.alerta.sucesso('Reunião excluída', titulo);
+        this.reunioes.update(lista => lista.filter(r => r.id !== reuniao.id));
+        this.alerta.sucesso('Reunião excluída', reuniao.titulo);
       },
-      // O aviso de falha vem do interceptor; aqui so fechamos o modal.
-      error: () => {
-        this.reuniaoParaExcluir = null;
-      }
+      error: () => {}
     });
   }
 }
