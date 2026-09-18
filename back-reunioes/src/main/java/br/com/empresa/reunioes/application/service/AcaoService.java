@@ -115,7 +115,7 @@ public class AcaoService {
         Acao acao = buscarPorId(id);
 
         log.debug("Atualizando com mapper.");
-        mapper.updateParsiEntity(acao, request);
+        mapper.updateParcialEntity(acao, request);
 
         if (request.responsavel() != null) {
             log.debug("Buscando e setando colaboradores responsáveis pela ação.");

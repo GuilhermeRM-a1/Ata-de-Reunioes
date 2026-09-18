@@ -93,7 +93,7 @@ public class ColaboradorService {
         Colaborador colaborador = buscarPorId(id);
 
         log.debug("Atualizando com mapper");
-        mapper.updateParsiEntity(colaborador, request);
+        mapper.updateParcialEntity(colaborador, request);
 
         Colaborador colaboradorAtualizado = colaboradorRepository.save(colaborador);
         log.info("Colaborador atualizado salvo com sucesso.");

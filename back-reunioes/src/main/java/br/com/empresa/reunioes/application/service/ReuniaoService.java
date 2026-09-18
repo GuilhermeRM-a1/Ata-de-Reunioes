@@ -107,7 +107,7 @@ public class ReuniaoService {
         Reuniao reuniao = buscarPorId(id);
 
         log.debug("Atualizando com mapper");
-        mapper.updateParsiEntity(reuniao, request);
+        mapper.updateParcialEntity(reuniao, request);
 
         if (request.participantes() != null) {
             log.debug("buscando participantes");

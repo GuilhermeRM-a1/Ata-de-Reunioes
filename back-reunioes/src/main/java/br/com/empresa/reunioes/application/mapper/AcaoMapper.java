@@ -31,7 +31,7 @@ public class AcaoMapper {
         acao.setConcluida(request.concluida() != null ? request.concluida() : false);
     }
 
-    public void updateParsiEntity(Acao acao, AcaoRequest request) {
+    public void updateParcialEntity(Acao acao, AcaoRequest request) {
         if (request.titulo() != null) {
             acao.setTitulo(request.titulo());
         }
