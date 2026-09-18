@@ -58,7 +58,7 @@ public class AcaoService {
 
         log.debug("Buscando ação por id");
         Acao acaoEncontrada = repository.findById(id)
-                .orElseThrow(() -> RecursoNaoEncontradoException.de("Ação", id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Ação não encontrada"));
 
         log.debug("Ação encontrada: {}", acaoEncontrada);
 
@@ -84,8 +84,8 @@ public class AcaoService {
         List<Acao> lista = repository.findAllByReuniaoId(reuniaoId);
 
         if (!reuniaoRepository.existsById(reuniaoId)) {
-            log.error("Reunião não encontrada ou não existe.");
-            throw RecursoNaoEncontradoException.de("Reunião", reuniaoId);
+            log.warn("Reunião não encontrada");
+            throw new RecursoNaoEncontradoException("Reunião não encontrada.");
         }
 
         log.debug("Lista gerada");
@@ -152,7 +152,7 @@ public class AcaoService {
     private Reuniao buscarReuniao(Long id) {
 
         return reuniaoRepository.findById(id)
-                .orElseThrow(() -> RecursoNaoEncontradoException.de("Reunião", id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Reunião não encontrada"));
     }
 
     /**

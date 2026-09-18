@@ -5,6 +5,7 @@ import br.com.empresa.reunioes.domain.entity.Colaborador;
 import br.com.empresa.reunioes.domain.repository.ColaboradorRepository;
 import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorPatchRequest;
 import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorRequest;
+import br.com.empresa.reunioes.web.exception.EmailCadastradoExistenteException;
 import br.com.empresa.reunioes.web.exception.RecursoNaoEncontradoException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,7 +32,16 @@ public class ColaboradorService {
     public Colaborador salvar(ColaboradorRequest request) {
         log.info ("Iniciando processo de salvar colaborador.");
 
+        log.debug("Verificando se já colaborador existe.");
+        Colaborador colaboradorExistente = colaboradorRepository.findByEmail(request.email());
+
+        if(colaboradorExistente != null) {
+            log.warn("Email existente, não é possível salvar colaborador.");
+            throw new EmailCadastradoExistenteException("Este email já existe, cadastre outro.");
+        }
+
         Colaborador colaborador = mapper.toEntity(request);
+
         log.debug("Requisição convertida para entidade.");
 
         Colaborador colaboradorSalvo = this.colaboradorRepository.save(colaborador);
@@ -46,7 +56,7 @@ public class ColaboradorService {
 
         log.debug("Buscando Colaborador por id.");
         Colaborador colaboradorEncontrado = colaboradorRepository.findById(id)
-                .orElseThrow(() -> RecursoNaoEncontradoException.de("Colaborador", id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Colaborador não encontrado"));
         log.debug("Colaborador encontrado: {}", colaboradorEncontrado);
 
         return colaboradorEncontrado;
@@ -54,14 +64,13 @@ public class ColaboradorService {
 
     @Transactional(readOnly = true)
     public Colaborador buscarPorEmail(String email) {
-        log.info("Iniciando busca por Colaborador por email.");
+        log.info("Iniciando busca do Colaborador pelo email.");
 
-        log.debug("Buscando Colaborador por email.");
+        log.debug("Verificando se colaborador existe.");
         Colaborador colaboradorEncontrado = colaboradorRepository.findByEmail(email);
 
         if (colaboradorEncontrado == null) {
-            log.error("Colaborador não encontrado por email");
-            throw RecursoNaoEncontradoException.de("Colaborador", email);
+            throw new RecursoNaoEncontradoException("Colaborador com email" + email + "não encontrado");
         }
 
         return colaboradorEncontrado;
