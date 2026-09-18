@@ -28,6 +28,13 @@ public class RestExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(RestExceptionHandler.class);
 
+    @ExceptionHandler(EmailCadastradoExistenteException.class)
+    public ProblemDetail tratarEmailExistente(EmailCadastradoExistenteException e) {
+
+        return montar(HttpStatus.CONFLICT, "Este email já existe.", e.getMessage(),
+                "email-existente");
+    }
+
     @ExceptionHandler(RecursoNaoEncontradoException.class)
     public ProblemDetail tratarNaoEncontrado(RecursoNaoEncontradoException e) {
 

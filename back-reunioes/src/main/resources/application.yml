@@ -38,7 +38,8 @@ springdoc:
 # Configuracoes de log
 logging:
   level:
-    com.seuprojeto.api: DEBUG
+    root:
+    br.com.empresa.reunioes: DEBUG
 
 # API externa de feriados nacionais, consumida por Feign.
 api:

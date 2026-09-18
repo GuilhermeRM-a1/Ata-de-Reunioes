@@ -68,7 +68,7 @@ public class ReuniaoService {
 
         log.debug("Buscando reunião por id.");
         Reuniao reuniaoEncontrada = reuniaoRepository.findById(id)
-                .orElseThrow(() -> RecursoNaoEncontradoException.de("Reunião", id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Reunião não encontrada."));
 
         log.debug("Reunião encontrada: {}", reuniaoEncontrada);
 
