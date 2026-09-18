@@ -18,5 +18,8 @@ public record ColaboradorRequest(@NotBlank(message = "O nome é obrigatório")
                                  @NotBlank(message = "A senha é obrigatória")
                                  String senha,
 
+                                 @NotBlank
+                                 String papel,
+
                                  Boolean monitorarReunioes,
                                  String dataCadastro) {}
