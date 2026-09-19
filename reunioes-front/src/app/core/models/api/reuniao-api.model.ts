@@ -1,10 +1,11 @@
-import { StatusReuniao } from '../reuniao.model';
+import { StatusReuniao, StatusTranscrição } from '../reuniao.model';
 
 export interface ReuniaoApiDTO {
   id: number;
   titulo: string;
   data: string;
-  status: StatusReuniao;
+  statusReuniao: StatusReuniao;
+  statusTranscricao: StatusTranscrição;
   participantes: string[];
   pontosChaves: string[];
   acoes: Acao[];
@@ -16,7 +17,8 @@ export interface ReuniaoApiDTO {
 export interface ReuniaoApiRequest {
   titulo: string;
   data: string;
-  status: StatusReuniao;
+  statusReuniao: StatusReuniao;
+  statusTranscricao: StatusTranscrição;
   areas: string[];
   pontosChaves: string[];
   participantes: number[];

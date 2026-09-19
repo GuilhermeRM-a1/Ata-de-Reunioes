@@ -1,25 +1,42 @@
-export type StatusReuniao =
+export type StatusTranscrição =
   | 'RECEBIDA'
   | 'TRANSCREVENDO'
   | 'ANALISANDO'
   | 'CONCLUIDA'
   | 'ERRO';
 
+  export type StatusReuniao =
+  | 'EM_ANDAMENTO'
+  | 'FINALIZADA'
+  | 'PENDENTE'
+
 export const STATUS_REUNIAO: StatusReuniao[] = [
+  'EM_ANDAMENTO',
+  'FINALIZADA',
+  'PENDENTE',
+];
+
+export const STATUS_TRANSCRICAO: StatusTranscrição[] = [
   'RECEBIDA',
   'TRANSCREVENDO',
   'ANALISANDO',
   'CONCLUIDA',
-  'ERRO',
+  'ERRO'
 ];
 
 /** Rotulo legivel para exibicao — nunca mostrar a constante crua na tela. */
-export const STATUS_LABEL: Record<StatusReuniao, string> = {
+export const STATUS_TRANSCRICAO_LABEL: Record<StatusTranscrição, string> = {
   RECEBIDA: 'Recebida',
   TRANSCREVENDO: 'Transcrevendo',
   ANALISANDO: 'Analisando',
   CONCLUIDA: 'Concluída',
   ERRO: 'Erro',
+};
+
+export const STATUS_REUNIAO_LABEL: Record<StatusReuniao, string> = {
+  EM_ANDAMENTO: 'Em Andamento',
+  PENDENTE: 'Pendente',
+  FINALIZADA: 'Finalizada',
 };
 
 export type TipoAcao = 'ACAO' | 'TAREFA';
@@ -36,7 +53,8 @@ export interface Reuniao {
   tituloReuniao: string;
   dataProcessamento: string;
   resumoExecutivo: string;
-  status: StatusReuniao;
+  statusReuniao: StatusReuniao;
+  statusTranscricao: StatusTranscrição;
   participantes: string[];
   areas: string[];
   totalAcoes: number;

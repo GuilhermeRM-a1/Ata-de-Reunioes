@@ -29,7 +29,8 @@
           <th>Data</th>
           <th>Áreas</th>
           <th>Ações</th>
-          <th>Status</th>
+          <th>Status transcrição</th>
+          <th>Status Reunião</th>
           <th></th>
         </tr>
       </thead>
@@ -44,7 +45,10 @@
               }
             </td>
             <td>{{ reuniao.totalAcoes }}</td>
-            <td><app-status-badge [status]="reuniao.status"></app-status-badge></td>
+            <td><app-status-badge [status]="reuniao.statusTranscricao" [tipo]="'transcricao'"></app-status-badge></td>
+            <td><app-status-badge [status]="reuniao.statusReuniao" [tipo]="'reuniao'"></app-status-badge></td>
+
+
             <td class="text-end">
               <button class="btn btn-sm btn-outline-secondary me-1" (click)="editarReuniao(reuniao.id,$event); $event.stopPropagation()" title="Editar">
                 <i class="fas fa-pen"></i>

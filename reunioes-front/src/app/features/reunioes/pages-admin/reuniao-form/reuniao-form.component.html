@@ -34,9 +34,9 @@
             </div>
 
             <div class="col-md-6 mb-3">
-              <label class="form-label small text-muted" for="status">Status</label>
-              <select id="status" formControlName="status" class="form-select"
-                [class.is-invalid]="form.get('status')?.invalid && form.get('status')?.touched">
+              <label class="form-label small text-muted" for="statusTranscricao">Status Da Transcrição</label>
+              <select id="statusTranscricao" formControlName="statusTranscricao" class="form-select"
+                [class.is-invalid]="form.get('statusTranscricao')?.invalid && form.get('statusTranscricao')?.touched">
                 <option value="">Selecione...</option>
                 <option value="RECEBIDA">Recebida</option>
                 <option value="TRANSCREVENDO">Transcrevendo</option>
@@ -44,8 +44,21 @@
                 <option value="CONCLUIDA">Concluída</option>
                 <option value="ERRO">Erro</option>
               </select>
-              @if (form.get('status')?.invalid && form.get('status')?.touched) {
-                <div class="invalid-feedback d-block">O status é obrigatório.</div>
+              @if (form.get('statusTranscricao')?.invalid && form.get('statusTranscricao')?.touched) {
+                <div class="invalid-feedback d-block">O status da transcrição é obrigatório.</div>
+              }
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label small text-muted" for="statusReuniao">Status Da Reunião</label>
+              <select id="statusReuniao" formControlName="statusReuniao" class="form-select"
+                [class.is-invalid]="form.get('statusReuniao')?.invalid && form.get('statusReuniao')?.touched">
+                <option value="">Selecione...</option>
+                <option value="EM_ANDAMENTO">Em Andamento</option>
+                <option value="PENDENTE">Pendente</option>
+                <option value="FINALIZADO">Finalizado</option>
+              </select>
+              @if (form.get('statusReuniao')?.invalid && form.get('statusReuniao')?.touched) {
+                <div class="invalid-feedback d-block">O status da reunião é obrigatório.</div>
               }
             </div>
           </div>
