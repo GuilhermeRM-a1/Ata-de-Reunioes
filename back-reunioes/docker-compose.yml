@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
     ports:
       # 5433 no host: a 5432 ja e do EnterpriseDB instalado na maquina.
-      - "55432:5432"
+      - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -20,14 +20,14 @@ services:
 
   api:
     build:
-      context: ../../..
-      dockerfile: ../../../Dockerfile
+      context: .
+      dockerfile: Dockerfile
     container_name: reunioes_api
     restart: unless-stopped
     environment:
       DB_USER: ${DB_USER:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
-      DB_URL: jdbc:postgresql://postgres:5432/reunioes_dev
+      DB_URL: jdbc:postgresql://postgres:55432/reunioes_dev
     ports:
       - "8080:8080"
     depends_on:

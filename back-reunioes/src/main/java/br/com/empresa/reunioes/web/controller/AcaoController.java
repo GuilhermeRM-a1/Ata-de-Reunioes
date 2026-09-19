@@ -11,6 +11,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -44,24 +46,25 @@ public class AcaoController {
     }
 
     @Operation(summary = "Lista ações",
-            description = "Devolve a lista de ações cadastradas.")
+            description = "Devolve o envelope padrão com content, page, size, totalElements e totalPages.")
     @ApiResponse(responseCode = "200", description = "Lista de ações devolvida")
     @GetMapping()
-    public ResponseEntity<List<AcaoDTO>> listar() {
+    public ResponseEntity<Page<AcaoDTO>> listar(Pageable paginacao) {
 
-        List<AcaoDTO> dto = service.listar()
-                .stream()
-                .map(mapper::toDTO)
-                .toList();
+        Page<AcaoDTO> dto = service.listar(paginacao)
+                .map(mapper::toDTO);
 
         return ResponseEntity.ok(dto);
     }
 
+    /**
+     * Para uso do Insomnia
+     * */
     @Operation(summary = "Lista ações",
             description = "Devolve a lista de ações cadastradas por reunião.")
     @ApiResponse(responseCode = "200", description = "Lista de ações devolvida")
-    @GetMapping("/reuniao/{reuniaoId}")
-    public ResponseEntity<List<AcaoDTO>> listarPorReuniao(@PathVariable Long reuniaoId) {
+    @GetMapping("/reuniao")
+    public ResponseEntity<List<AcaoDTO>> listarPorReuniao(@RequestParam Long reuniaoId) {
 
         List<AcaoDTO> dto = service.listarPorReuniao(reuniaoId)
                 .stream()
@@ -97,7 +100,7 @@ public class AcaoController {
         Acao acao = service.atualizar(id, request);
         AcaoDTO dto = mapper.toDTO(acao);
 
-        return new ResponseEntity<>(dto, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
     @Operation(summary = "Atualiza parcialmente uma ação",
@@ -113,7 +116,7 @@ public class AcaoController {
         Acao acao = service.atualizarParcial(id, request);
         AcaoDTO dto = mapper.toDTO(acao);
 
-        return new ResponseEntity<>(dto, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
     @Operation(summary = "Exclui uma ação")

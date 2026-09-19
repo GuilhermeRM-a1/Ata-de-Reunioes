@@ -18,6 +18,7 @@ public class AcaoMapper {
         acao.setDescricao(request.descricao());
         acao.setTipo(request.tipo());
         acao.setPrazo(request.prazo());
+        acao.setConcluida(request.concluida() != null ? request.concluida() : false);
 
         return acao;
     }
@@ -27,9 +28,10 @@ public class AcaoMapper {
         acao.setDescricao(request.descricao());
         acao.setTipo(request.tipo());
         acao.setPrazo(request.prazo());
+        acao.setConcluida(request.concluida() != null ? request.concluida() : false);
     }
 
-    public void updateParsiEntity(Acao acao, AcaoRequest request) {
+    public void updateParcialEntity(Acao acao, AcaoRequest request) {
         if (request.titulo() != null) {
             acao.setTitulo(request.titulo());
         }
@@ -45,9 +47,13 @@ public class AcaoMapper {
         if (request.prazo() != null) {
             acao.setPrazo(request.prazo());
         }
+
+        if (request.concluida() != null) {
+            acao.setConcluida(request.concluida());
+        }
     }
 
-    public AcaoDTO toDTO(Acao acao) {
+    public  AcaoDTO toDTO(Acao acao) {
         List<String> responsavelNomes = acao.getResponsavel() == null
                 ? List.of()
                 : acao.getResponsavel().stream().map(Colaborador::getNome).toList();
@@ -55,9 +61,11 @@ public class AcaoMapper {
         return new AcaoDTO(
                 acao.getId() == null ? null : String.valueOf(acao.getId()),
                 acao.getTitulo(),
+                acao.getTipo(),
                 acao.getDescricao(),
                 responsavelNomes,
                 acao.getPrazo(),
+                acao.getConcluida(),
                 acao.getReuniao().getId()
         );
     }

@@ -26,7 +26,11 @@ public class Colaborador {
     @Column(name = "senha")
     private String senha;
 
-    @Column(name = "monitoramento_reunioes")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "papel")
+    private Papel papel;
+
+    @Column(name = "monitorar_reunioes")
     private Boolean monitorarReunioes;
 
     @Column(name = "data_cadastro")
@@ -36,7 +40,10 @@ public class Colaborador {
     private List<Acao> acoes;
 
 
-    @ManyToMany(mappedBy = "participantes")
+    @ManyToMany
+    @JoinTable(name = "reuniao_participantes",
+            joinColumns = @JoinColumn(name = "participantes_id"),
+            inverseJoinColumns = @JoinColumn(name = "reuniao_id"))
     private List<Reuniao> reunioes;
 
 }

@@ -130,7 +130,7 @@ export class ReuniaoFormComponent implements OnInit {
 
   cancelar(): void {
     this.router.navigate(['/admin/reunioes']);
-  };
+  }
 
   private textoParaLista(texto: string): string[] {
     if (!texto) return [];

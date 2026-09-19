@@ -34,6 +34,7 @@ create table acao (
     descricao  text,
     tipo       varchar(255),
     prazo      varchar(255),
+    concluida  boolean,
     reuniao_id bigint,
     constraint fk_acao_reuniao foreign key (reuniao_id) references reuniao (id)
 );

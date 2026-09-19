@@ -2,16 +2,19 @@ package br.com.empresa.reunioes.application.mapper;
 
 import br.com.empresa.reunioes.domain.entity.Colaborador;
 import br.com.empresa.reunioes.domain.entity.Reuniao;
-import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorDTO;
-import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorRequest;
+import br.com.empresa.reunioes.web.controller.dto.Acao.AcaoDTO;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoDTO;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class ReuniaoMapper {
+
+    private AcaoMapper acaoMapper;
 
     public Reuniao toEntity(ReuniaoRequest request) {
         Reuniao reuniao = new Reuniao();
@@ -34,12 +37,25 @@ public class ReuniaoMapper {
 
         List<String> areas = reuniao.getAreas() == null ? List.of() : reuniao.getAreas();
 
+        List<String> pontosChaves = reuniao.getPontosChaves() == null ? List.of() : reuniao.getPontosChaves();
+
+        List<AcaoDTO> acoes = reuniao.getAcoes() != null
+                ? reuniao.getAcoes().stream()
+                .map(acao -> acaoMapper.toDTO(acao))
+                .toList()
+                : List.of();
+
+        String resumo = reuniao.getResumo();
+
         return new ReuniaoDTO(reuniao.getId(),
                 reuniao.getTitulo(),
                 reuniao.getData(),
                 reuniao.getStatus(),
                 participantes,
+                pontosChaves,
+                acoes,
                 areas,
+                resumo,
                 reuniao.getTotalAcoes());
     }
 
@@ -53,7 +69,7 @@ public class ReuniaoMapper {
 
     }
 
-    public void updateParsiEntity(Reuniao reuniao, ReuniaoRequest request) {
+    public void updateParcialEntity(Reuniao reuniao, ReuniaoRequest request) {
 
         if (request.titulo() != null)
             reuniao.setTitulo(request.titulo());
