@@ -27,10 +27,18 @@
           }
         </div>
       </div>
-      <app-status-badge [status]="reuniao.status"></app-status-badge>
+            <div class="d-flex align-items-center gap-2">
+            <span class="text-muted fw-bold mb-0">Status da Reunião:</span>
+      <app-status-badge [status]="reuniao.statusReuniao" [tipo]="'reuniao'"></app-status-badge>
+    </div>
+
     </div>
 
     <div class="card bg-light border-0 mb-4">
+      <div class="d-flex align-items-center gap-2">
+        <span class="text-muted fw-bold mb-0">Status da transcricão</span>
+        <app-status-badge [status]="reuniao.statusTranscricao" [tipo]="'transcricao'"></app-status-badge>
+    </div>
       <div class="card-body">
         <h6 class="text-uppercase text-muted mb-2">Resumo executivo</h6>
         <p class="mb-0">{{ reuniao.resumo }}</p>

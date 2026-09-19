@@ -24,6 +24,8 @@ export class ReuniaoDetalheComponent implements OnInit {
   transcricaoAberta = false;
   carregando = true; // indicador de loading no html se necessário
 
+  constructor(private ReuniaoStoreService: ReuniaoStoreService) {}
+
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
     const id = idParam ? Number(idParam) : NaN;
@@ -46,6 +48,8 @@ export class ReuniaoDetalheComponent implements OnInit {
       }
     });
   }
+
+  
 
   get pontosChaveLista(): string[] {
     // retorna a lista de pontos-chave da reunião, ou uma lista vazia se não houver reunião carregada(no back já é uma lista)

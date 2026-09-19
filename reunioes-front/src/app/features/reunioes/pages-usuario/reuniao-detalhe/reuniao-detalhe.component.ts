@@ -48,6 +48,8 @@ export class ReuniaoDetalheComponent implements OnInit {
     });
   }
 
+
+  
   get pontosChaveLista(): string[] {
     // Como no backend já é uma lista (array), basta retornar ela ou um array vazio
     return this.reuniao?.pontosChaves || [];

@@ -1,5 +1,5 @@
 import { Component, inject, input, OnInit } from '@angular/core';
-import { ColaboradorServiceService } from '../../../../core/services/colaborador-service.service';
+import { ColaboradorService } from '../../../../core/services/colaborador.service';
 import { Colaborador } from '../../../../core/models';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -13,13 +13,14 @@ import { FormsModule } from '@angular/forms';
 export class ColaboradoresComponent implements OnInit {
 
 
-  private colaboradorService = inject(ColaboradorServiceService);
+  private colaboradorService = inject(ColaboradorService);
 
   inputId: number | null = null;
 
   inputEmail: string = '';
   inputNome: string = '';
   inputMonitorarReunioes: boolean = false;
+  papel = "";
 
   colaboradores: Colaborador[] = [];
   ngOnInit(): void {
@@ -105,6 +106,7 @@ export class ColaboradoresComponent implements OnInit {
       nome: this.inputNome,
       email: this.inputEmail,
       monitorarReunioes: this.inputMonitorarReunioes,
+      papel: this.papel
     };
 
     this.colaboradorService
@@ -152,6 +154,7 @@ export class ColaboradoresComponent implements OnInit {
       email: this.inputEmail,
       nome: this.inputNome,
       monitorarReunioes: this.inputMonitorarReunioes,
+      papel: this.papel
     };
 
     this.colaboradorService.save(novoColaborador).subscribe({

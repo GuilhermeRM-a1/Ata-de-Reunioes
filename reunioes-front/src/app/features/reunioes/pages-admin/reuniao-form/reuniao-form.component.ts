@@ -26,7 +26,8 @@ export class ReuniaoFormComponent implements OnInit {
       tituloReuniao: ['', [Validators.required, Validators.minLength(5)]],
       dataProcessamento: ['', Validators.required],
       resumoExecutivo: [''],
-      status: ['', Validators.required],
+      statusTranscricao: ['', Validators.required],
+      statusReuniao: ['', Validators.required],
       areas: [''],
       participantes: [''],
       pontosChave: [''],
@@ -94,6 +95,7 @@ export class ReuniaoFormComponent implements OnInit {
     this.acoes.removeAt(index);
   }
 
+  
   salvar(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
