@@ -22,10 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -93,7 +90,7 @@ public class ReuniaoController {
         Reuniao reuniao = reuniaoService.atualizar(id, request);
         ReuniaoDTO dto = mapper.toDTO(reuniao);
 
-        return new ResponseEntity<>(dto, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
     /**
@@ -107,11 +104,11 @@ public class ReuniaoController {
     })
     @PatchMapping("/{id}")
     public ResponseEntity<ReuniaoDTO> atualizarParcial(@PathVariable Long id,
-                                                       @RequestBody ReuniaoRequest request) {
+                                                       @Valid @RequestBody ReuniaoRequest request) {
         Reuniao reuniao = reuniaoService.atualizarParcial(id, request);
         ReuniaoDTO dto = mapper.toDTO(reuniao);
 
-        return new ResponseEntity<>(dto, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
     @Operation(summary = "Recebe a análise da IA (ingestão)",

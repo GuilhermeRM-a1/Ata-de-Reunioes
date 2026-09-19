@@ -1,8 +1,6 @@
 package br.com.empresa.reunioes.web.controller.dto.Acao;
 
-import br.com.empresa.reunioes.domain.entity.Acao;
-import br.com.empresa.reunioes.domain.entity.Colaborador;
-import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorDTO;
+import jakarta.validation.constraints.NotBlank;
 
 import java.util.List;
 
@@ -14,5 +12,6 @@ public record AcaoDTO(
         List<String> responsavel,
         String prazo,
         Boolean concluida,
+        @NotBlank
         Long reuniaoId) {
 }

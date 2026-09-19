@@ -1,5 +1,6 @@
 package br.com.empresa.reunioes.domain.entity;
 
+import br.com.empresa.reunioes.domain.enums.StatusTranscricao;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,13 +31,11 @@ public class Reuniao {
     @Column(name = "transcricao")
     private String transcricao;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private String status;
+    private StatusTranscricao status;
 
-    @ManyToMany
-    @JoinTable(name = "reuniao_participantes",
-            joinColumns = @JoinColumn(name = "reuniao_id"),
-            inverseJoinColumns = @JoinColumn(name = "participantes_id"))
+    @ManyToMany(mappedBy = "reunioes")
     private List<Colaborador> participantes;
 
     @ElementCollection
@@ -49,7 +48,6 @@ public class Reuniao {
     @Column(name = "pontos_chaves")
     private List<String> pontosChaves;
 
-    /** Lado inverso: a coluna reuniao_id mora na tabela acao. */
     /** Lado inverso: a coluna reuniao_id mora na tabela acao. */
     @OneToMany(mappedBy = "reuniao", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Acao> acoes;

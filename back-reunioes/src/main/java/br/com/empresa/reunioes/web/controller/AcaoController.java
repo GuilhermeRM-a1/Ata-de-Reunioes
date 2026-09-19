@@ -100,7 +100,7 @@ public class AcaoController {
         Acao acao = service.atualizar(id, request);
         AcaoDTO dto = mapper.toDTO(acao);
 
-        return new ResponseEntity<>(dto, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
     @Operation(summary = "Atualiza parcialmente uma ação",
@@ -116,7 +116,7 @@ public class AcaoController {
         Acao acao = service.atualizarParcial(id, request);
         AcaoDTO dto = mapper.toDTO(acao);
 
-        return new ResponseEntity<>(dto, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
     @Operation(summary = "Exclui uma ação")

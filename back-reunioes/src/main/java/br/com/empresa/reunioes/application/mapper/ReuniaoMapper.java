@@ -3,16 +3,18 @@ package br.com.empresa.reunioes.application.mapper;
 import br.com.empresa.reunioes.domain.entity.Colaborador;
 import br.com.empresa.reunioes.domain.entity.Reuniao;
 import br.com.empresa.reunioes.web.controller.dto.Acao.AcaoDTO;
-import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorDTO;
-import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorRequest;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoDTO;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class ReuniaoMapper {
+
+    private AcaoMapper acaoMapper;
 
     public Reuniao toEntity(ReuniaoRequest request) {
         Reuniao reuniao = new Reuniao();
@@ -39,7 +41,7 @@ public class ReuniaoMapper {
 
         List<AcaoDTO> acoes = reuniao.getAcoes() != null
                 ? reuniao.getAcoes().stream()
-                .map(acao -> new AcaoMapper().toDTO(acao))
+                .map(acao -> acaoMapper.toDTO(acao))
                 .toList()
                 : List.of();
 

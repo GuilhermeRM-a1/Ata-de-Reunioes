@@ -1,7 +1,7 @@
 package br.com.empresa.reunioes.web.controller.dto.Reuniao;
 
+import br.com.empresa.reunioes.domain.enums.StatusTranscricao;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 
 import java.util.List;
@@ -19,7 +19,7 @@ public record ReuniaoRequest(@NotBlank(message = "O título é obrigatório")
                              String data,
 
                              @NotBlank(message = "O status é obrigatório")
-                             String status,
+                             StatusTranscricao status,
 
                              List<String> areas,
                              List<String> pontosChaves,
