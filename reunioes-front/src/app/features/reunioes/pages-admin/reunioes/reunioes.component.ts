@@ -1,10 +1,12 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { ReuniaoStoreService } from '../../../../core/services/reuniao.service';
 import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
 import { ReuniaoApiDTO } from '../../../../core/models/api/reuniao-api.model';
 import { AlertaService } from '../../../../core/services/alerta.service';
+
+type StatusReuniaoAgenda = 'PENDENTE' | 'EM_ANDAMENTO' | 'FINALIZADA';
 
 @Component({
   selector: 'app-reunioes',
@@ -14,9 +16,17 @@ import { AlertaService } from '../../../../core/services/alerta.service';
   styleUrl: './reunioes.component.scss'
 })
 export class ReunioesComponent implements OnInit {
-  readonly reunioes = signal<ReuniaoApiDTO[]>([]);
-  readonly carregando = signal(true);
-  readonly erro = signal<string | null>(null);
+  todasReunioes: ReuniaoApiDTO[] = [];
+  reunioesPendentes: ReuniaoApiDTO[] = [];
+  reunioesEmAndamento: ReuniaoApiDTO[] = [];
+  reunioesFinalizadas: ReuniaoApiDTO[] = [];
+
+  carregando = true;
+  erro: string | null = null;
+
+  paginaAtual = 1;
+  limite = 10;
+  totalPaginas = 1;
 
   constructor(
     private readonly reuniaoService: ReuniaoStoreService,
@@ -29,20 +39,80 @@ export class ReunioesComponent implements OnInit {
   }
 
   private carregarReunioes(): void {
-    this.carregando.set(true);
-    this.erro.set(null);
+    this.carregando = true;
+    this.erro = null;
 
     this.reuniaoService.listar().subscribe({
       next: (dados: any) => {
-        this.reunioes.set(dados.content);
-        this.carregando.set(false);
+        this.todasReunioes = dados.content;
+        this.atualizarPagina();
+        this.carregando = false;
       },
       error: (err: any) => {
         console.error('Erro ao carregar reuniões:', err);
-        this.erro.set('Não foi possível carregar as reuniões. Tente novamente em instantes.');
-        this.carregando.set(false);
+        this.erro = 'Não foi possível carregar as reuniões. Tente novamente em instantes.';
+        this.carregando = false;
       }
     });
+  }
+
+  /**
+   * Simulacao: o backend ainda nao tem o campo statusReuniao (Pendente/Em
+   * andamento/Finalizada) separado do status de transcricao. Ate isso
+   * existir na API, derivamos comparando a data da reuniao com hoje.
+   */
+  private obterStatusAgenda(reuniao: ReuniaoApiDTO): StatusReuniaoAgenda {
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    const dataReuniao = new Date(reuniao.data);
+    dataReuniao.setHours(0, 0, 0, 0);
+
+    if (dataReuniao.getTime() > hoje.getTime()) return 'PENDENTE';
+    if (dataReuniao.getTime() === hoje.getTime()) return 'EM_ANDAMENTO';
+    return 'FINALIZADA';
+  }
+
+  atualizarPagina(): void {
+    const pendentes = this.todasReunioes
+      .filter(r => this.obterStatusAgenda(r) === 'PENDENTE')
+      .sort((a, b) => a.data.localeCompare(b.data));
+
+    const emAndamento = this.todasReunioes
+      .filter(r => this.obterStatusAgenda(r) === 'EM_ANDAMENTO')
+      .sort((a, b) => a.data.localeCompare(b.data));
+
+    const finalizadas = this.todasReunioes
+      .filter(r => this.obterStatusAgenda(r) === 'FINALIZADA')
+      .sort((a, b) => b.data.localeCompare(a.data));
+
+    const inicio = (this.paginaAtual - 1) * this.limite;
+    const fim = inicio + this.limite;
+
+    this.reunioesPendentes = pendentes.slice(inicio, fim);
+    this.reunioesEmAndamento = emAndamento.slice(inicio, fim);
+    this.reunioesFinalizadas = finalizadas.slice(inicio, fim);
+
+    this.totalPaginas = Math.max(
+      Math.ceil(pendentes.length / this.limite),
+      Math.ceil(emAndamento.length / this.limite),
+      Math.ceil(finalizadas.length / this.limite),
+      1
+    );
+  }
+
+  proximaPagina(): void {
+    if (this.paginaAtual < this.totalPaginas) {
+      this.paginaAtual++;
+      this.atualizarPagina();
+    }
+  }
+
+  paginaAnterior(): void {
+    if (this.paginaAtual > 1) {
+      this.paginaAtual--;
+      this.atualizarPagina();
+    }
   }
 
   novaReuniao(): void {
@@ -70,8 +140,8 @@ export class ReunioesComponent implements OnInit {
 
     this.reuniaoService.remover(reuniao.id).subscribe({
       next: () => {
-        this.reunioes.update(lista => lista.filter(r => r.id !== reuniao.id));
         this.alerta.sucesso('Reunião excluída', reuniao.titulo);
+        this.carregarReunioes();
       },
       error: () => {}
     });

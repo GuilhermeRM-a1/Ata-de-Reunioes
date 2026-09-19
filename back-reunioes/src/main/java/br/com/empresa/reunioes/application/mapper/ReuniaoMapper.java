@@ -14,7 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReuniaoMapper {
 
-    private AcaoMapper acaoMapper;
+    private final AcaoMapper acaoMapper;
 
     public Reuniao toEntity(ReuniaoRequest request) {
         Reuniao reuniao = new Reuniao();
