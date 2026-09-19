@@ -1,35 +1,35 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { ReuniaoApiDTO, ReuniaoApiRequest } from '../models/api/reuniao-api.model';
 
 @Injectable({ providedIn: 'root' })
-export class ReuniaoService {
-  private readonly baseUrl = 'http://localhost:8080/api/reunioes';
+export class ReuniaoStoreService {
+  private readonly apiUrl = 'http://localhost:8080/api/reunioes'; 
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+
+  }
 
   listar(): Observable<ReuniaoApiDTO[]> {
-    return this.http.get<ReuniaoApiDTO[]>(this.baseUrl);
-  }
+      return this.http.get<ReuniaoApiDTO[]>(this.apiUrl);
+    }
 
   buscarPorId(id: number): Observable<ReuniaoApiDTO> {
-    return this.http.get<ReuniaoApiDTO>(`${this.baseUrl}/${id}`);
+    return this.http.get<ReuniaoApiDTO>(`${this.apiUrl}/${id}`);
   }
 
-  salvar(dados: ReuniaoApiRequest): Observable<ReuniaoApiDTO> {
-    return this.http.post<ReuniaoApiDTO>(this.baseUrl, dados);
+
+  criar(dados: ReuniaoApiRequest): Observable<ReuniaoApiDTO> {
+    return this.http.post<ReuniaoApiDTO>(this.apiUrl, dados);
   }
 
   atualizar(id: number, dados: ReuniaoApiRequest): Observable<ReuniaoApiDTO> {
-    return this.http.put<ReuniaoApiDTO>(`${this.baseUrl}/${id}`, dados);
+    return this.http.put<ReuniaoApiDTO>(`${this.apiUrl}/${id}`, dados);
   }
 
-  atualizarParcial(id: number, dados: Partial<ReuniaoApiRequest>): Observable<ReuniaoApiDTO> {
-    return this.http.patch<ReuniaoApiDTO>(`${this.baseUrl}/${id}`, dados);
-  }
 
-  deletar(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  remover(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }

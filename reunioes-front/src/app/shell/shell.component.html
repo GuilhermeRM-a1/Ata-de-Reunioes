@@ -1,20 +1,22 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container-fluid">
-    <a class="navbar-brand" routerLink="/reunioes">
+    <a class="navbar-brand" [routerLink]="reunioesRoute">
       Ata de Reunião
     </a>
 
     <div class="navbar-nav">
+          <!-- Link de Reuniões -->
           <a
             class="nav-link"
-            routerLink="/reunioes"
+            [routerLink]="reunioesRoute"
             routerLinkActive="active">
             Reuniões
           </a>
 
+          <!-- Link de Ações -->
           <a
             class="nav-link"
-            routerLink="/acoes"
+            [routerLink]="acoesRoute"
             routerLinkActive="active">
             Ações
           </a>

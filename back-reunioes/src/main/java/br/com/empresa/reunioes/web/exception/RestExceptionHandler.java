@@ -1,5 +1,6 @@
 package br.com.empresa.reunioes.web.exception;
 
+import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -27,11 +28,30 @@ public class RestExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(RestExceptionHandler.class);
 
+    @ExceptionHandler(EmailCadastradoExistenteException.class)
+    public ProblemDetail tratarEmailExistente(EmailCadastradoExistenteException e) {
+
+        return montar(HttpStatus.CONFLICT, "Este email já existe.", e.getMessage(),
+                "email-existente");
+    }
+
     @ExceptionHandler(RecursoNaoEncontradoException.class)
     public ProblemDetail tratarNaoEncontrado(RecursoNaoEncontradoException e) {
 
         return montar(HttpStatus.NOT_FOUND, "Recurso não encontrado", e.getMessage(),
                 "recurso-nao-encontrado");
+    }
+
+    /**
+     * O recurso existe, mas o estado dele nao permite a operacao ainda.
+     * 409 e nao 404: dizer "nao encontrado" aqui mandaria o cliente procurar
+     * um id que existe.
+     */
+    @ExceptionHandler(RelatorioIndisponivelException.class)
+    public ProblemDetail tratarRelatorioIndisponivel(RelatorioIndisponivelException e) {
+
+        return montar(HttpStatus.CONFLICT, "Relatório indisponível", e.getMessage(),
+                "relatorio-indisponivel");
     }
 
     /** Corpo reprovado na validacao — devolve a lista de campos rejeitados. */
@@ -66,6 +86,21 @@ public class RestExceptionHandler {
         return montar(HttpStatus.BAD_REQUEST, "Parâmetro inválido",
                 "O parâmetro " + e.getName() + " recebeu um valor de tipo incompatível.",
                 "parametro-invalido");
+    }
+
+    /**
+     * A API externa de feriados falhou ou demorou demais. Isso e problema de
+     * terceiro, nao do cliente: devolve 503, nao 500, e o servico segue de pe
+     * para todo o resto.
+     */
+    @ExceptionHandler(FeignException.class)
+    public ProblemDetail tratarApiExterna(FeignException e) {
+
+        log.error("Falha ao consultar a API externa de feriados (status {})", e.status(), e);
+
+        return montar(HttpStatus.SERVICE_UNAVAILABLE, "Serviço externo indisponível",
+                "Não foi possível consultar o calendário de feriados no momento. Tente novamente.",
+                "servico-externo-indisponivel");
     }
 
     /**

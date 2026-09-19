@@ -1,10 +1,10 @@
 package br.com.empresa.reunioes.application.mapper;
 
 import br.com.empresa.reunioes.domain.entity.Colaborador;
-import br.com.empresa.reunioes.domain.entity.Reuniao;
 import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorDTO;
 import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorPatchRequest;
 import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorRequest;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -16,6 +16,7 @@ public class ColaboradorMapper {
         colaborador.setNome(request.nome());
         colaborador.setEmail(request.email());
         colaborador.setSenha(request.senha());
+        colaborador.setPapel(request.papel());
         colaborador.setMonitorarReunioes(request.monitorarReunioes());
         colaborador.setDataCadastro(request.dataCadastro());
 
@@ -28,6 +29,7 @@ public class ColaboradorMapper {
                 colaborador.getId(),
                 colaborador.getNome(),
                 colaborador.getEmail(),
+                colaborador.getPapel(),
                 colaborador.getMonitorarReunioes(),
                 colaborador.getDataCadastro()
         );
@@ -36,16 +38,22 @@ public class ColaboradorMapper {
     public void updateEntity(Colaborador colaborador, ColaboradorRequest request) {
         colaborador.setNome(request.nome());
         colaborador.setEmail(request.email());
+        colaborador.setSenha(request.senha());
+        colaborador.setPapel(request.papel());
         colaborador.setMonitorarReunioes(request.monitorarReunioes());
         colaborador.setDataCadastro(request.dataCadastro());
     }
 
-    public void updateParsiEntity(Colaborador colaborador, ColaboradorPatchRequest request) {
+    public void updateParcialEntity(Colaborador colaborador, ColaboradorPatchRequest request) {
 
         if (request.nome() != null)
             colaborador.setNome(request.nome());
         if (request.email() != null)
             colaborador.setEmail(request.email());
+        if (request.senha() != null)
+            colaborador.setSenha(request.senha());
+        if (request.papel() != null)
+            colaborador.setPapel(request.papel());
         if (request.monitorarReunioes() != null)
             colaborador.setMonitorarReunioes(request.monitorarReunioes());
         if (request.dataCadastro() != null)
