@@ -3,4 +3,5 @@ export interface Colaborador {
   email: string;
   nome: string;
   monitorarReunioes: boolean;
+  papel: string;
 }
