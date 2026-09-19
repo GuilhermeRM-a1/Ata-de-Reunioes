@@ -107,7 +107,7 @@ public class ColaboradorController {
         Colaborador colaborador = service.atualizar(id, request);
         ColaboradorDTO dto = mapper.toDTO(colaborador);
 
-        return new ResponseEntity<>(dto, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
     @Operation(summary = "Atualiza parcialmente um colaborador",
@@ -125,7 +125,7 @@ public class ColaboradorController {
         Colaborador colaborador = service.atualizarParcial(id, request);
         ColaboradorDTO dto = mapper.toDTO(colaborador);
 
-        return new ResponseEntity<>(dto, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
     @Operation(summary = "Exclui um colaborador")

@@ -16,13 +16,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import java.util.List;
 
-
-/**
- * Todo metodo publico devolve Entidade
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -37,10 +32,13 @@ public class ReuniaoService {
     public Reuniao salvar(ReuniaoRequest request) {
         log.info("Iniciando salvamento da reunião.");
 
-        log.debug("Requisição recebida: {}", request);
+        log.debug("Dados da reunião recebidos: título={}, data={}, participantes={}",
+                request.titulo(),
+                request.data(),
+                request.participantes() != null ? request.participantes().size() : 0);
 
         Reuniao reuniao = mapper.toEntity(request);
-        log.debug("requisição covertida para entidade");
+        log.debug("Requisição convertida para entidade.");
 
         log.debug("Buscando e setando colaboradores.");
         reuniao.setParticipantes(buscarColaboradores(request.participantes()));
@@ -48,29 +46,29 @@ public class ReuniaoService {
         log.debug("Buscando e setando ações.");
         reuniao.setAcoes(buscarAcoes(request.acoes()));
 
-        log.debug("Calculando e setando o total de ações numericamente.");
         reuniao.setTotalAcoes(reuniao.getAcoes().size());
 
-        log.debug("Reunião com colaboradores, ações e total de ações setados: {}", reuniao.getParticipantes(),
-                reuniao.getAcoes(),
+        log.debug("Relacionamentos da reunião definidos: participantes={}, ações={}, totalAcoes={}",
+                reuniao.getParticipantes().size(),
+                reuniao.getAcoes().size(),
                 reuniao.getTotalAcoes());
 
         Reuniao reuniaoSalva = reuniaoRepository.save(reuniao);
 
-        log.info("Reunião salva com sucesso");
+        log.info("Reunião salva com sucesso: id={}", reuniaoSalva.getId());
 
         return reuniaoSalva;
     }
 
     @Transactional(readOnly = true)
     public Reuniao buscarPorId(Long id) {
-        log.info("Iniciando busca por reunião pelo id.");
+        log.debug("Buscando reunião por id={}", id);
 
-        log.debug("Buscando reunião por id.");
         Reuniao reuniaoEncontrada = reuniaoRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Reunião não encontrada."));
+                .orElseThrow(() -> new RecursoNaoEncontradoException(
+                        "Reunião não encontrada."));
 
-        log.debug("Reunião encontrada: {}", reuniaoEncontrada);
+        log.debug("Reunião encontrada: id={}", id);
 
         return reuniaoEncontrada;
     }
@@ -80,13 +78,16 @@ public class ReuniaoService {
         log.info("Iniciando listagem de reuniões.");
 
         Page<Reuniao> listaPaginada = reuniaoRepository.findAll(paginacao);
-        log.debug("Listagem de reuniões concluída. Total encontrado: {}", listaPaginada.getTotalElements());
+
+        log.debug("Listagem de reuniões concluída. Total encontrado: {}",
+                listaPaginada.getTotalElements());
 
         return listaPaginada;
     }
 
     @Transactional
     public Reuniao atualizar(Long id, ReuniaoRequest request) {
+        log.info("Iniciando atualização da reunião com id={}", id);
 
         Reuniao reuniao = buscarPorId(id);
 
@@ -96,56 +97,53 @@ public class ReuniaoService {
         reuniao.setAcoes(buscarAcoes(request.acoes()));
         reuniao.setTotalAcoes(reuniao.getAcoes().size());
 
-        return this.reuniaoRepository.save(reuniao);
+        Reuniao reuniaoAtualizada = reuniaoRepository.save(reuniao);
+
+        log.info("Reunião atualizada com sucesso: id={}", id);
+
+        return reuniaoAtualizada;
     }
 
     @Transactional
     public Reuniao atualizarParcial(Long id, ReuniaoRequest request) {
-        log.info("Iniciando atualização parcial da reunião com id: {}", id);
+        log.info("Iniciando atualização parcial da reunião com id={}", id);
 
-        log.debug("Buscando reunião existente.");
         Reuniao reuniao = buscarPorId(id);
 
-        log.debug("Atualizando com mapper");
+        log.debug("Atualizando reunião parcialmente com mapper: id={}", id);
         mapper.updateParcialEntity(reuniao, request);
 
         if (request.participantes() != null) {
-            log.debug("buscando participantes");
+            log.debug("Atualizando participantes da reunião: id={}", id);
             reuniao.setParticipantes(buscarColaboradores(request.participantes()));
         }
 
-
         if (request.acoes() != null) {
-            log.debug("buscando ações");
+            log.debug("Atualizando ações da reunião: id={}", id);
             reuniao.setAcoes(buscarAcoes(request.acoes()));
-            log.debug("calculando total de ações");
+
+            log.debug("Recalculando total de ações da reunião: id={}", id);
             reuniao.setTotalAcoes(reuniao.getAcoes().size());
         }
 
-        log.debug("Salvando reunião atualizada.");
         Reuniao reuniaoAtualizada = reuniaoRepository.save(reuniao);
 
-        log.info("Reunião atualizada salva com sucesso.");
+        log.info("Reunião atualizada parcialmente com sucesso: id={}", id);
 
         return reuniaoAtualizada;
     }
 
     @Transactional
     public void deletar(Long id) {
-        log.info("Iniciando processo de remover reunião");
+        log.info("Iniciando processo de remoção da reunião: id={}", id);
 
-        log.debug("Buscando reunião existente por id");
         Reuniao reuniao = buscarPorId(id);
 
         reuniaoRepository.delete(reuniao);
-        log.info("Reunião removida com sucesso: ID: {}", id);
+
+        log.info("Reunião removida com sucesso: id={}", id);
     }
 
-    /**
-     * Troca os ids da request pelas entidades do banco. findAllById descarta
-     * id inexistente em silencio, entao a contagem e conferida para o cliente
-     * receber 404 em vez de uma reuniao salva com participante faltando.
-     */
     private List<Colaborador> buscarColaboradores(List<Long> ids) {
 
         if (ids == null || ids.isEmpty()) {
@@ -156,7 +154,7 @@ public class ReuniaoService {
 
         if (colaboradores.size() != ids.stream().distinct().count()) {
             throw new RecursoNaoEncontradoException(
-                    "Colaborador não encontrado entre os participantes informados");
+                    "Colaborador não encontrado entre os participantes informados.");
         }
 
         return colaboradores;
@@ -172,21 +170,9 @@ public class ReuniaoService {
 
         if (acoes.size() != ids.stream().distinct().count()) {
             throw new RecursoNaoEncontradoException(
-                    "Ação não encontrada entre as ações informadas");
+                    "Ação não encontrada entre as ações informadas.");
         }
 
         return acoes;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

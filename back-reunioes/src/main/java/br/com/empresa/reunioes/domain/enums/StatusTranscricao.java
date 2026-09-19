@@ -1,8 +1,6 @@
 package br.com.empresa.reunioes.domain.enums;
 
-public enum StatusReuniao {
-
-    // PARA PM2
+public enum StatusTranscricao {
 
     RECEBIDA,
     TRANSCREVENDO,

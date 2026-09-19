@@ -9,18 +9,18 @@ import br.com.empresa.reunioes.domain.repository.ColaboradorRepository;
 import br.com.empresa.reunioes.domain.repository.ReuniaoRepository;
 import br.com.empresa.reunioes.web.controller.dto.Acao.AcaoRequest;
 import br.com.empresa.reunioes.web.exception.RecursoNaoEncontradoException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Todo metodo publico devolve Entidade
+ * Todo método público devolve Entidade.
  */
 @Slf4j
 @Service
@@ -34,131 +34,146 @@ public class AcaoService {
 
     @Transactional
     public Acao salvar(Long reuniaoId, AcaoRequest request) {
-        log.info("Iniciando processo de salvar AÇÃO");
+        log.info("Iniciando processo de salvar ação: reuniaoId={}", reuniaoId);
 
         Acao acao = mapper.toEntity(request);
         log.debug("Requisição convertida para entidade.");
 
-        log.debug("Buscando e setando responsáveis pela Ação.");
+        log.debug("Buscando e setando responsáveis pela ação.");
         acao.setResponsavel(buscarResponsaveis(request.responsavel()));
 
-        log.debug("Buscando e setando reunião da ação.");
+        log.debug("Buscando e setando reunião da ação: reuniaoId={}", reuniaoId);
         acao.setReuniao(buscarReuniao(reuniaoId));
 
-        log.debug("Salvando ação via repositório");
+        log.debug("Salvando ação via repositório.");
         Acao acaoSalva = repository.save(acao);
-        log.info("Ação salva.");
+
+        log.info("Ação salva com sucesso: id={}, reuniaoId={}",
+                acaoSalva.getId(), reuniaoId);
 
         return acaoSalva;
     }
 
     @Transactional(readOnly = true)
     public Acao buscarPorId(Long id) {
-        log.info("Iniciando busca por id da ação.");
+        log.debug("Buscando ação por id={}", id);
 
-        log.debug("Buscando ação por id");
         Acao acaoEncontrada = repository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Ação não encontrada"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException(
+                        "Ação não encontrada"));
 
-        log.debug("Ação encontrada: {}", acaoEncontrada);
+        log.debug("Ação encontrada: id={}", id);
 
         return acaoEncontrada;
     }
 
     @Transactional(readOnly = true)
     public Page<Acao> listar(Pageable paginacao) {
-        log.info("Listando ações paginadas.");
+        log.info("Iniciando listagem paginada de ações.");
 
-        log.debug("Listando...");
         Page<Acao> pagina = repository.findAll(paginacao);
 
-        log.debug("Lista gerada.");
+        log.debug("Listagem de ações concluída. Total encontrado: {}",
+                pagina.getTotalElements());
 
         return pagina;
     }
 
     @Transactional(readOnly = true)
     public List<Acao> listarPorReuniao(Long reuniaoId) {
-        log.info("Listando ações por reunião");
+        log.info("Iniciando listagem de ações da reunião: reuniaoId={}", reuniaoId);
+
+        if (!reuniaoRepository.existsById(reuniaoId)) {
+            log.warn("Reunião não encontrada: id={}", reuniaoId);
+            throw new RecursoNaoEncontradoException(
+                    "Reunião não encontrada.");
+        }
 
         List<Acao> lista = repository.findAllByReuniaoId(reuniaoId);
 
-        if (!reuniaoRepository.existsById(reuniaoId)) {
-            log.warn("Reunião não encontrada");
-            throw new RecursoNaoEncontradoException("Reunião não encontrada.");
-        }
-
-        log.debug("Lista gerada");
+        log.debug(
+                "Listagem de ações da reunião concluída: reuniaoId={}, total={}",
+                reuniaoId,
+                lista.size()
+        );
 
         return lista;
     }
 
     @Transactional
     public Acao atualizar(Long id, AcaoRequest request) {
+        log.info("Iniciando atualização da ação: id={}", id);
 
         Acao acao = buscarPorId(id);
 
+        log.debug("Atualizando ação com mapper: id={}", id);
         mapper.updateEntity(acao, request);
 
+        log.debug("Atualizando responsáveis da ação: id={}", id);
         acao.setResponsavel(buscarResponsaveis(request.responsavel()));
 
-        // nunca atualiza a reuniao
+        // Nunca atualiza a reunião.
 
-        return repository.save(acao);
+        Acao acaoAtualizada = repository.save(acao);
+
+        log.info("Ação atualizada com sucesso: id={}", id);
+
+        return acaoAtualizada;
     }
 
     @Transactional
     public Acao atualizarParcial(Long id, AcaoRequest request) {
-        log.info("Atualizando Ação parcialmente");
+        log.info("Iniciando atualização parcial da ação: id={}", id);
 
-        log.debug("Buscando ação por id.");
         Acao acao = buscarPorId(id);
 
-        log.debug("Atualizando com mapper.");
+        log.debug("Atualizando ação parcialmente com mapper: id={}", id);
         mapper.updateParcialEntity(acao, request);
 
         if (request.responsavel() != null) {
-            log.debug("Buscando e setando colaboradores responsáveis pela ação.");
+            log.debug("Atualizando responsáveis da ação: id={}", id);
             acao.setResponsavel(buscarResponsaveis(request.responsavel()));
         }
 
-        // nunca atualiza a reuniao
-        log.debug("Chamando metodo save no repositorio");
+        // Nunca atualiza a reunião.
+
         Acao acaoAtualizada = repository.save(acao);
 
-        log.debug("Ação salva.");
+        log.info("Ação atualizada parcialmente com sucesso: id={}", id);
 
         return acaoAtualizada;
     }
 
     @Transactional
     public void deletar(Long id) {
-        log.info("Iniciando processo de deletar ação.");
+        log.info("Iniciando processo de remoção da ação: id={}", id);
 
-        log.debug("Buscando se ação existe por id.");
         Acao acao = buscarPorId(id);
 
-        log.debug("Buscando se reunião existe(Para remover ação dela).");
+        log.debug("Buscando reunião associada à ação: acaoId={}", id);
         Reuniao reuniao = acao.getReuniao();
 
-        log.debug("removendo ação da reunião.");
+        log.debug("Removendo ação da reunião: acaoId={}, reuniaoId={}",
+                id, reuniao.getId());
+
         reuniao.getAcoes().remove(acao);
 
         repository.delete(acao);
-        log.debug("Ação deletada.");
+
+        log.info("Ação removida com sucesso: id={}", id);
     }
 
-
     private Reuniao buscarReuniao(Long id) {
-
         return reuniaoRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Reunião não encontrada"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException(
+                        "Reunião não encontrada"));
     }
 
     /**
-     * Troca os ids da request pelas entidades do banco. findAllById descarta
-     * id inexistente em silencio, entao a contagem e conferida para o cliente
-     * receber 404 em vez de uma acao salva sem o responsavel pedido.
+     * Troca os IDs da request pelas entidades do banco.
+     * findAllById ignora IDs inexistentes, então a contagem é conferida
+     * para que o cliente receba 404 em vez de uma ação ser salva
+     * sem o responsável solicitado.
      */
     private List<Colaborador> buscarResponsaveis(List<Long> ids) {
 
@@ -166,7 +181,8 @@ public class AcaoService {
             return new ArrayList<>();
         }
 
-        List<Colaborador> colaboradores = colaboradorRepository.findAllById(ids);
+        List<Colaborador> colaboradores =
+                colaboradorRepository.findAllById(ids);
 
         if (colaboradores.size() != ids.stream().distinct().count()) {
             throw new RecursoNaoEncontradoException(
@@ -175,17 +191,4 @@ public class AcaoService {
 
         return colaboradores;
     }
-
 }
-
-
-
-
-
-
-
-
-
-
-
-

@@ -27,7 +27,6 @@ public class FeriadoService {
     private final FeriadoClient feriadoClient;
     private final ReuniaoService reuniaoService;
 
-    @Transactional(readOnly = true)
     public ReuniaoFeriadoDTO verificarReuniao(Long reuniaoId) {
         log.info("Verificando se a reunião {} caiu em feriado.", reuniaoId);
 

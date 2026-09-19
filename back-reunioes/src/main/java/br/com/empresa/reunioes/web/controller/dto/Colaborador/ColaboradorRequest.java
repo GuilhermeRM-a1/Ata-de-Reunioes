@@ -1,5 +1,6 @@
 package br.com.empresa.reunioes.web.controller.dto.Colaborador;
 
+import br.com.empresa.reunioes.domain.enums.Papel;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
@@ -19,7 +20,7 @@ public record ColaboradorRequest(@NotBlank(message = "O nome é obrigatório")
                                  String senha,
 
                                  @NotBlank
-                                 String papel,
+                                 Papel papel,
 
                                  Boolean monitorarReunioes,
                                  String dataCadastro) {}

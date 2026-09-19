@@ -1,7 +1,6 @@
 package br.com.empresa.reunioes.web.controller.dto.Acao;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
