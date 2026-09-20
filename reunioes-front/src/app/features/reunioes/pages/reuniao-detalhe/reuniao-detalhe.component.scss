@@ -1,3 +1,5 @@
+// O modal e montado na mao (sem o JS do Bootstrap), entao o backdrop
+// e o unico bloco que ainda precisa de CSS proprio.
 .modal-backdrop-custom {
   position: fixed;
   inset: 0;
@@ -6,17 +8,5 @@
   align-items: center;
   justify-content: center;
   z-index: 1050;
-}
-
-.modal-dialog-custom {
-  width: 100%;
-  max-width: 500px;
-  margin: 1rem;
-
-  .modal-content {
-    background-color: #fff;
-    border-radius: 0.5rem;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.3);
-    border: none;
-  }
+  padding: 1rem;
 }

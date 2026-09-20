@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 
@@ -14,6 +14,17 @@ export class ShellComponent {
   protected readonly auth = inject(AuthService);
 
   private readonly router = inject(Router);
+
+  /** So apresentacao: controla o collapse da navbar em tela estreita. */
+  readonly menuAberto = signal(false);
+
+  alternarMenu(): void {
+    this.menuAberto.update(aberto => !aberto);
+  }
+
+  fecharMenu(): void {
+    this.menuAberto.set(false);
+  }
 
   sair(): void {
     this.auth.sair();

@@ -1,57 +1,58 @@
-<div class="container-fluid py-5">
-  <div class="d-flex justify-content-between align-items-center mb-5">
-    <h2 class="fw-bold">Ações</h2>
-  </div>
+<header class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h1 class="h3 mb-0">Ações</h1>
+</header>
 
-  @if (carregando()) {
-    <div class="text-center py-5">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Carregando...</span>
-      </div>
-      <p class="text-muted mt-3">Carregando ações...</p>
+@if (carregando()) {
+  <div class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Carregando...</span>
     </div>
-  } @else {
+    <p class="text-muted mt-3 mb-0">Carregando ações...</p>
+  </div>
+} @else {
 
-    <div class="mb-5 pb-3">
-      <h4 class="text-uppercase text-muted fs-6 mb-3 fw-semibold tracking-wide">Ações Pendentes</h4>
+  <section class="mb-4">
+    <h2 class="h6 text-uppercase text-muted fw-semibold mb-3">Ações pendentes</h2>
 
-      @if (acoesPendentes().length === 0) {
-        <div class="alert alert-info text-center py-3">
+    @if (acoesPendentes().length === 0) {
+      <div class="card border-0 shadow-sm">
+        <div class="card-body text-center text-muted py-4">
+          <i class="fas fa-list-check fa-lg mb-2 d-block opacity-50"></i>
           Nenhuma ação pendente no momento.
         </div>
-      } @else {
-        <div class="card border-0 shadow-sm">
-          <div class="card-body p-0">
+      </div>
+    } @else {
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+          <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
               <thead class="table-light">
                 <tr>
-                  <th class="py-3 ps-3">Título</th>
-                  <th class="py-3">Descrição</th>
-                  <th class="py-3">Tipo</th>
-                  <th class="py-3">Prazo</th>
+                  <th class="ps-3">Título</th>
+                  <th>Descrição</th>
+                  <th>Tipo</th>
+                  <th>Prazo</th>
                   @if (auth.isAdmin) {
-                    <th class="py-3 text-end pe-3">Ações</th>
+                    <th class="text-end pe-3">Ações</th>
                   }
                 </tr>
               </thead>
               <tbody>
                 @for (acao of acoesPendentes(); track acao.id) {
-                  <tr (dblclick)="verReuniao(acao.reuniaoId)" style="cursor: pointer;" title="Clique duas vezes para ver a reunião">
-                    <td class="fw-semibold ps-3">{{ acao.titulo }}</td>
+                  <tr class="cursor-pointer" (dblclick)="verReuniao(acao.reuniaoId)" title="Clique duas vezes para ver a reunião">
+                    <td class="ps-3 fw-semibold">{{ acao.titulo }}</td>
                     <td class="text-secondary">{{ acao.descricao }}</td>
                     <td>
-                      <span class="badge rounded-pill bg-light text-dark border px-2 py-1">{{ acao.tipo || '—' }}</span>
+                      <span class="badge rounded-pill bg-light text-dark border">{{ acao.tipo || '—' }}</span>
                     </td>
-                    <td>
-                      {{ acao.prazo ? (acao.prazo | date: 'dd/MM/yyyy') : '—' }}
-                    </td>
+                    <td class="text-nowrap">{{ acao.prazo ? (acao.prazo | date: 'dd/MM/yyyy') : '—' }}</td>
                     @if (auth.isAdmin) {
-                      <td class="text-end pe-3" (click)="$event.stopPropagation()">
-                        <button class="btn btn-sm btn-link text-success p-0 text-decoration-none me-2" (click)="mudarStatus(acao)" title="Concluir">
-                          <i class="fas fa-check-circle fs-5"></i>
+                      <td class="text-end text-nowrap pe-3" (click)="$event.stopPropagation()">
+                        <button class="btn btn-sm btn-outline-success me-1" (click)="mudarStatus(acao)" title="Concluir">
+                          <i class="fas fa-check"></i>
                         </button>
-                        <button class="btn btn-sm btn-link text-danger p-0 text-decoration-none" (click)="excluir(acao, $event)" title="Excluir">
-                          <i class="fas fa-trash fs-5"></i>
+                        <button class="btn btn-sm btn-outline-danger" (click)="excluir(acao, $event)" title="Excluir">
+                          <i class="fas fa-trash"></i>
                         </button>
                       </td>
                     }
@@ -61,49 +62,52 @@
             </table>
           </div>
         </div>
-      }
-    </div>
+      </div>
+    }
+  </section>
 
-    <div class="mb-5 pb-3">
-      <h4 class="text-uppercase text-muted fs-6 mb-3 fw-semibold tracking-wide">Ações Concluídas</h4>
+  <section class="mb-4">
+    <h2 class="h6 text-uppercase text-muted fw-semibold mb-3">Ações concluídas</h2>
 
-      @if (acoesConcluidas().length === 0) {
-        <div class="alert alert-secondary text-center py-3">
+    @if (acoesConcluidas().length === 0) {
+      <div class="card border-0 shadow-sm">
+        <div class="card-body text-center text-muted py-4">
+          <i class="fas fa-circle-check fa-lg mb-2 d-block opacity-50"></i>
           Nenhuma ação concluída ainda.
         </div>
-      } @else {
-        <div class="card border-0 shadow-sm">
-          <div class="card-body p-0">
-            <table class="table table-hover align-middle mb-0 text-muted">
+      </div>
+    } @else {
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
               <thead class="table-light">
                 <tr>
-                  <th class="py-3 ps-3">Título</th>
-                  <th class="py-3">Descrição</th>
-                  <th class="py-3">Tipo</th>
-                  <th class="py-3">Prazo</th>
+                  <th class="ps-3">Título</th>
+                  <th>Descrição</th>
+                  <th>Tipo</th>
+                  <th>Prazo</th>
                   @if (auth.isAdmin) {
-                    <th class="py-3 text-end pe-3">Ações</th>
+                    <th class="text-end pe-3">Ações</th>
                   }
                 </tr>
               </thead>
               <tbody>
                 @for (acao of acoesConcluidas(); track acao.id) {
-                  <tr (dblclick)="verReuniao(acao.reuniaoId)" style="cursor: pointer;" class="opacity-75" title="Clique duas vezes para ver a reunião">
-                    <td class="text-decoration-line-through ps-3">{{ acao.titulo }}</td>
-                    <td class="text-decoration-line-through">{{ acao.descricao }}</td>
+                  <tr class="cursor-pointer opacity-75" (dblclick)="verReuniao(acao.reuniaoId)" title="Clique duas vezes para ver a reunião">
+                    <td class="ps-3 text-decoration-line-through">{{ acao.titulo }}</td>
+                    <td class="text-secondary text-decoration-line-through">{{ acao.descricao }}</td>
                     <td>
-                      <span class="badge rounded-pill bg-light text-dark border px-2 py-1">{{ acao.tipo || '—' }}</span>
+                      <span class="badge rounded-pill bg-light text-dark border">{{ acao.tipo || '—' }}</span>
                     </td>
-                    <td>
-                      {{ acao.prazo ? (acao.prazo | date: 'dd/MM/yyyy') : '—' }}
-                    </td>
+                    <td class="text-nowrap">{{ acao.prazo ? (acao.prazo | date: 'dd/MM/yyyy') : '—' }}</td>
                     @if (auth.isAdmin) {
-                      <td class="text-end pe-3 text-decoration-none" (click)="$event.stopPropagation()">
-                        <button class="btn btn-sm btn-link text-secondary p-0 text-decoration-none me-2" (click)="mudarStatus(acao)" title="Reverter">
-                          <i class="fas fa-undo-alt fs-5"></i>
+                      <td class="text-end text-nowrap pe-3" (click)="$event.stopPropagation()">
+                        <button class="btn btn-sm btn-outline-secondary me-1" (click)="mudarStatus(acao)" title="Reverter">
+                          <i class="fas fa-undo-alt"></i>
                         </button>
-                        <button class="btn btn-sm btn-link text-danger p-0 text-decoration-none" (click)="excluir(acao, $event)" title="Excluir">
-                          <i class="fas fa-trash fs-5"></i>
+                        <button class="btn btn-sm btn-outline-danger" (click)="excluir(acao, $event)" title="Excluir">
+                          <i class="fas fa-trash"></i>
                         </button>
                       </td>
                     }
@@ -113,18 +117,18 @@
             </table>
           </div>
         </div>
-      }
-    </div>
+      </div>
+    }
+  </section>
 
-    <div class="d-flex justify-content-between align-items-center mt-5 pt-3">
-      <button class="btn btn-outline-secondary px-4" (click)="paginaAnterior()" [disabled]="paginaAtual() === 1">
-        <i class="fas fa-chevron-left me-1"></i> Anterior
-      </button>
-      <span class="text-muted fw-medium">Página {{ paginaAtual() }} de {{ totalPaginas() }}</span>
-      <button class="btn btn-outline-secondary px-4" (click)="proximaPagina()" [disabled]="paginaAtual() === totalPaginas()">
-        Próxima <i class="fas fa-chevron-right ms-1"></i>
-      </button>
-    </div>
+  <nav class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-4" aria-label="Paginação">
+    <button class="btn btn-sm btn-outline-secondary" (click)="paginaAnterior()" [disabled]="paginaAtual() === 1">
+      <i class="fas fa-chevron-left me-1"></i> Anterior
+    </button>
+    <span class="text-muted small">Página {{ paginaAtual() }} de {{ totalPaginas() }}</span>
+    <button class="btn btn-sm btn-outline-secondary" (click)="proximaPagina()" [disabled]="paginaAtual() === totalPaginas()">
+      Próxima <i class="fas fa-chevron-right ms-1"></i>
+    </button>
+  </nav>
 
-  }
-</div>
+}
