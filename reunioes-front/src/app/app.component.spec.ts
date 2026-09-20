@@ -20,10 +20,10 @@ describe('AppComponent', () => {
     expect(app.title).toEqual('reunioes-front');
   });
 
-  it('should render title', () => {
+  it('monta o router-outlet onde as rotas sao desenhadas', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, reunioes-front');
+    expect(compiled.querySelector('router-outlet')).toBeTruthy();
   });
 });

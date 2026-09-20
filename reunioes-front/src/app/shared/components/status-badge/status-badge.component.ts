@@ -38,7 +38,7 @@ export class StatusBadgeComponent {
         return `${classeBase} bg-success`;
         
       case 'PENDENTE':
-        return `${classeBase} bg-danger `; 
+        return `${classeBase} bg-warning text-dark`; 
         
       case 'EM_ANDAMENTO':
       case 'TRANSCREVENDO':
