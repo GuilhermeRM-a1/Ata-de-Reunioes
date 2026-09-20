@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, ResourceStatus, inject} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Colaborador } from '../models';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 
 @Injectable({
@@ -21,8 +21,14 @@ export class ColaboradorService {
     return this.http.post<string>(this.API, colaborador);
   }
 
-  listar(): Observable<Colaborador[]>{
-    return this.http.get<Colaborador[]>(this.API);
+  /**
+   * O endpoint e paginado e responde { content: [...] }, mas ja respondeu
+   * array puro. Aceita as duas formas e entrega sempre uma lista.
+   */
+  listar(): Observable<Colaborador[]> {
+    return this.http
+      .get<Colaborador[] | { content: Colaborador[] }>(this.API)
+      .pipe(map(resposta => Array.isArray(resposta) ? resposta : (resposta?.content ?? [])));
   }
 
   buscarPorId(id: number): Observable<Colaborador>{
