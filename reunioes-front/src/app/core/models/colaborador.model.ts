@@ -10,4 +10,6 @@ export interface Colaborador {
   nome: string;
   monitorarReunioes: boolean;
   papel: Papel;
+  /** So vai no cadastro. O back exige no POST e nunca devolve de volta. */
+  senha?: string;
 }

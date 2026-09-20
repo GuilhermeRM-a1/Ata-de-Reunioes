@@ -32,6 +32,7 @@ export class ColaboradoresComponent implements OnInit {
 
   inputNome = '';
   inputEmail = '';
+  inputSenha = '';
   inputMonitorarReunioes = false;
   inputPapel: Papel = 'USUARIO';
 
@@ -90,7 +91,8 @@ export class ColaboradoresComponent implements OnInit {
     };
 
     if (this.edicaoId === null) {
-      this.criar(dados);
+      // A senha so existe no cadastro: o back a exige no POST e nunca a devolve.
+      this.criar({ ...dados, senha: this.inputSenha });
       return;
     }
 
@@ -135,21 +137,26 @@ export class ColaboradoresComponent implements OnInit {
         this.limparFormulario();
         this.listar();
       },
-      error: () => {
-        this.alerta.erro('Erro ao cadastrar', 'Verifique os dados e tente novamente.');
+      error: (erro) => {
+        this.alerta.erro('Erro ao cadastrar', this.mensagemDoErro(erro));
       },
     });
   }
 
+  /**
+   * Usa PATCH e nao PUT. O PUT cai no ColaboradorRequest, que exige senha —
+   * e editar o nome de alguem nao deveria obrigar a redefinir a senha dele.
+   * No PATCH, campo ausente significa "nao mexer".
+   */
   private atualizar(id: number, dados: Colaborador): void {
-    this.colaboradorService.atualizar(id, dados).subscribe({
+    this.colaboradorService.atualizarParcial(id, dados).subscribe({
       next: () => {
         this.alerta.sucesso('Colaborador atualizado');
         this.limparFormulario();
         this.listar();
       },
-      error: () => {
-        this.alerta.erro('Erro ao atualizar', 'Verifique os dados e tente novamente.');
+      error: (erro) => {
+        this.alerta.erro('Erro ao atualizar', this.mensagemDoErro(erro));
       },
     });
   }
@@ -165,13 +172,33 @@ export class ColaboradoresComponent implements OnInit {
       return false;
     }
 
+    if (this.edicaoId === null && this.inputSenha.trim() === '') {
+      this.alerta.erro('Senha obrigatória', 'Informe uma senha para o novo colaborador.');
+      return false;
+    }
+
     return true;
+  }
+
+  /**
+   * O back responde no formato ProblemDetail e lista o que reprovou em
+   * "campos". Mostrar isso evita o "verifique os dados" que nao diz nada.
+   */
+  private mensagemDoErro(erro: any): string {
+    const campos = erro?.error?.campos;
+
+    if (Array.isArray(campos) && campos.length > 0) {
+      return campos.map((c: any) => c.mensagem).join(' ');
+    }
+
+    return erro?.error?.detail ?? 'Verifique os dados e tente novamente.';
   }
 
   private limparFormulario(): void {
     this.edicaoId = null;
     this.inputNome = '';
     this.inputEmail = '';
+    this.inputSenha = '';
     this.inputMonitorarReunioes = false;
     this.inputPapel = 'USUARIO';
   }

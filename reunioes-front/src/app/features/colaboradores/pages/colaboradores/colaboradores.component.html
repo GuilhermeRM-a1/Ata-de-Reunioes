@@ -35,6 +35,20 @@
             />
           </div>
 
+          @if (edicaoId === null) {
+            <div class="col-md-3">
+              <label for="senha" class="form-label">Senha</label>
+              <input
+                type="password"
+                id="senha"
+                name="senha"
+                class="form-control"
+                [(ngModel)]="inputSenha"
+                required
+              />
+            </div>
+          }
+
           <div class="col-md-2">
             <label for="papel" class="form-label">Papel</label>
             <select
