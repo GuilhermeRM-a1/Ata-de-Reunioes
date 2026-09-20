@@ -1,161 +1,173 @@
-<div class="container-fluid py-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Colaboradores</h2>
-  </div>
+<header class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h1 class="h3 mb-0">Colaboradores</h1>
+</header>
 
-  <div class="card mb-4">
-    <div class="card-body">
-      <h5 class="card-title mb-3">
-        {{ edicaoId === null ? 'Novo colaborador' : 'Editar colaborador' }}
-      </h5>
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body">
+    <h2 class="h6 text-uppercase text-muted fw-semibold mb-3">
+      {{ edicaoId === null ? 'Novo colaborador' : 'Editar colaborador' }}
+    </h2>
 
-      <form (ngSubmit)="salvar()">
-        <div class="row g-3">
-          <div class="col-md-4">
-            <label for="nome" class="form-label">Nome</label>
-            <input
-              type="text"
-              id="nome"
-              name="nome"
-              class="form-control"
-              [(ngModel)]="inputNome"
-              required
-            />
-          </div>
-
-          <div class="col-md-4">
-            <label for="email" class="form-label">E-mail</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              class="form-control"
-              [(ngModel)]="inputEmail"
-              required
-            />
-          </div>
-
-          @if (edicaoId === null) {
-            <div class="col-md-3">
-              <label for="senha" class="form-label">Senha</label>
-              <input
-                type="password"
-                id="senha"
-                name="senha"
-                class="form-control"
-                [(ngModel)]="inputSenha"
-                required
-              />
-            </div>
-          }
-
-          <div class="col-md-2">
-            <label for="papel" class="form-label">Papel</label>
-            <select
-              id="papel"
-              name="papel"
-              class="form-select"
-              [(ngModel)]="inputPapel"
-              required
-            >
-              @for (papel of papeis; track papel) {
-                <option [value]="papel">{{ rotuloPapel(papel) }}</option>
-              }
-            </select>
-          </div>
-
-          <div class="col-md-2 d-flex align-items-end">
-            <div class="form-check mb-2">
-              <input
-                type="checkbox"
-                id="monitorar"
-                name="monitorar"
-                class="form-check-input"
-                [(ngModel)]="inputMonitorarReunioes"
-              />
-              <label class="form-check-label" for="monitorar">
-                Monitorar reuniões
-              </label>
-            </div>
-          </div>
+    <form (ngSubmit)="salvar()">
+      <div class="row g-3">
+        <div class="col-12 col-md-6 col-lg-4">
+          <label for="nome" class="form-label">Nome</label>
+          <input
+            type="text"
+            id="nome"
+            name="nome"
+            class="form-control"
+            [(ngModel)]="inputNome"
+            required
+          />
         </div>
 
-        <div class="mt-3 d-flex gap-2">
-          <button type="submit" class="btn btn-primary">
-            {{ edicaoId === null ? 'Cadastrar' : 'Salvar alterações' }}
+        <div class="col-12 col-md-6 col-lg-4">
+          <label for="email" class="form-label">E-mail</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            class="form-control"
+            [(ngModel)]="inputEmail"
+            required
+          />
+        </div>
+
+        @if (edicaoId === null) {
+          <div class="col-12 col-md-6 col-lg-4">
+            <label for="senha" class="form-label">Senha</label>
+            <input
+              type="password"
+              id="senha"
+              name="senha"
+              class="form-control"
+              [(ngModel)]="inputSenha"
+              required
+            />
+          </div>
+        }
+
+        <div class="col-12 col-md-6 col-lg-4">
+          <label for="papel" class="form-label">Papel</label>
+          <select
+            id="papel"
+            name="papel"
+            class="form-select"
+            [(ngModel)]="inputPapel"
+            required
+          >
+            @for (papel of papeis; track papel) {
+              <option [value]="papel">{{ rotuloPapel(papel) }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-4 d-flex align-items-end">
+          <div class="form-check mb-2">
+            <input
+              type="checkbox"
+              id="monitorar"
+              name="monitorar"
+              class="form-check-input"
+              [(ngModel)]="inputMonitorarReunioes"
+            />
+            <label class="form-check-label" for="monitorar">
+              Monitorar reuniões
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 d-flex flex-wrap gap-2">
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-floppy-disk me-1"></i>
+          {{ edicaoId === null ? 'Cadastrar' : 'Salvar alterações' }}
+        </button>
+
+        @if (edicaoId !== null) {
+          <button type="button" class="btn btn-outline-secondary" (click)="cancelarEdicao()">
+            Cancelar
           </button>
-
-          @if (edicaoId !== null) {
-            <button type="button" class="btn btn-outline-secondary" (click)="cancelarEdicao()">
-              Cancelar
-            </button>
-          }
-        </div>
-      </form>
-    </div>
+        }
+      </div>
+    </form>
   </div>
+</div>
+
+<section class="mb-4">
+  <h2 class="h6 text-uppercase text-muted fw-semibold mb-3">Cadastrados</h2>
 
   @if (carregando()) {
     <div class="text-center py-5">
       <div class="spinner-border text-primary" role="status">
         <span class="visually-hidden">Carregando...</span>
       </div>
-      <p class="text-muted mt-2">Carregando colaboradores...</p>
+      <p class="text-muted mt-3 mb-0">Carregando colaboradores...</p>
     </div>
   } @else if (colaboradores().length === 0) {
-    <div class="alert alert-info text-center py-3">
-      Nenhum colaborador cadastrado.
+    <div class="card border-0 shadow-sm">
+      <div class="card-body text-center text-muted py-4">
+        <i class="fas fa-users fa-lg mb-2 d-block opacity-50"></i>
+        Nenhum colaborador cadastrado.
+      </div>
     </div>
   } @else {
-    <table class="table table-hover align-middle">
-      <thead>
-        <tr>
-          <th>Nome</th>
-          <th>E-mail</th>
-          <th>Papel</th>
-          <th>Monitorar reuniões</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (colaborador of colaboradores(); track colaborador.email) {
-          <tr>
-            <td>{{ colaborador.nome }}</td>
-            <td>{{ colaborador.email }}</td>
-            <td>
-              <span class="badge rounded-pill bg-light text-dark border">
-                {{ rotuloPapel(colaborador.papel) }}
-              </span>
-            </td>
-            <td>
-              @if (colaborador.monitorarReunioes) {
-                <span class="badge rounded-pill bg-success">Sim</span>
-              } @else {
-                <span class="badge rounded-pill bg-secondary">Não</span>
-              }
-            </td>
-            <td class="text-end">
-              <button
-                type="button"
-                class="btn btn-sm btn-outline-secondary me-1"
-                (click)="editar(colaborador)"
-                title="Editar"
-              >
-                Editar
-              </button>
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th class="ps-3">Nome</th>
+                <th>E-mail</th>
+                <th>Papel</th>
+                <th>Monitorar reuniões</th>
+                <th class="text-end pe-3">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (colaborador of colaboradores(); track colaborador.email) {
+                <tr>
+                  <td class="ps-3 fw-semibold">{{ colaborador.nome }}</td>
+                  <td class="text-secondary">{{ colaborador.email }}</td>
+                  <td>
+                    <span class="badge rounded-pill bg-light text-dark border">
+                      {{ rotuloPapel(colaborador.papel) }}
+                    </span>
+                  </td>
+                  <td>
+                    @if (colaborador.monitorarReunioes) {
+                      <span class="badge rounded-pill bg-success">Sim</span>
+                    } @else {
+                      <span class="badge rounded-pill bg-secondary">Não</span>
+                    }
+                  </td>
+                  <td class="text-end text-nowrap pe-3">
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-secondary me-1"
+                      (click)="editar(colaborador)"
+                      title="Editar"
+                    >
+                      <i class="fas fa-pen"></i>
+                    </button>
 
-              <button
-                type="button"
-                class="btn btn-sm btn-outline-danger"
-                (click)="remover(colaborador)"
-                title="Excluir"
-              >
-                Excluir
-              </button>
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-danger"
+                      (click)="remover(colaborador)"
+                      title="Excluir"
+                    >
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   }
-</div>
+</section>

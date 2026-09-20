@@ -4,13 +4,7 @@
   overflow-x: hidden;
 }
 
-.container {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px;
-}
-
+// Sem utilitario equivalente: o Bootstrap nao marca o link ativo sozinho.
 .nav-link.active {
-  font-weight: bold;
+  font-weight: 600;
 }
