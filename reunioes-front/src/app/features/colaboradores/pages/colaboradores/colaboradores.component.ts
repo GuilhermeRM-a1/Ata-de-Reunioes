@@ -1,4 +1,4 @@
-import { Component, inject, input, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { ColaboradorService } from '../../../../core/services/colaborador.service';
 import { Colaborador } from '../../../../core/models';
 import { CommonModule } from '@angular/common';

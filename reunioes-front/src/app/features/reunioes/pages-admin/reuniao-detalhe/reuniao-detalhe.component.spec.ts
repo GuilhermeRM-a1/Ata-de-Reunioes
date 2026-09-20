@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { ReuniaoDetalheComponent } from './reuniao-detalhe.component';
-import { ReuniaoStoreService } from '../../../../core/services/reuniao-store.service';
+import { ReuniaoStoreService } from '../../../../core/services/reuniao.service';
 
 describe('ReuniaoDetalheComponent', () => {
   let component: ReuniaoDetalheComponent;
