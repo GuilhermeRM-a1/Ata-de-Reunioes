@@ -22,7 +22,8 @@ create table reuniao (
     titulo      varchar(255),
     data        varchar(255),
     resumo      text,
-    status      varchar(255),
+    status_transcricao      varchar(255),
+    status_reuniao      varchar(255),
     total_acoes integer
 );
 

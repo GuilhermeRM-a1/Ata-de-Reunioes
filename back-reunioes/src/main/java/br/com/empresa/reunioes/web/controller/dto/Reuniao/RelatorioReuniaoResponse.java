@@ -1,5 +1,6 @@
 package br.com.empresa.reunioes.web.controller.dto.Reuniao;
 
+import br.com.empresa.reunioes.domain.enums.StatusReuniao;
 import br.com.empresa.reunioes.domain.enums.StatusTranscricao;
 import br.com.empresa.reunioes.web.controller.dto.Acao.AcaoDTO;
 import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorDTO;
@@ -9,7 +10,8 @@ import java.util.List;
 public record RelatorioReuniaoResponse(String titulo,
                                        String data,
                                        String resumo,
-                                       StatusTranscricao status,
+                                       StatusTranscricao statusTranscricao,
+                                       StatusReuniao statusReuniao,
                                        List<ColaboradorDTO> participantes,
                                        List<String> areas,
                                        List<String> pontosChaves,
@@ -19,7 +21,8 @@ public record RelatorioReuniaoResponse(String titulo,
     public static RelatorioReuniaoResponse de(String titulo,
                                               String data,
                                               String resumo,
-                                              StatusTranscricao status,
+                                              StatusTranscricao statusTranscricao,
+                                              StatusReuniao statusReuniao,
                                               List<ColaboradorDTO> participantes,
                                               List<String> areas,
                                               List<String> pontosChaves,
@@ -30,7 +33,8 @@ public record RelatorioReuniaoResponse(String titulo,
                 titulo,
                 data,
                 resumo,
-                status,
+                statusTranscricao,
+                statusReuniao,
                 participantes,
                 areas,
                 pontosChaves,
