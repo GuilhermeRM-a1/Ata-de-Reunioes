@@ -1,4 +1,4 @@
-export type StatusTranscrição =
+export type StatusTranscricao =
   | 'RECEBIDA'
   | 'TRANSCREVENDO'
   | 'ANALISANDO'
@@ -16,7 +16,7 @@ export const STATUS_REUNIAO: StatusReuniao[] = [
   'PENDENTE',
 ];
 
-export const STATUS_TRANSCRICAO: StatusTranscrição[] = [
+export const STATUS_TRANSCRICAO: StatusTranscricao[] = [
   'RECEBIDA',
   'TRANSCREVENDO',
   'ANALISANDO',
@@ -25,7 +25,7 @@ export const STATUS_TRANSCRICAO: StatusTranscrição[] = [
 ];
 
 /** Rotulo legivel para exibicao — nunca mostrar a constante crua na tela. */
-export const STATUS_TRANSCRICAO_LABEL: Record<StatusTranscrição, string> = {
+export const STATUS_TRANSCRICAO_LABEL: Record<StatusTranscricao, string> = {
   RECEBIDA: 'Recebida',
   TRANSCREVENDO: 'Transcrevendo',
   ANALISANDO: 'Analisando',
@@ -54,7 +54,7 @@ export interface Reuniao {
   dataProcessamento: string;
   resumoExecutivo: string;
   statusReuniao: StatusReuniao;
-  statusTranscricao: StatusTranscrição;
+  statusTranscricao: StatusTranscricao;
   participantes: string[];
   areas: string[];
   totalAcoes: number;
