@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { StatusReuniao, STATUS_REUNIAO_LABEL, STATUS_TRANSCRICAO_LABEL, StatusTranscrição } from '../../../core/models';
+import { StatusReuniao, STATUS_REUNIAO_LABEL, STATUS_TRANSCRICAO_LABEL, StatusTranscricao } from '../../../core/models';
 
 @Component({
   selector: 'app-status-badge',
@@ -10,7 +10,7 @@ import { StatusReuniao, STATUS_REUNIAO_LABEL, STATUS_TRANSCRICAO_LABEL, StatusTr
   styleUrl: './status-badge.component.scss'
 })
 export class StatusBadgeComponent {
-  @Input({ required: true }) status!: StatusReuniao | StatusTranscrição;
+  @Input({ required: true }) status!: StatusReuniao | StatusTranscricao;
 
   @Input({ required: true }) tipo!: 'reuniao' | 'transcricao';
 
@@ -22,7 +22,7 @@ export class StatusBadgeComponent {
     if (this.tipo === 'reuniao') {
       return STATUS_REUNIAO_LABEL[this.status as StatusReuniao];
     }
-    return STATUS_TRANSCRICAO_LABEL[this.status as StatusTranscrição];
+    return STATUS_TRANSCRICAO_LABEL[this.status as StatusTranscricao];
   }
 
   get classeCss(): string {

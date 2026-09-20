@@ -49,8 +49,9 @@ export class ReuniaoFormComponent implements OnInit {
             this.form.patchValue({
               tituloReuniao: reuniao.titulo,
               dataProcessamento: reuniao.data ? reuniao.data.split('T')[0] : '',
-              resumoExecutivo: reuniao.reusmo,
-              status: reuniao.status,
+              resumoExecutivo: reuniao.resumoExecutivo,
+              statusTranscricao: reuniao.statusTranscricao,
+              statusReuniao: reuniao.statusReuniao,
               areas: Array.isArray(reuniao.areas) ? reuniao.areas.join(', ') : reuniao.areas,
               participantes: Array.isArray(reuniao.participantes) ? reuniao.participantes.join(', ') : reuniao.participantes,
               pontosChave: Array.isArray(reuniao.pontosChaves) ? reuniao.pontosChaves.join('\n') : reuniao.pontosChaves
@@ -106,6 +107,8 @@ export class ReuniaoFormComponent implements OnInit {
 
     const dados = {
       ...bruto,
+      statusTranscricao: bruto.statusTranscricao,
+      statusReuniao: bruto.statusReuniao || 'PENDENTE',
       areas: this.textoParaLista(bruto.areas),
       participantes: this.textoParaLista(bruto.participantes),
       acoes: bruto.acoes.map((a: any) => ({
