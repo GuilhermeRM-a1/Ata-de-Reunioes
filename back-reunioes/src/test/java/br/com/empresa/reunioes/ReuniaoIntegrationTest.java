@@ -74,7 +74,8 @@ class ReuniaoIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.titulo").value("Retrospectiva da sprint"))
                 .andExpect(jsonPath("$.data").value("2026-09-01"))
-                .andExpect(jsonPath("$.status").value("CONCLUIDA"))
+                .andExpect(jsonPath("$.statusTranscricao").value("CONCLUIDA"))
+                .andExpect(jsonPath("$.statusReuniao").value("FINALIZADA"))
                 .andExpect(jsonPath("$.areas[0]").value("Engenharia"));
     }
 
@@ -86,7 +87,7 @@ class ReuniaoIntegrationTest {
 
         // Titulo vazio: reprovado por @NotBlank e por @Size(min = 5).
         String corpo = """
-                {"titulo": "", "data": "2026-09-01", "status": "CONCLUIDA"}
+                {"titulo": "", "data": "2026-09-01", "statusTranscricao": "CONCLUIDA", "statusReuniao": "FINALIZADA"}
                 """;
 
         mockMvc.perform(post("/api/reunioes")
@@ -132,7 +133,8 @@ class ReuniaoIntegrationTest {
         String corpo = """
                 {"titulo": "Reuniao com acoes",
                  "data": "2026-09-01",
-                 "status": "CONCLUIDA",
+                 "statusTranscricao": "CONCLUIDA",
+                 "statusReuniao": "FINALIZADA",
                  "areas": ["Engenharia"],
                  "pontosChaves": ["Prazo apertado"],
                  "acoes": [%d, %d]}
@@ -163,7 +165,8 @@ class ReuniaoIntegrationTest {
         return """
                 {"titulo": "%s",
                  "data": "2026-09-01",
-                 "status": "CONCLUIDA",
+                 "statusTranscricao": "CONCLUIDA",
+                 "statusReuniao": "FINALIZADA",
                  "areas": ["Engenharia"],
                  "pontosChaves": ["Definir o escopo"]}
                 """.formatted(titulo);
