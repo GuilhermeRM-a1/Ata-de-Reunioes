@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -146,8 +147,11 @@ public class ReuniaoService {
 
     private List<Colaborador> buscarColaboradores(List<Long> ids) {
 
+        // ArrayList e nao List.of(): a colecao vai para uma entidade gerenciada
+        // e o Hibernate precisa poder altera-la. Lista imutavel aqui derruba o
+        // save com UnsupportedOperationException.
         if (ids == null || ids.isEmpty()) {
-            return List.of();
+            return new ArrayList<>();
         }
 
         List<Colaborador> colaboradores = colaboradorRepository.findAllById(ids);
@@ -162,8 +166,9 @@ public class ReuniaoService {
 
     private List<Acao> buscarAcoes(List<Long> ids) {
 
+        // Mesmo motivo de buscarColaboradores: a lista precisa ser mutavel.
         if (ids == null || ids.isEmpty()) {
-            return List.of();
+            return new ArrayList<>();
         }
 
         List<Acao> acoes = acaoRepository.findAllById(ids);

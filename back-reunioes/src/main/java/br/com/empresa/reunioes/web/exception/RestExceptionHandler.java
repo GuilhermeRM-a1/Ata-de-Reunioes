@@ -10,7 +10,10 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.net.URI;
 import java.time.OffsetDateTime;
@@ -86,6 +89,36 @@ public class RestExceptionHandler {
         return montar(HttpStatus.BAD_REQUEST, "Parâmetro inválido",
                 "O parâmetro " + e.getName() + " recebeu um valor de tipo incompatível.",
                 "parametro-invalido");
+    }
+
+    /** Rota que nao existe. Sem isto cai na rede de seguranca e vira 500. */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ProblemDetail tratarRotaInexistente(NoResourceFoundException e) {
+
+        return montar(HttpStatus.NOT_FOUND, "Recurso não encontrado",
+                "Não existe nenhum recurso nesta rota. Confira o caminho e o método.",
+                "rota-inexistente");
+    }
+
+    /** Rota certa, verbo errado — por exemplo DELETE na coleção. */
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ProblemDetail tratarMetodoNaoSuportado(HttpRequestMethodNotSupportedException e) {
+
+        String aceitos = e.getSupportedHttpMethods() == null ? ""
+                : " Métodos aceitos nesta rota: " + e.getSupportedHttpMethods() + ".";
+
+        return montar(HttpStatus.METHOD_NOT_ALLOWED, "Método não permitido",
+                "O método " + e.getMethod() + " não é aceito neste recurso." + aceitos,
+                "metodo-nao-permitido");
+    }
+
+    /** Query param obrigatorio ausente, como reuniaoId em /acoes/reuniao. */
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ProblemDetail tratarParametroAusente(MissingServletRequestParameterException e) {
+
+        return montar(HttpStatus.BAD_REQUEST, "Parâmetro obrigatório ausente",
+                "O parâmetro " + e.getParameterName() + " é obrigatório nesta requisição.",
+                "parametro-ausente");
     }
 
     /**
