@@ -25,6 +25,7 @@ public class ReuniaoMapper {
         reuniao.setStatusReuniao(request.statusReuniao());
         reuniao.setAreas(request.areas());
         reuniao.setPontosChaves(request.pontosChaves());
+        reuniao.setResumo(request.resumo());
 
         return reuniao;
     }
@@ -69,6 +70,7 @@ public class ReuniaoMapper {
         reuniao.setStatusReuniao(request.statusReuniao());
         reuniao.setAreas(request.areas());
         reuniao.setPontosChaves(request.pontosChaves());
+        reuniao.setResumo(request.resumo());
 
     }
 
@@ -86,5 +88,7 @@ public class ReuniaoMapper {
             reuniao.setAreas(request.areas());
         if (request.pontosChaves() != null)
             reuniao.setPontosChaves(request.pontosChaves());
+        if (request.resumo() != null)
+            reuniao.setResumo(request.resumo());
     }
 }
