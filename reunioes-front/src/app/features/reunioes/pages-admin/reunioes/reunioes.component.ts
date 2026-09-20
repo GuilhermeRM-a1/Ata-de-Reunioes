@@ -6,8 +6,6 @@ import { StatusBadgeComponent } from '../../../../shared/components/status-badge
 import { ReuniaoApiDTO } from '../../../../core/models/api/reuniao-api.model';
 import { AlertaService } from '../../../../core/services/alerta.service';
 
-type StatusReuniaoAgenda = 'PENDENTE' | 'EM_ANDAMENTO' | 'FINALIZADA';
-
 @Component({
   selector: 'app-reunioes',
   standalone: true,
@@ -56,34 +54,17 @@ export class ReunioesComponent implements OnInit {
     });
   }
 
-  /**
-   * Simulacao: o backend ainda nao tem o campo statusReuniao (Pendente/Em
-   * andamento/Finalizada) separado do status de transcricao. Ate isso
-   * existir na API, derivamos comparando a data da reuniao com hoje.
-   */
-  private obterStatusAgenda(reuniao: ReuniaoApiDTO): StatusReuniaoAgenda {
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
-
-    const dataReuniao = new Date(reuniao.data);
-    dataReuniao.setHours(0, 0, 0, 0);
-
-    if (dataReuniao.getTime() > hoje.getTime()) return 'PENDENTE';
-    if (dataReuniao.getTime() === hoje.getTime()) return 'EM_ANDAMENTO';
-    return 'FINALIZADA';
-  }
-
   atualizarPagina(): void {
     const pendentes = this.todasReunioes
-      .filter(r => this.obterStatusAgenda(r) === 'PENDENTE')
+      .filter(r => r.statusReuniao === 'PENDENTE')
       .sort((a, b) => a.data.localeCompare(b.data));
 
     const emAndamento = this.todasReunioes
-      .filter(r => this.obterStatusAgenda(r) === 'EM_ANDAMENTO')
+      .filter(r => r.statusReuniao === 'EM_ANDAMENTO')
       .sort((a, b) => a.data.localeCompare(b.data));
 
     const finalizadas = this.todasReunioes
-      .filter(r => this.obterStatusAgenda(r) === 'FINALIZADA')
+      .filter(r => r.statusReuniao === 'FINALIZADA')
       .sort((a, b) => b.data.localeCompare(a.data));
 
     const inicio = (this.paginaAtual - 1) * this.limite;
