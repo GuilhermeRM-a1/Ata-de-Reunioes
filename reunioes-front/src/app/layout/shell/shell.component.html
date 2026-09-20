@@ -1,0 +1,37 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container-fluid">
+    <a class="navbar-brand" routerLink="/reunioes">
+      Ata de Reunião
+    </a>
+
+    <div class="navbar-nav me-auto">
+      <a class="nav-link" routerLink="/reunioes" routerLinkActive="active">
+        Reuniões
+      </a>
+
+      <a class="nav-link" routerLink="/acoes" routerLinkActive="active">
+        Ações
+      </a>
+
+      @if (auth.isAdmin) {
+        <a class="nav-link" routerLink="/colaboradores" routerLinkActive="active">
+          Colaboradores
+        </a>
+      }
+    </div>
+
+    <div class="d-flex align-items-center gap-3">
+      @if (auth.papel) {
+        <span class="text-muted small">{{ auth.papel }}</span>
+      }
+
+      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="sair()">
+        Sair
+      </button>
+    </div>
+  </div>
+</nav>
+
+<main class="container">
+  <router-outlet></router-outlet>
+</main>

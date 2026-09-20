@@ -2,20 +2,20 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 
-import { ColaboradoresComponent } from './colaboradores.component';
+import { AcoesComponent } from './acoes.component';
 
-describe('ColaboradoresComponent', () => {
-  let component: ColaboradoresComponent;
-  let fixture: ComponentFixture<ColaboradoresComponent>;
+describe('AcoesComponent', () => {
+  let component: AcoesComponent;
+  let fixture: ComponentFixture<AcoesComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ColaboradoresComponent],
+      imports: [AcoesComponent],
       providers: [provideHttpClient(), provideRouter([])]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ColaboradoresComponent);
+    fixture = TestBed.createComponent(AcoesComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
