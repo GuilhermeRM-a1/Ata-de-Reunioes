@@ -15,11 +15,12 @@ export class AcaoService {
     return this.http.get<Acao[]>(this.apiUrl);
   }
 
-  atualizarParcial(id: number, dados: any): Observable<any> {
+  /** O id vem do back como String (AcaoDTO usa String.valueOf). */
+  atualizarParcial(id: string, dados: any): Observable<any> {
     return this.http.patch(`${this.apiUrl}/${id}`, dados);
   }
 
-  remover(reuniaoId: number, id: number): Observable<void> {
+  remover(reuniaoId: number, id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${reuniaoId}/${id}`);
   }
 }

@@ -5,23 +5,16 @@ export type StatusTranscricao =
   | 'CONCLUIDA'
   | 'ERRO';
 
-  export type StatusReuniao =
+export type StatusReuniao =
   | 'EM_ANDAMENTO'
   | 'FINALIZADA'
-  | 'PENDENTE'
+  | 'PENDENTE';
 
+/** Usado pelo teste do status-badge para cobrir todos os status. */
 export const STATUS_REUNIAO: StatusReuniao[] = [
   'EM_ANDAMENTO',
   'FINALIZADA',
   'PENDENTE',
-];
-
-export const STATUS_TRANSCRICAO: StatusTranscricao[] = [
-  'RECEBIDA',
-  'TRANSCREVENDO',
-  'ANALISANDO',
-  'CONCLUIDA',
-  'ERRO'
 ];
 
 /** Rotulo legivel para exibicao — nunca mostrar a constante crua na tela. */
@@ -39,15 +32,6 @@ export const STATUS_REUNIAO_LABEL: Record<StatusReuniao, string> = {
   FINALIZADA: 'Finalizada',
 };
 
-export type TipoAcao = 'ACAO' | 'TAREFA';
-
-export interface Acao {
-  descricao: string;
-  tipo: TipoAcao;
-  prazo: string | null;
-  responsavel: string | null;
-}
-
 export interface Reuniao {
   id: number;
   tituloReuniao: string;
@@ -58,10 +42,4 @@ export interface Reuniao {
   participantes: string[];
   areas: string[];
   totalAcoes: number;
-}
-
-export interface ReuniaoDetalhe extends Reuniao {
-  transcricaoPura: string;
-  pontosChave: string;
-  acoes: Acao[];
 }

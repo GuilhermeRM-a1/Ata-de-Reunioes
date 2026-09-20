@@ -1,4 +1,5 @@
 import { StatusReuniao, StatusTranscricao } from '../reuniao.model';
+import { Acao } from '../acao.model';
 
 export interface ReuniaoApiDTO {
   id: number;
@@ -23,17 +24,4 @@ export interface ReuniaoApiRequest {
   pontosChaves: string[];
   participantes: number[];
   acoes: number[];
-}
-
-export type TipoAcao = 'ACAO' | 'TAREFA';
-
-export interface Acao {
-  id: number;
-  descricao: string;
-  tipo: String;
-  titulo: string;
-  concluida: boolean; 
-  prazo: string | null;
-  responsavel: string | null;
-  reuniaoId: number;
 }
