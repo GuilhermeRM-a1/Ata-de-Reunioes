@@ -1,174 +1,178 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { ColaboradorService } from '../../../../core/services/colaborador.service';
-import { Colaborador } from '../../../../core/models';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+
+import { ColaboradorService } from '../../../../core/services/colaborador.service';
+import { AlertaService } from '../../../../core/services/alerta.service';
+import { AuthService, Papel } from '../../../../core/services/auth.service';
+import { Colaborador } from '../../../../core/models';
 
 @Component({
   selector: 'app-colaboradores',
+  standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './colaboradores.component.html',
   styleUrl: './colaboradores.component.scss',
 })
 export class ColaboradoresComponent implements OnInit {
 
+  private readonly colaboradorService = inject(ColaboradorService);
+  private readonly alerta = inject(AlertaService);
+  private readonly router = inject(Router);
 
-  private colaboradorService = inject(ColaboradorService);
+  /** Publico: o template esconde a tela inteira para quem nao e admin. */
+  protected readonly auth = inject(AuthService);
 
-  inputId: number | null = null;
+  readonly colaboradores = signal<Colaborador[]>([]);
+  readonly carregando = signal(false);
 
-  inputEmail: string = '';
-  inputNome: string = '';
-  inputMonitorarReunioes: boolean = false;
-  papel = "";
+  /** null = formulario em modo "novo cadastro". */
+  edicaoId: number | null = null;
 
-  colaboradores: Colaborador[] = [];
+  inputNome = '';
+  inputEmail = '';
+  inputMonitorarReunioes = false;
+  inputPapel: Papel = 'USUARIO';
+
+  readonly papeis: Papel[] = ['ADMIN', 'USUARIO'];
+
   ngOnInit(): void {
+    // Tela exclusiva de admin: quem nao for, volta para as reunioes.
+    if (!this.auth.isAdmin) {
+      this.router.navigate(['/reunioes']);
+      return;
+    }
+
     this.listar();
   }
 
-  colaboradorSelecionado: Colaborador | null = null;
+  listar(): void {
+    this.carregando.set(true);
 
-  deletar() {
-    if (this.inputId === null) {
-      alert('Por favor, informe o ID do colaborador que deseja deletar!');
-      return;
-    }
-
-    const confirmar = confirm(
-      `Tem certeza que deseja excluir o colaborador de ID ${this.inputId}?`,
-    );
-    if (!confirmar) {
-      return;
-    }
-
-    const id: number = this.inputId;
-
-    this.colaboradorService.deletar(id).subscribe({
-      next: () => {
-        console.log('Colaborador deletado com sucesso!');
-        alert('Colaborador excluído com sucesso!');
-
-        this.inputId = null;
-      },
-      error: (erro) => {
-        console.error('Erro ao deletar colaborador:', erro);
-        alert('Erro ao excluir. Verifique se o ID realmente existe.');
-      },
-    });
-  }
-
-  atualizarParcial() {
-    if (this.inputId === null) {
-      alert('Por favor, informe o ID do colaborador que deseja atualizar!');
-      return;
-    }
-
-    const id: number = this.inputId;
-
-    const dadosParciais: Partial<Colaborador> = {};
-
-    if (this.inputNome.trim() !== '') {
-      dadosParciais.nome = this.inputNome;
-    }
-
-    if (this.inputEmail.trim() !== '') {
-      dadosParciais.email = this.inputEmail;
-    }
-
-    dadosParciais.monitorarReunioes = this.inputMonitorarReunioes;
-
-    if (Object.keys(dadosParciais).length === 0) {
-      alert('Preencha ao menos um campo para atualizar!');
-      return;
-    }
-    this.colaboradorService.atualizarParcial(id, dadosParciais).subscribe({
-      next: (resposta) => {
-        console.log(
-          'Colaborador atualizado parcialmente com sucesso!',
-          resposta,
-        );
-        alert('Atualização parcial realizada com sucesso!');
-      },
-      error: (erro) => {
-        console.error('Erro ao atualizar parcialmente:', erro);
-        alert('Erro ao atualizar. Verifique o ID.');
-      },
-    });
-  }
-
-  atualizar() {
-    if (this.inputId === null) {
-      alert('Por favor, informe o ID do colaborador que deseja atualizar!');
-      return;
-    }
-    const colaboradorAtualizado: Colaborador = {
-      nome: this.inputNome,
-      email: this.inputEmail,
-      monitorarReunioes: this.inputMonitorarReunioes,
-      papel: this.papel
-    };
-
-    this.colaboradorService
-      .atualizar(this.inputId, colaboradorAtualizado)
-      .subscribe({
-        next: (resposta) => {
-          console.log('Colaborador atualizado com sucesso!', resposta);
-          alert('Atualizado com sucesso!');
-        },
-        error: (erro) => {
-          console.error('Erro ao atualizar colaborador:', erro);
-          alert('Erro ao atualizar. Verifique se o ID existe.');
-        },
-      });
-  }
-
-  buscarPorId(id: number) {
-    this.colaboradorService.buscarPorId(id).subscribe({
-      next: (resposta) => {
-        this.colaboradorSelecionado = resposta;
-        console.log('Colaborador encontrado:', this.colaboradorSelecionado);
-      },
-      error: (erro) => {
-        console.error('Erro ao buscar colaborador:', erro);
-        alert('Colaborador não encontrado.');
-      },
-    });
-  }
-
-  listar() {
     this.colaboradorService.listar().subscribe({
       next: (resposta) => {
-        console.log('Colaboradores carregados:', this.colaboradores);
-        this.colaboradores = resposta;
+        this.colaboradores.set(resposta);
+        this.carregando.set(false);
       },
-      error: (erro) => {
-        console.error('Erro ao carregar colaboradores:', erro);
-        alert('Não foi possível carregar a lista de colaboradores.');
+      error: () => {
+        this.carregando.set(false);
+        this.alerta.erro(
+          'Não foi possível carregar',
+          'A lista de colaboradores não pôde ser carregada. Tente novamente.',
+        );
       },
     });
   }
 
-  save() {
-    const novoColaborador: Colaborador = {
-      email: this.inputEmail,
-      nome: this.inputNome,
+  editar(colaborador: Colaborador): void {
+    this.edicaoId = colaborador.id ?? null;
+    this.inputNome = colaborador.nome;
+    this.inputEmail = colaborador.email;
+    this.inputMonitorarReunioes = colaborador.monitorarReunioes;
+    this.inputPapel = colaborador.papel;
+  }
+
+  cancelarEdicao(): void {
+    this.limparFormulario();
+  }
+
+  salvar(): void {
+    if (!this.formularioValido()) {
+      return;
+    }
+
+    const dados: Colaborador = {
+      nome: this.inputNome.trim(),
+      email: this.inputEmail.trim(),
       monitorarReunioes: this.inputMonitorarReunioes,
-      papel: this.papel
+      papel: this.inputPapel,
     };
 
-    this.colaboradorService.save(novoColaborador).subscribe({
-      next: (resposta) => {
-        alert('Cadastrado com sucesso!');
-        console.log('Colaborador Cadastrado com sucesso', resposta);
-        this.inputEmail = '';
-        this.inputMonitorarReunioes = false;
-        this.inputNome = '';
+    if (this.edicaoId === null) {
+      this.criar(dados);
+      return;
+    }
+
+    this.atualizar(this.edicaoId, dados);
+  }
+
+  async remover(colaborador: Colaborador): Promise<void> {
+    if (colaborador.id === undefined) {
+      this.alerta.erro('Colaborador sem id', 'Não é possível excluir este registro.');
+      return;
+    }
+
+    const confirmado = await this.alerta.confirmar(
+      'Excluir colaborador?',
+      `${colaborador.nome} será removido permanentemente.`,
+    );
+
+    if (!confirmado) {
+      return;
+    }
+
+    this.colaboradorService.deletar(colaborador.id).subscribe({
+      next: () => {
+        this.alerta.sucesso('Colaborador excluído');
+        this.limparFormulario();
+        this.listar();
       },
-      error: (erro) => {
-        console.error('Erro ao cadastrar colaborador', erro);
-        alert('Erro ao salvar. Verifique o console.');
+      error: () => {
+        this.alerta.erro('Erro ao excluir', 'O colaborador não pôde ser removido.');
       },
     });
+  }
+
+  rotuloPapel(papel: Papel): string {
+    return papel === 'ADMIN' ? 'Administrador' : 'Usuário';
+  }
+
+  private criar(dados: Colaborador): void {
+    this.colaboradorService.save(dados).subscribe({
+      next: () => {
+        this.alerta.sucesso('Colaborador cadastrado');
+        this.limparFormulario();
+        this.listar();
+      },
+      error: () => {
+        this.alerta.erro('Erro ao cadastrar', 'Verifique os dados e tente novamente.');
+      },
+    });
+  }
+
+  private atualizar(id: number, dados: Colaborador): void {
+    this.colaboradorService.atualizar(id, dados).subscribe({
+      next: () => {
+        this.alerta.sucesso('Colaborador atualizado');
+        this.limparFormulario();
+        this.listar();
+      },
+      error: () => {
+        this.alerta.erro('Erro ao atualizar', 'Verifique os dados e tente novamente.');
+      },
+    });
+  }
+
+  private formularioValido(): boolean {
+    if (this.inputNome.trim() === '') {
+      this.alerta.erro('Nome obrigatório', 'Informe o nome do colaborador.');
+      return false;
+    }
+
+    if (this.inputEmail.trim() === '') {
+      this.alerta.erro('E-mail obrigatório', 'Informe o e-mail do colaborador.');
+      return false;
+    }
+
+    return true;
+  }
+
+  private limparFormulario(): void {
+    this.edicaoId = null;
+    this.inputNome = '';
+    this.inputEmail = '';
+    this.inputMonitorarReunioes = false;
+    this.inputPapel = 'USUARIO';
   }
 }
