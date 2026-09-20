@@ -18,6 +18,8 @@ export class ReuniaoEditarComponent implements OnInit {
     });
   }
 
+  
+
   navigateBack(): void {
     if (this.id) {
       this.router.navigate([`/admin/reunioes/${this.id}`], { 
