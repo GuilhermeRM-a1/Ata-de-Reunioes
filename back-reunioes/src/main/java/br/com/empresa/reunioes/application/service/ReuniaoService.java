@@ -45,7 +45,7 @@ public class ReuniaoService {
         reuniao.setParticipantes(buscarColaboradores(request.participantes()));
 
         log.debug("Buscando e setando ações.");
-        reuniao.setAcoes(buscarAcoes(request.acoes()));
+        substituirAcoes(reuniao, buscarAcoes(request.acoes()));
 
         reuniao.setTotalAcoes(reuniao.getAcoes().size());
 
@@ -95,7 +95,7 @@ public class ReuniaoService {
         mapper.updateEntity(reuniao, request);
 
         reuniao.setParticipantes(buscarColaboradores(request.participantes()));
-        reuniao.setAcoes(buscarAcoes(request.acoes()));
+        substituirAcoes(reuniao, buscarAcoes(request.acoes()));
         reuniao.setTotalAcoes(reuniao.getAcoes().size());
 
         Reuniao reuniaoAtualizada = reuniaoRepository.save(reuniao);
@@ -121,7 +121,7 @@ public class ReuniaoService {
 
         if (request.acoes() != null) {
             log.debug("Atualizando ações da reunião: id={}", id);
-            reuniao.setAcoes(buscarAcoes(request.acoes()));
+            substituirAcoes(reuniao, buscarAcoes(request.acoes()));
 
             log.debug("Recalculando total de ações da reunião: id={}", id);
             reuniao.setTotalAcoes(reuniao.getAcoes().size());
@@ -145,6 +145,30 @@ public class ReuniaoService {
         log.info("Reunião removida com sucesso: id={}", id);
     }
 
+
+    /**
+     * Acoes usa orphanRemoval, e o Hibernate recusa que a colecao seja trocada
+     * por outra instancia — quem faz isso leva "a collection with orphan
+     * deletion was no longer referenced". Entao a lista existente e alterada
+     * no lugar, e nao substituida.
+     *
+     * Atencao ao efeito: acao que nao vier na lista deixa de pertencer a
+     * reuniao e o orphanRemoval a apaga. E a semantica do PUT, que substitui
+     * o recurso inteiro.
+     */
+    private void substituirAcoes(Reuniao reuniao, List<Acao> novas) {
+
+        if (reuniao.getAcoes() == null) {
+            reuniao.setAcoes(new ArrayList<>());
+        }
+
+        reuniao.getAcoes().clear();
+
+        for (Acao acao : novas) {
+            acao.setReuniao(reuniao);
+            reuniao.getAcoes().add(acao);
+        }
+    }
     private List<Colaborador> buscarColaboradores(List<Long> ids) {
 
         // ArrayList e nao List.of(): a colecao vai para uma entidade gerenciada
