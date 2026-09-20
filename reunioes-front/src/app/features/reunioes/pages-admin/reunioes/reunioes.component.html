@@ -35,6 +35,7 @@
               <th>Áreas</th>
               <th>Ações</th>
               <th>Status transcrição</th>
+              <th>Status Reunião</th>
               <th></th>
             </tr>
           </thead>
@@ -49,7 +50,8 @@
                   }
                 </td>
                 <td>{{ reuniao.totalAcoes }}</td>
-                <td><app-status-badge [status]="reuniao.status"></app-status-badge></td>
+                <td><app-status-badge [status]="reuniao.statusTranscricao" [tipo]="'transcricao'"></app-status-badge></td>
+                <td><app-status-badge [status]="reuniao.statusReuniao" [tipo]="'reuniao'"></app-status-badge></td>
                 <td class="text-end">
                   <button class="btn btn-sm btn-outline-secondary me-1" (click)="editarReuniao(reuniao.id, $event)" title="Editar">
                     <i class="fas fa-pen"></i>
@@ -70,7 +72,7 @@
 
       @if (reunioesEmAndamento.length === 0) {
         <div class="alert alert-info text-center py-3">
-          Nenhuma reunião em andamento hoje.
+          Nenhuma reunião em andamento.
         </div>
       } @else {
         <table class="table table-hover align-middle">
@@ -81,6 +83,7 @@
               <th>Áreas</th>
               <th>Ações</th>
               <th>Status transcrição</th>
+              <th>Status Reunião</th>
               <th></th>
             </tr>
           </thead>
@@ -95,7 +98,8 @@
                   }
                 </td>
                 <td>{{ reuniao.totalAcoes }}</td>
-                <td><app-status-badge [status]="reuniao.status"></app-status-badge></td>
+                <td><app-status-badge [status]="reuniao.statusTranscricao" [tipo]="'transcricao'"></app-status-badge></td>
+                <td><app-status-badge [status]="reuniao.statusReuniao" [tipo]="'reuniao'"></app-status-badge></td>
                 <td class="text-end">
                   <button class="btn btn-sm btn-outline-secondary me-1" (click)="editarReuniao(reuniao.id, $event)" title="Editar">
                     <i class="fas fa-pen"></i>
@@ -127,6 +131,7 @@
               <th>Áreas</th>
               <th>Ações</th>
               <th>Status transcrição</th>
+              <th>Status Reunião</th>
               <th></th>
             </tr>
           </thead>
@@ -141,7 +146,8 @@
                   }
                 </td>
                 <td>{{ reuniao.totalAcoes }}</td>
-                <td><app-status-badge [status]="reuniao.status"></app-status-badge></td>
+                <td><app-status-badge [status]="reuniao.statusTranscricao" [tipo]="'transcricao'"></app-status-badge></td>
+                <td><app-status-badge [status]="reuniao.statusReuniao" [tipo]="'reuniao'"></app-status-badge></td>
                 <td class="text-end">
                   <button class="btn btn-sm btn-outline-secondary me-1" (click)="editarReuniao(reuniao.id, $event)" title="Editar">
                     <i class="fas fa-pen"></i>
@@ -167,44 +173,5 @@
       </button>
     </div>
 
-    <table class="table table-hover align-middle">
-      <thead>
-        <tr>
-          <th>Título</th>
-          <th>Data</th>
-          <th>Áreas</th>
-          <th>Ações</th>
-          <th>Status transcrição</th>
-          <th>Status Reunião</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (reuniao of reunioes(); track reuniao.id) {
-          <tr (click)="verReuniao(reuniao.id)" style="cursor: pointer;">
-            <td>{{ reuniao.titulo }}</td>
-            <td>{{ reuniao.data | date:'dd/MM/yyyy HH:mm' }}</td>
-            <td>
-              @for (area of reuniao.areas; track area) {
-                <span class="badge rounded-pill bg-light text-dark border me-1">{{ area }}</span>
-              }
-            </td>
-            <td>{{ reuniao.totalAcoes }}</td>
-            <td><app-status-badge [status]="reuniao.statusTranscricao" [tipo]="'transcricao'"></app-status-badge></td>
-            <td><app-status-badge [status]="reuniao.statusReuniao" [tipo]="'reuniao'"></app-status-badge></td>
-
-
-            <td class="text-end">
-              <button class="btn btn-sm btn-outline-secondary me-1" (click)="editarReuniao(reuniao.id,$event); $event.stopPropagation()" title="Editar">
-                <i class="fas fa-pen"></i>
-              </button>
-              <button class="btn btn-sm btn-outline-danger" (click)="excluir(reuniao, $event)" title="Excluir">
-                <i class="fas fa-trash"></i>
-              </button>
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
   }
 </div>
