@@ -50,10 +50,14 @@
                   }
                 </td>
                 <td>{{ reuniao.totalAcoes }}</td>
-                <td><app-status-badge [status]="reuniao.statusTranscricao" [tipo]="'transcricao'"></app-status-badge></td>
-                <td><app-status-badge [status]="reuniao.statusReuniao" [tipo]="'reuniao'"></app-status-badge></td>
+                <td>
+                  <app-status-badge [status]="reuniao.statusTranscricao" [tipo]="'transcricao'"></app-status-badge>
+                </td>
+                <td>
+                  <app-status-badge [status]="reuniao.statusReuniao" [tipo]="'reuniao'"></app-status-badge>
+                </td>
                 <td class="text-end">
-                  <button class="btn btn-sm btn-outline-secondary me-1" (click)="editarReuniao(reuniao.id, $event)" title="Editar">
+                  <button class="btn btn-sm btn-outline-secondary me-1" (click)="editarReuniao(reuniao.id, $event); $event.stopPropagation()" title="Editar">
                     <i class="fas fa-pen"></i>
                   </button>
                   <button class="btn btn-sm btn-outline-danger" (click)="excluir(reuniao, $event)" title="Excluir">
@@ -72,7 +76,7 @@
 
       @if (reunioesEmAndamento.length === 0) {
         <div class="alert alert-info text-center py-3">
-          Nenhuma reunião em andamento.
+          Nenhuma reunião em andamento hoje.
         </div>
       } @else {
         <table class="table table-hover align-middle">
@@ -98,10 +102,14 @@
                   }
                 </td>
                 <td>{{ reuniao.totalAcoes }}</td>
-                <td><app-status-badge [status]="reuniao.statusTranscricao" [tipo]="'transcricao'"></app-status-badge></td>
-                <td><app-status-badge [status]="reuniao.statusReuniao" [tipo]="'reuniao'"></app-status-badge></td>
+                <td>
+                  <app-status-badge [status]="reuniao.statusTranscricao" [tipo]="'transcricao'"></app-status-badge>
+                </td>
+                <td>
+                  <app-status-badge [status]="reuniao.statusReuniao" [tipo]="'reuniao'"></app-status-badge>
+                </td>
                 <td class="text-end">
-                  <button class="btn btn-sm btn-outline-secondary me-1" (click)="editarReuniao(reuniao.id, $event)" title="Editar">
+                  <button class="btn btn-sm btn-outline-secondary me-1" (click)="editarReuniao(reuniao.id, $event); $event.stopPropagation()" title="Editar">
                     <i class="fas fa-pen"></i>
                   </button>
                   <button class="btn btn-sm btn-outline-danger" (click)="excluir(reuniao, $event)" title="Excluir">
@@ -146,10 +154,14 @@
                   }
                 </td>
                 <td>{{ reuniao.totalAcoes }}</td>
-                <td><app-status-badge [status]="reuniao.statusTranscricao" [tipo]="'transcricao'"></app-status-badge></td>
-                <td><app-status-badge [status]="reuniao.statusReuniao" [tipo]="'reuniao'"></app-status-badge></td>
+                <td>
+                  <app-status-badge [status]="reuniao.statusTranscricao" [tipo]="'transcricao'"></app-status-badge>
+                </td>
+                <td>
+                  <app-status-badge [status]="reuniao.statusReuniao" [tipo]="'reuniao'"></app-status-badge>
+                </td>
                 <td class="text-end">
-                  <button class="btn btn-sm btn-outline-secondary me-1" (click)="editarReuniao(reuniao.id, $event)" title="Editar">
+                  <button class="btn btn-sm btn-outline-secondary me-1" (click)="editarReuniao(reuniao.id, $event); $event.stopPropagation()" title="Editar">
                     <i class="fas fa-pen"></i>
                   </button>
                   <button class="btn btn-sm btn-outline-danger" (click)="excluir(reuniao, $event)" title="Excluir">
