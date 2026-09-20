@@ -21,7 +21,8 @@ public class ReuniaoMapper {
 
         reuniao.setTitulo(request.titulo());
         reuniao.setData(request.data());
-        reuniao.setStatus(request.status());
+        reuniao.setStatusTranscricao(request.statusTranscricao());
+        reuniao.setStatusReuniao(request.statusReuniao());
         reuniao.setAreas(request.areas());
         reuniao.setPontosChaves(request.pontosChaves());
 
@@ -50,7 +51,8 @@ public class ReuniaoMapper {
         return new ReuniaoDTO(reuniao.getId(),
                 reuniao.getTitulo(),
                 reuniao.getData(),
-                reuniao.getStatus(),
+                reuniao.getStatusTranscricao(),
+                reuniao.getStatusReuniao(),
                 participantes,
                 pontosChaves,
                 acoes,
@@ -63,7 +65,8 @@ public class ReuniaoMapper {
 
         reuniao.setTitulo(request.titulo());
         reuniao.setData(request.data());
-        reuniao.setStatus(request.status());
+        reuniao.setStatusTranscricao(request.statusTranscricao());
+        reuniao.setStatusReuniao(request.statusReuniao());
         reuniao.setAreas(request.areas());
         reuniao.setPontosChaves(request.pontosChaves());
 
@@ -75,8 +78,10 @@ public class ReuniaoMapper {
             reuniao.setTitulo(request.titulo());
         if (request.data() != null)
             reuniao.setData(request.data());
-        if (request.status() != null)
-            reuniao.setStatus(request.status());
+        if (request.statusTranscricao() != null)
+            reuniao.setStatusTranscricao(request.statusTranscricao());
+        if (request.statusReuniao() != null)
+            reuniao.setStatusReuniao(request.statusReuniao());
         if (request.areas() != null)
             reuniao.setAreas(request.areas());
         if (request.pontosChaves() != null)

@@ -1,5 +1,6 @@
 package br.com.empresa.reunioes.domain.entity;
 
+import br.com.empresa.reunioes.domain.enums.StatusReuniao;
 import br.com.empresa.reunioes.domain.enums.StatusTranscricao;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -32,8 +33,12 @@ public class Reuniao {
     private String transcricao;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status")
-    private StatusTranscricao status;
+    @Column(name = "status_transcricao")
+    private StatusTranscricao statusTranscricao;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status_reuniao")
+    private StatusReuniao statusReuniao;
 
     @ManyToMany(mappedBy = "reunioes")
     private List<Colaborador> participantes;
