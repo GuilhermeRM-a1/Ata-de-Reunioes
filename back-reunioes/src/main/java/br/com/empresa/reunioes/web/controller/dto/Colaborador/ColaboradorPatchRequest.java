@@ -2,7 +2,6 @@ package br.com.empresa.reunioes.web.controller.dto.Colaborador;
 
 import br.com.empresa.reunioes.domain.enums.Papel;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
 /**
@@ -19,7 +18,6 @@ public record ColaboradorPatchRequest(@Pattern(regexp = ".*\\S.*", message = "O 
 
                                       String senha,
 
-                                      @NotBlank
                                       Papel papel,
 
                                       Boolean monitorarReunioes,
