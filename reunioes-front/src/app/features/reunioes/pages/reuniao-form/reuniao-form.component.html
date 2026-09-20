@@ -97,8 +97,19 @@
             @for (acao of acoes.controls; track acao; let i = $index) {
               <div [formGroupName]="i" class="card bg-light border-0 mb-2 p-3">
                 <div class="row g-2 align-items-start">
-                  <div class="col-md-4">
-                    <input type="text" formControlName="descricao" class="form-control form-control-sm" placeholder="Descrição" />
+                  <div class="col-md-3">
+                    <input type="text" formControlName="titulo" class="form-control form-control-sm" placeholder="Título"
+                      [class.is-invalid]="acoes.at(i).get('titulo')?.invalid && acoes.at(i).get('titulo')?.touched" />
+                    @if (acoes.at(i).get('titulo')?.invalid && acoes.at(i).get('titulo')?.touched) {
+                      <div class="invalid-feedback d-block">O título da ação é obrigatório.</div>
+                    }
+                  </div>
+                  <div class="col-md-3">
+                    <input type="text" formControlName="descricao" class="form-control form-control-sm" placeholder="Descrição"
+                      [class.is-invalid]="acoes.at(i).get('descricao')?.invalid && acoes.at(i).get('descricao')?.touched" />
+                    @if (acoes.at(i).get('descricao')?.invalid && acoes.at(i).get('descricao')?.touched) {
+                      <div class="invalid-feedback d-block">A descrição é obrigatória.</div>
+                    }
                   </div>
                   <div class="col-md-2">
                     <select formControlName="tipo" class="form-select form-select-sm">
@@ -106,11 +117,16 @@
                       <option value="TAREFA">Tarefa</option>
                     </select>
                   </div>
-                  <div class="col-md-2">
+                  <div class="col-md-1">
                     <input type="date" formControlName="prazo" class="form-control form-control-sm" />
                   </div>
-                  <div class="col-md-3">
-                    <input type="text" formControlName="responsavel" class="form-control form-control-sm" placeholder="Responsável" />
+                  <div class="col-md-2">
+                    <select formControlName="responsavel" class="form-select form-select-sm">
+                      <option [ngValue]="null">Responsável...</option>
+                      @for (colaborador of colaboradores(); track colaborador.id) {
+                        <option [ngValue]="colaborador.id">{{ colaborador.nome }}</option>
+                      }
+                    </select>
                   </div>
                   <div class="col-md-1 text-end">
                     <button type="button" class="btn btn-sm btn-outline-danger" (click)="removerAcao(i)">

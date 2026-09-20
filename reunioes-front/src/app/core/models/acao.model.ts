@@ -16,3 +16,17 @@ export interface Acao {
   concluida: boolean;
   reuniaoId: number;
 }
+
+/**
+ * Corpo aceito por POST/PATCH /api/reunioes/acoes.
+ * Diferente do AcaoDTO: `titulo` e obrigatorio e `responsavel` vai como
+ * lista de ids de colaborador, nao de nomes.
+ */
+export interface AcaoRequestPayload {
+  titulo: string;
+  descricao: string;
+  tipo: TipoAcao;
+  prazo: string | null;
+  concluida: boolean;
+  responsavel: number[];
+}

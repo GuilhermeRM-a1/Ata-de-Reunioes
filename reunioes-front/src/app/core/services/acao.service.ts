@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { Acao } from '../models/acao.model';
+import { Observable, map } from 'rxjs';
+import { Acao, AcaoRequestPayload } from '../models/acao.model';
 
 @Injectable({
   providedIn: 'root'
@@ -11,8 +11,22 @@ export class AcaoService {
 
   constructor(private http: HttpClient) {}
 
+  /**
+   * O endpoint e paginado e responde { content: [...] }, mas ja respondeu
+   * array puro. Aceita as duas formas e entrega sempre uma lista.
+   */
   listarAcoes(): Observable<Acao[]> {
-    return this.http.get<Acao[]>(this.apiUrl);
+    return this.http
+      .get<Acao[] | { content: Acao[] }>(this.apiUrl)
+      .pipe(map(resposta => Array.isArray(resposta) ? resposta : (resposta?.content ?? [])));
+  }
+
+  /**
+   * A acao so existe dentro de uma reuniao ja salva — por isso o id da
+   * reuniao vai na URL e nao no corpo.
+   */
+  criar(reuniaoId: number, dados: AcaoRequestPayload): Observable<Acao> {
+    return this.http.post<Acao>(`${this.apiUrl}/${reuniaoId}`, dados);
   }
 
   /** O id vem do back como String (AcaoDTO usa String.valueOf). */
