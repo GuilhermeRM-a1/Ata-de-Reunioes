@@ -4,6 +4,7 @@ import br.com.empresa.reunioes.application.mapper.AcaoMapper;
 import br.com.empresa.reunioes.application.service.AcaoService;
 import br.com.empresa.reunioes.domain.entity.Acao;
 import br.com.empresa.reunioes.web.controller.dto.Acao.AcaoDTO;
+import br.com.empresa.reunioes.web.controller.dto.Acao.AcaoPatchRequest;
 import br.com.empresa.reunioes.web.controller.dto.Acao.AcaoRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -112,8 +113,8 @@ public class AcaoController {
     @PatchMapping("/{id}")
     public ResponseEntity<AcaoDTO> atualizarParcial(
             @PathVariable Long id,
-            @Valid @RequestBody AcaoRequest request) {
-        Acao acao = service.atualizarParcial(id, request);
+            @Valid @RequestBody AcaoPatchRequest request) {
+        Acao acao = service.atualizarParcial(id, request.paraRequest());
         AcaoDTO dto = mapper.toDTO(acao);
 
         return new ResponseEntity<>(dto, HttpStatus.OK);
