@@ -9,6 +9,7 @@ import br.com.empresa.reunioes.domain.entity.Reuniao;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoDTO;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.RelatorioReuniaoResponse;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoFeriadoDTO;
+import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoPatchRequest;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoRequest;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoResumoRequest;
 import io.swagger.v3.oas.annotations.Operation;
@@ -112,8 +113,8 @@ public class ReuniaoController {
     })
     @PatchMapping("/{id}")
     public ResponseEntity<ReuniaoDTO> atualizarParcial(@PathVariable Long id,
-                                                       @Valid @RequestBody ReuniaoRequest request) {
-        Reuniao reuniao = reuniaoService.atualizarParcial(id, request);
+                                                       @Valid @RequestBody ReuniaoPatchRequest request) {
+        Reuniao reuniao = reuniaoService.atualizarParcial(id, request.paraRequest());
         ReuniaoDTO dto = mapper.toDTO(reuniao);
 
         return new ResponseEntity<>(dto, HttpStatus.OK);
