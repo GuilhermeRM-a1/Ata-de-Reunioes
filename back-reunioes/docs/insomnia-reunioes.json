@@ -1,611 +1,1127 @@
 {
   "_type": "export",
   "__export_format": 4,
-  "__export_date": "2026-08-17T00:00:00.000Z",
-  "__export_source": "insomnia.desktop.app:v9.0.0",
+  "__export_date": "2026-09-21T00:54:05.641Z",
+  "__export_source": "ata-de-reunioes",
   "resources": [
     {
       "_id": "wrk_reunioes",
       "_type": "workspace",
       "parentId": null,
-      "name": "API Atas de Reuniao",
-      "description": "Colecao de testes do back-reunioes (Spring Boot 4 + H2 em memoria).",
+      "name": "Ata de Reunioes - API",
+      "description": "Colecao conferida contra a aplicacao rodando em 20/09/2026.\n\nAntes de rodar: suba o Postgres (docker compose up -d postgres) e a API\n(./mvnw spring-boot:run). Ajuste base_url no ambiente se usar outra porta.\n\nAs pastas estao em ordem de demonstracao. A pasta 6 mostra o tratamento de\nerro, que responde sempre em ProblemDetail (RFC 7807).",
       "scope": "collection"
     },
     {
-      "_id": "env_local",
+      "_id": "env_reunioes",
       "_type": "environment",
       "parentId": "wrk_reunioes",
-      "name": "Local",
+      "name": "Base",
       "data": {
         "base_url": "http://localhost:8080",
+        "id_reuniao": "1",
         "id_colaborador": "1",
-        "id_reuniao": "1"
+        "id_acao": "1"
       },
-      "metaSortKey": 1
+      "dataPropertyOrder": {
+        "&": [
+          "base_url",
+          "id_reuniao",
+          "id_colaborador",
+          "id_acao"
+        ]
+      },
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 1789952045641
     },
-
     {
-      "_id": "fld_00",
+      "_id": "fld_1",
       "_type": "request_group",
       "parentId": "wrk_reunioes",
-      "name": "00 - Sanidade",
-      "metaSortKey": -400
+      "name": "1. Documentacao",
+      "description": "Onde o avaliador confere o contrato da API.",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1789952045541
     },
     {
-      "_id": "req_0001",
+      "_id": "req_2",
       "_type": "request",
-      "parentId": "fld_00",
-      "name": "OpenAPI (lista todas as rotas reais)",
+      "parentId": "fld_1",
+      "name": "OpenAPI 3.1 - contrato completo",
+      "description": "Especificacao gerada pelo springdoc. E a fonte de verdade das rotas.",
       "method": "GET",
       "url": "{{ _.base_url }}/v3/api-docs",
       "body": {},
       "headers": [],
       "parameters": [],
       "authentication": {},
-      "metaSortKey": -1000
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952045441,
+      "isPrivate": false
     },
     {
-      "_id": "req_0002",
+      "_id": "req_3",
       "_type": "request",
-      "parentId": "fld_00",
-      "name": "Swagger UI (abrir no navegador)",
+      "parentId": "fld_1",
+      "name": "Swagger UI - abrir no navegador",
+      "description": "Interface de documentacao. Abrir no navegador, nao pelo Insomnia.",
       "method": "GET",
-      "url": "{{ _.base_url }}/swagger-ui.html",
+      "url": "{{ _.base_url }}/swagger-ui/index.html",
       "body": {},
       "headers": [],
       "parameters": [],
       "authentication": {},
-      "metaSortKey": -999
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952045341,
+      "isPrivate": false
     },
-
     {
-      "_id": "fld_01",
+      "_id": "fld_4",
       "_type": "request_group",
       "parentId": "wrk_reunioes",
-      "name": "01 - Colaboradores (caminho felizes)",
-      "metaSortKey": -300
+      "name": "2. Reunioes",
+      "description": "CRUD completo do recurso principal.",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1789952045241
     },
     {
-      "_id": "req_0101",
+      "_id": "req_5",
       "_type": "request",
-      "parentId": "fld_01",
-      "name": "C1 - POST criar colaborador -> 201",
-      "method": "POST",
-      "url": "{{ _.base_url }}/api/reunioes/colaboradores",
-      "body": {
-        "mimeType": "application/json",
-        "text": "{\n  \"nome\": \"Ana Beatriz Fontes\",\n  \"senha\": \"123456\",\n  \"monitorarReunioes\": true,\n  \"dataCadastro\": \"2026-08-17\"\n}"
-      },
-      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "parentId": "fld_4",
+      "name": "Listar paginado -> 200",
+      "description": "Devolve o envelope com content, page, size, totalElements e totalPages.\nAceita os query params page, size e sort.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/reunioes",
+      "body": {},
+      "headers": [],
       "parameters": [],
       "authentication": {},
-      "metaSortKey": -900
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952045141,
+      "isPrivate": false
     },
     {
-      "_id": "req_0102",
+      "_id": "req_6",
       "_type": "request",
-      "parentId": "fld_01",
-      "name": "C2 - POST segundo colaborador -> 201",
-      "method": "POST",
-      "url": "{{ _.base_url }}/api/reunioes/colaboradores",
-      "body": {
-        "mimeType": "application/json",
-        "text": "{\n  \"nome\": \"Carlos Eduardo Prado\",\n  \"senha\": \"abc123\",\n  \"monitorarReunioes\": false,\n  \"dataCadastro\": \"2026-08-17\"\n}"
-      },
-      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "parentId": "fld_4",
+      "name": "Listar com paginacao e ordenacao -> 200",
+      "description": "Demonstra os query params de paginacao.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/reunioes?page=0&size=5&sort=titulo",
+      "body": {},
+      "headers": [],
       "parameters": [],
       "authentication": {},
-      "metaSortKey": -890
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952045041,
+      "isPrivate": false
     },
     {
-      "_id": "req_0103",
+      "_id": "req_7",
       "_type": "request",
-      "parentId": "fld_01",
-      "name": "C3 - GET listar paginado -> 200",
+      "parentId": "fld_4",
+      "name": "Buscar por id -> 200",
+      "description": "Traz participantes, pontos-chave, areas e acoes da reuniao.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/reunioes/{{ _.id_reuniao }}",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952044941,
+      "isPrivate": false
+    },
+    {
+      "_id": "req_8",
+      "_type": "request",
+      "parentId": "fld_4",
+      "name": "Criar -> 201 com header Location",
+      "description": "Repare no header Location da resposta: ele aponta para o recurso criado.\n\nparticipantes e acoes sao listas de IDS de registros que ja existem,\nnao objetos. Anote o id devolvido e coloque em id_reuniao no ambiente.",
+      "method": "POST",
+      "url": "{{ _.base_url }}/api/reunioes",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"titulo\": \"Reuniao criada pelo Insomnia\",\n  \"data\": \"2026-09-20T14:00:00\",\n  \"statusTranscricao\": \"RECEBIDA\",\n  \"statusReuniao\": \"PENDENTE\",\n  \"resumo\": \"Resumo executivo da reuniao.\",\n  \"areas\": [\n    \"Tecnologia\",\n    \"Operacoes\"\n  ],\n  \"pontosChaves\": [\n    \"Primeiro ponto discutido\",\n    \"Segundo ponto discutido\"\n  ],\n  \"participantes\": [\n    1,\n    2\n  ],\n  \"acoes\": []\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952044841,
+      "isPrivate": false
+    },
+    {
+      "_id": "req_9",
+      "_type": "request",
+      "parentId": "fld_4",
+      "name": "Substituir por completo -> 200",
+      "description": "PUT substitui o recurso inteiro. Campo que nao for enviado e apagado,\ne acao que nao aparecer na lista acoes deixa de pertencer a reuniao.\nPara alterar so um campo, use o PATCH.",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/api/reunioes/{{ _.id_reuniao }}",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"titulo\": \"Reuniao substituida pelo PUT\",\n  \"data\": \"2026-09-20T16:00:00\",\n  \"statusTranscricao\": \"CONCLUIDA\",\n  \"statusReuniao\": \"FINALIZADA\",\n  \"resumo\": \"Resumo atualizado.\",\n  \"areas\": [\n    \"Financeiro\"\n  ],\n  \"pontosChaves\": [\n    \"Ponto revisado\"\n  ],\n  \"participantes\": [\n    1\n  ],\n  \"acoes\": []\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952044741,
+      "isPrivate": false
+    },
+    {
+      "_id": "req_10",
+      "_type": "request",
+      "parentId": "fld_4",
+      "name": "Atualizar so o status -> 200",
+      "description": "No PATCH, campo ausente significa \"nao mexer\".",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/api/reunioes/{{ _.id_reuniao }}",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"statusReuniao\": \"EM_ANDAMENTO\"\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952044641,
+      "isPrivate": false
+    },
+    {
+      "_id": "req_11",
+      "_type": "request",
+      "parentId": "fld_4",
+      "name": "Excluir -> 204",
+      "description": "Sem corpo na resposta. Um GET seguinte devolve 404.",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/api/reunioes/{{ _.id_reuniao }}",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952044541,
+      "isPrivate": false
+    },
+    {
+      "_id": "fld_12",
+      "_type": "request_group",
+      "parentId": "wrk_reunioes",
+      "name": "3. Regra de negocio",
+      "description": "O que o sistema faz alem de CRUD.",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1789952044441
+    },
+    {
+      "_id": "req_13",
+      "_type": "request",
+      "parentId": "fld_12",
+      "name": "Relatorio da reuniao -> 200",
+      "description": "Monta o relatorio consolidado: resumo, participantes, pontos-chave e acoes.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/reunioes/{{ _.id_reuniao }}/relatorio",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952044341,
+      "isPrivate": false
+    },
+    {
+      "_id": "req_14",
+      "_type": "request",
+      "parentId": "fld_12",
+      "name": "Consulta feriado (Spring Cloud OpenFeign) -> 200",
+      "description": "Consome a BrasilAPI por um cliente Feign e informa se a data da reuniao\ncaiu em feriado nacional.\n\nSe a API externa estiver fora, a resposta e 503 e nao 500 — o problema e\nde terceiro e o servico continua de pe para todo o resto.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/reunioes/{{ _.id_reuniao }}/feriado",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952044241,
+      "isPrivate": false
+    },
+    {
+      "_id": "req_15",
+      "_type": "request",
+      "parentId": "fld_12",
+      "name": "Ingestao da transcricao -> 200",
+      "description": "Entrada do material transcrito na reuniao.",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/api/reunioes/{{ _.id_reuniao }}/ingestao",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"transcricao\": \"Texto integral da transcricao vinda da IA.\",\n  \"resumo\": \"Resumo executivo gerado a partir da transcricao.\"\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952044141,
+      "isPrivate": false
+    },
+    {
+      "_id": "fld_16",
+      "_type": "request_group",
+      "parentId": "wrk_reunioes",
+      "name": "4. Acoes",
+      "description": "Recurso aninhado: a acao nasce vinculada a uma reuniao.",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1789952044041
+    },
+    {
+      "_id": "req_17",
+      "_type": "request",
+      "parentId": "fld_16",
+      "name": "Listar paginado -> 200",
+      "description": "Envelope paginado, igual ao das reunioes.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/reunioes/acoes",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952043941,
+      "isPrivate": false
+    },
+    {
+      "_id": "req_18",
+      "_type": "request",
+      "parentId": "fld_16",
+      "name": "Listar por reuniao -> 200",
+      "description": "O query param reuniaoId e OBRIGATORIO. Sem ele a resposta e 400.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/reunioes/acoes/reuniao?reuniaoId={{ _.id_reuniao }}",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952043841,
+      "isPrivate": false
+    },
+    {
+      "_id": "req_19",
+      "_type": "request",
+      "parentId": "fld_16",
+      "name": "Buscar por id -> 200",
+      "description": "Atencao: o id da acao vem como STRING no JSON de resposta.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/reunioes/acoes/{{ _.id_acao }}",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952043741,
+      "isPrivate": false
+    },
+    {
+      "_id": "req_20",
+      "_type": "request",
+      "parentId": "fld_16",
+      "name": "Criar dentro da reuniao -> 201",
+      "description": "O id da reuniao vai na ROTA, nao no corpo.\nresponsavel e lista de ids de colaborador.",
+      "method": "POST",
+      "url": "{{ _.base_url }}/api/reunioes/acoes/{{ _.id_reuniao }}",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"titulo\": \"Enviar a ata revisada\",\n  \"descricao\": \"Revisar e enviar a ata para os participantes.\",\n  \"tipo\": \"TAREFA\",\n  \"prazo\": \"2026-10-01\",\n  \"concluida\": false,\n  \"responsavel\": [\n    1\n  ]\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952043641,
+      "isPrivate": false
+    },
+    {
+      "_id": "req_21",
+      "_type": "request",
+      "parentId": "fld_16",
+      "name": "Substituir -> 200",
+      "description": "",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/api/reunioes/acoes/{{ _.id_acao }}",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"titulo\": \"Enviar a ata revisada\",\n  \"descricao\": \"Descricao substituida por completo.\",\n  \"tipo\": \"ACAO\",\n  \"prazo\": \"2026-10-05\",\n  \"concluida\": false,\n  \"responsavel\": [\n    2\n  ]\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952043541,
+      "isPrivate": false
+    },
+    {
+      "_id": "req_22",
+      "_type": "request",
+      "parentId": "fld_16",
+      "name": "Concluir a acao -> 200",
+      "description": "Atualizacao parcial: so o campo enviado muda.",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/api/reunioes/acoes/{{ _.id_acao }}",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"concluida\": true\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952043441,
+      "isPrivate": false
+    },
+    {
+      "_id": "req_23",
+      "_type": "request",
+      "parentId": "fld_16",
+      "name": "Excluir -> 204",
+      "description": "A rota carrega a reuniao e a acao, nessa ordem.",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/api/reunioes/acoes/{{ _.id_reuniao }}/{{ _.id_acao }}",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952043341,
+      "isPrivate": false
+    },
+    {
+      "_id": "fld_24",
+      "_type": "request_group",
+      "parentId": "wrk_reunioes",
+      "name": "5. Colaboradores",
+      "description": "Cadastro de pessoas e papeis.",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1789952043241
+    },
+    {
+      "_id": "req_25",
+      "_type": "request",
+      "parentId": "fld_24",
+      "name": "Listar paginado -> 200",
+      "description": "",
       "method": "GET",
       "url": "{{ _.base_url }}/api/reunioes/colaboradores",
       "body": {},
       "headers": [],
-      "parameters": [
-        { "name": "page", "value": "0" },
-        { "name": "size", "value": "10" },
-        { "name": "sort", "value": "nome,asc" }
-      ],
+      "parameters": [],
       "authentication": {},
-      "metaSortKey": -880
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952043141,
+      "isPrivate": false
     },
     {
-      "_id": "req_0104",
+      "_id": "req_26",
       "_type": "request",
-      "parentId": "fld_01",
-      "name": "C4 - GET por id -> 200",
+      "parentId": "fld_24",
+      "name": "Buscar por id -> 200",
+      "description": "",
       "method": "GET",
       "url": "{{ _.base_url }}/api/reunioes/colaboradores/{{ _.id_colaborador }}",
       "body": {},
       "headers": [],
       "parameters": [],
       "authentication": {},
-      "metaSortKey": -870
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952043041,
+      "isPrivate": false
     },
     {
-      "_id": "req_0105",
+      "_id": "req_27",
       "_type": "request",
-      "parentId": "fld_01",
-      "name": "C5 - PUT substituir -> 202",
+      "parentId": "fld_24",
+      "name": "Buscar por e-mail -> 200",
+      "description": "E o endpoint que a tela de login usa para descobrir o papel do usuario.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/reunioes/colaboradores/email/ana.fontes@exemplo.com.br",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952042941,
+      "isPrivate": false
+    },
+    {
+      "_id": "req_28",
+      "_type": "request",
+      "parentId": "fld_24",
+      "name": "Criar -> 201",
+      "description": "papel aceita ADMIN ou USUARIO. senha e obrigatoria no POST.",
+      "method": "POST",
+      "url": "{{ _.base_url }}/api/reunioes/colaboradores",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"Colaborador criado pelo Insomnia\",\n  \"email\": \"colaborador.insomnia@exemplo.com.br\",\n  \"senha\": \"senha123\",\n  \"papel\": \"USUARIO\",\n  \"monitorarReunioes\": true\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952042841,
+      "isPrivate": false
+    },
+    {
+      "_id": "req_29",
+      "_type": "request",
+      "parentId": "fld_24",
+      "name": "Substituir -> 200",
+      "description": "O PUT exige todos os campos, inclusive senha.",
       "method": "PUT",
       "url": "{{ _.base_url }}/api/reunioes/colaboradores/{{ _.id_colaborador }}",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n  \"nome\": \"Ana Beatriz Fontes Silva\",\n  \"senha\": \"123456\",\n  \"monitorarReunioes\": false,\n  \"dataCadastro\": \"2026-08-17\"\n}"
+        "text": "{\n  \"nome\": \"Nome substituido\",\n  \"email\": \"ana.fontes@exemplo.com.br\",\n  \"senha\": \"senha123\",\n  \"papel\": \"ADMIN\",\n  \"monitorarReunioes\": true\n}"
       },
-      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
       "parameters": [],
       "authentication": {},
-      "metaSortKey": -860
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952042741,
+      "isPrivate": false
     },
     {
-      "_id": "req_0106",
+      "_id": "req_30",
       "_type": "request",
-      "parentId": "fld_01",
-      "name": "C6 - PATCH so um campo -> 202",
+      "parentId": "fld_24",
+      "name": "Atualizar so o nome -> 200",
+      "description": "No PATCH nenhum campo e obrigatorio, nem a senha.",
       "method": "PATCH",
       "url": "{{ _.base_url }}/api/reunioes/colaboradores/{{ _.id_colaborador }}",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n  \"monitorarReunioes\": true\n}"
+        "text": "{\n  \"nome\": \"Nome alterado pelo PATCH\"\n}"
       },
-      "headers": [{ "name": "Content-Type", "value": "application/json" }],
-      "parameters": [],
-      "authentication": {},
-      "metaSortKey": -850
-    },
-    {
-      "_id": "req_0107",
-      "_type": "request",
-      "parentId": "fld_01",
-      "name": "C7 - DELETE -> 204 (use um id SEM reuniao)",
-      "method": "DELETE",
-      "url": "{{ _.base_url }}/api/reunioes/colaboradores/2",
-      "body": {},
-      "headers": [],
-      "parameters": [],
-      "authentication": {},
-      "metaSortKey": -840
-    },
-
-    {
-      "_id": "fld_02",
-      "_type": "request_group",
-      "parentId": "wrk_reunioes",
-      "name": "02 - Reunioes (caminho felizes)",
-      "metaSortKey": -200
-    },
-    {
-      "_id": "req_0201",
-      "_type": "request",
-      "parentId": "fld_02",
-      "name": "R1 - POST criar reuniao -> 201",
-      "method": "POST",
-      "url": "{{ _.base_url }}/",
-      "body": {
-        "mimeType": "application/json",
-        "text": "{\n  \"titulo\": \"Alinhamento semanal de Operacoes\",\n  \"data\": \"2026-08-17T09:00:00\",\n  \"status\": \"CONCLUIDA\",\n  \"areas\": [\"Operacoes\", \"Financeiro\"],\n  \"pontosChaves\": [\"Fila de atendimento acima da meta\", \"Escala de fim de semana precisa reforco\"],\n  \"participantes\": [1],\n  \"acoes\": [],\n  \"totalAcoes\": 2\n}"
-      },
-      "headers": [{ "name": "Content-Type", "value": "application/json" }],
-      "parameters": [],
-      "authentication": {},
-      "metaSortKey": -700
-    },
-    {
-      "_id": "req_0202",
-      "_type": "request",
-      "parentId": "fld_02",
-      "name": "R2 - POST reuniao sem participante -> 201",
-      "method": "POST",
-      "url": "{{ _.base_url }}/",
-      "body": {
-        "mimeType": "application/json",
-        "text": "{\n  \"titulo\": \"Cafe com RH - escuta de clima\",\n  \"data\": \"2026-08-18T16:00:00\",\n  \"status\": \"RECEBIDA\",\n  \"areas\": [\"Recursos Humanos\"],\n  \"pontosChaves\": [],\n  \"participantes\": [],\n  \"acoes\": [],\n  \"totalAcoes\": 0\n}"
-      },
-      "headers": [{ "name": "Content-Type", "value": "application/json" }],
-      "parameters": [],
-      "authentication": {},
-      "metaSortKey": -690
-    },
-    {
-      "_id": "req_0203",
-      "_type": "request",
-      "parentId": "fld_02",
-      "name": "R3 - GET listar paginado -> 200",
-      "method": "GET",
-      "url": "{{ _.base_url }}/",
-      "body": {},
-      "headers": [],
-      "parameters": [
-        { "name": "page", "value": "0" },
-        { "name": "size", "value": "10" },
-        { "name": "sort", "value": "titulo,asc" }
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
       ],
-      "authentication": {},
-      "metaSortKey": -680
-    },
-    {
-      "_id": "req_0204",
-      "_type": "request",
-      "parentId": "fld_02",
-      "name": "R4 - GET por id -> 200",
-      "method": "GET",
-      "url": "{{ _.base_url }}/{{ _.id_reuniao }}",
-      "body": {},
-      "headers": [],
       "parameters": [],
       "authentication": {},
-      "metaSortKey": -670
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952042641,
+      "isPrivate": false
     },
     {
-      "_id": "req_0205",
+      "_id": "req_31",
       "_type": "request",
-      "parentId": "fld_02",
-      "name": "R5 - PUT substituir -> 202",
-      "method": "PUT",
-      "url": "{{ _.base_url }}/{{ _.id_reuniao }}",
-      "body": {
-        "mimeType": "application/json",
-        "text": "{\n  \"titulo\": \"Alinhamento semanal revisado\",\n  \"data\": \"2026-08-19T09:00:00\",\n  \"status\": \"ANALISANDO\",\n  \"areas\": [\"Operacoes\"],\n  \"pontosChaves\": [\"Novo checklist aprovado\"],\n  \"participantes\": [1],\n  \"acoes\": [],\n  \"totalAcoes\": 3\n}"
-      },
-      "headers": [{ "name": "Content-Type", "value": "application/json" }],
-      "parameters": [],
-      "authentication": {},
-      "metaSortKey": -660
-    },
-    {
-      "_id": "req_0206",
-      "_type": "request",
-      "parentId": "fld_02",
-      "name": "R6 - PATCH so o status -> 202",
-      "method": "PATCH",
-      "url": "{{ _.base_url }}/{{ _.id_reuniao }}",
-      "body": {
-        "mimeType": "application/json",
-        "text": "{\n  \"status\": \"ERRO\"\n}"
-      },
-      "headers": [{ "name": "Content-Type", "value": "application/json" }],
-      "parameters": [],
-      "authentication": {},
-      "metaSortKey": -650
-    },
-    {
-      "_id": "req_0207",
-      "_type": "request",
-      "parentId": "fld_02",
-      "name": "R7 - PATCH corpo vazio -> 202 (nada muda)",
-      "method": "PATCH",
-      "url": "{{ _.base_url }}/{{ _.id_reuniao }}",
-      "body": {
-        "mimeType": "application/json",
-        "text": "{}"
-      },
-      "headers": [{ "name": "Content-Type", "value": "application/json" }],
-      "parameters": [],
-      "authentication": {},
-      "metaSortKey": -640
-    },
-    {
-      "_id": "req_0208",
-      "_type": "request",
-      "parentId": "fld_02",
-      "name": "R8 - DELETE -> 204",
+      "parentId": "fld_24",
+      "name": "Excluir -> 204",
+      "description": "Use um id que NAO participe de nenhuma reuniao.\nExcluir colaborador vinculado a reuniao devolve 500 hoje — bug conhecido,\ndeveria ser 409.",
       "method": "DELETE",
-      "url": "{{ _.base_url }}/{{ _.id_reuniao }}",
-      "body": {},
-      "headers": [],
-      "parameters": [],
-      "authentication": {},
-      "metaSortKey": -630
-    },
-
-    {
-      "_id": "fld_03",
-      "_type": "request_group",
-      "parentId": "wrk_reunioes",
-      "name": "03 - Erros e casos de borda",
-      "metaSortKey": -100
-    },
-    {
-      "_id": "req_0301",
-      "_type": "request",
-      "parentId": "fld_03",
-      "name": "E1 - POST reuniao 4 campos invalidos -> 400",
-      "method": "POST",
-      "url": "{{ _.base_url }}/",
-      "body": {
-        "mimeType": "application/json",
-        "text": "{\n  \"titulo\": \"abc\",\n  \"data\": \"\",\n  \"status\": \"\",\n  \"totalAcoes\": -1\n}"
-      },
-      "headers": [{ "name": "Content-Type", "value": "application/json" }],
-      "parameters": [],
-      "authentication": {},
-      "metaSortKey": -500
-    },
-    {
-      "_id": "req_0302",
-      "_type": "request",
-      "parentId": "fld_03",
-      "name": "E2 - POST colaborador nome/senha vazios -> 400",
-      "method": "POST",
-      "url": "{{ _.base_url }}/api/reunioes/colaboradores",
-      "body": {
-        "mimeType": "application/json",
-        "text": "{\n  \"nome\": \"\",\n  \"senha\": \"\"\n}"
-      },
-      "headers": [{ "name": "Content-Type", "value": "application/json" }],
-      "parameters": [],
-      "authentication": {},
-      "metaSortKey": -490
-    },
-    {
-      "_id": "req_0303",
-      "_type": "request",
-      "parentId": "fld_03",
-      "name": "E3 - GET reuniao id inexistente -> 404",
-      "method": "GET",
-      "url": "{{ _.base_url }}/999",
-      "body": {},
-      "headers": [],
-      "parameters": [],
-      "authentication": {},
-      "metaSortKey": -480
-    },
-    {
-      "_id": "req_0304",
-      "_type": "request",
-      "parentId": "fld_03",
-      "name": "E4 - GET colaborador id inexistente -> 404",
-      "method": "GET",
       "url": "{{ _.base_url }}/api/reunioes/colaboradores/999",
       "body": {},
       "headers": [],
       "parameters": [],
       "authentication": {},
-      "metaSortKey": -470
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952042541,
+      "isPrivate": false
     },
     {
-      "_id": "req_0305",
-      "_type": "request",
-      "parentId": "fld_03",
-      "name": "E5 - GET id nao numerico -> 400",
-      "method": "GET",
-      "url": "{{ _.base_url }}/abc",
-      "body": {},
-      "headers": [],
-      "parameters": [],
-      "authentication": {},
-      "metaSortKey": -460
-    },
-    {
-      "_id": "req_0306",
-      "_type": "request",
-      "parentId": "fld_03",
-      "name": "E6 - POST participante inexistente -> 404",
-      "method": "POST",
-      "url": "{{ _.base_url }}/",
-      "body": {
-        "mimeType": "application/json",
-        "text": "{\n  \"titulo\": \"Reuniao com participante fantasma\",\n  \"data\": \"2026-08-20\",\n  \"status\": \"RECEBIDA\",\n  \"participantes\": [999]\n}"
-      },
-      "headers": [{ "name": "Content-Type", "value": "application/json" }],
-      "parameters": [],
-      "authentication": {},
-      "metaSortKey": -450
-    },
-    {
-      "_id": "req_0307",
-      "_type": "request",
-      "parentId": "fld_03",
-      "name": "E7 - POST acao inexistente -> 404",
-      "method": "POST",
-      "url": "{{ _.base_url }}/",
-      "body": {
-        "mimeType": "application/json",
-        "text": "{\n  \"titulo\": \"Reuniao com acao fantasma\",\n  \"data\": \"2026-08-20\",\n  \"status\": \"RECEBIDA\",\n  \"acoes\": [99]\n}"
-      },
-      "headers": [{ "name": "Content-Type", "value": "application/json" }],
-      "parameters": [],
-      "authentication": {},
-      "metaSortKey": -440
-    },
-    {
-      "_id": "req_0308",
-      "_type": "request",
-      "parentId": "fld_03",
-      "name": "E8 - POST JSON malformado -> 400",
-      "method": "POST",
-      "url": "{{ _.base_url }}/",
-      "body": {
-        "mimeType": "application/json",
-        "text": "{\n  \"titulo\": \"json quebrado\""
-      },
-      "headers": [{ "name": "Content-Type", "value": "application/json" }],
-      "parameters": [],
-      "authentication": {},
-      "metaSortKey": -430
-    },
-    {
-      "_id": "req_0309",
-      "_type": "request",
-      "parentId": "fld_03",
-      "name": "E9 - POST status inexistente no enum -> 201 (BUG)",
-      "method": "POST",
-      "url": "{{ _.base_url }}/",
-      "body": {
-        "mimeType": "application/json",
-        "text": "{\n  \"titulo\": \"Status que nao existe\",\n  \"data\": \"2026-08-20\",\n  \"status\": \"BANANA\"\n}"
-      },
-      "headers": [{ "name": "Content-Type", "value": "application/json" }],
-      "parameters": [],
-      "authentication": {},
-      "metaSortKey": -420
-    },
-    {
-      "_id": "req_0310",
-      "_type": "request",
-      "parentId": "fld_03",
-      "name": "E10 - DELETE colaborador que participa de reuniao -> 500 (BUG)",
-      "method": "DELETE",
-      "url": "{{ _.base_url }}/api/reunioes/colaboradores/1",
-      "body": {},
-      "headers": [],
-      "parameters": [],
-      "authentication": {},
-      "metaSortKey": -410
-    },
-    {
-      "_id": "req_0311",
-      "_type": "request",
-      "parentId": "fld_03",
-      "name": "E11 - PUT colaborador id inexistente -> 404",
-      "method": "PUT",
-      "url": "{{ _.base_url }}/api/reunioes/colaboradores/999",
-      "body": {
-        "mimeType": "application/json",
-        "text": "{\n  \"nome\": \"Fulano Inexistente\",\n  \"senha\": \"123456\"\n}"
-      },
-      "headers": [{ "name": "Content-Type", "value": "application/json" }],
-      "parameters": [],
-      "authentication": {},
-      "metaSortKey": -400
-    },
-    {
-      "_id": "req_0312",
-      "_type": "request",
-      "parentId": "fld_03",
-      "name": "E12 - GET pagina fora do range -> 200 content vazio",
-      "method": "GET",
-      "url": "{{ _.base_url }}/",
-      "body": {},
-      "headers": [],
-      "parameters": [
-        { "name": "page", "value": "50" },
-        { "name": "size", "value": "10" }
-      ],
-      "authentication": {},
-      "metaSortKey": -390
-    },
-
-    {
-      "_id": "fld_04",
+      "_id": "fld_32",
       "_type": "request_group",
       "parentId": "wrk_reunioes",
-      "name": "04 - Vinculo colaborador x reuniao",
-      "description": "Rode na ordem, com a API recem-iniciada. V1 cria o colaborador, V2 cria a reuniao vazia, V3 injeta o colaborador nela, V4 confirma. V5 e V6 sao os casos negativos.",
-      "metaSortKey": 0
+      "name": "6. Tratamento de erro",
+      "description": "Toda falha responde em ProblemDetail (RFC 7807), sem stack trace.",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1789952042441
     },
     {
-      "_id": "req_0401",
+      "_id": "req_33",
       "_type": "request",
-      "parentId": "fld_04",
-      "name": "V1 - POST colaborador (anote o id da resposta) -> 201",
+      "parentId": "fld_32",
+      "name": "Id inexistente -> 404",
+      "description": "Recurso nao encontrado.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/reunioes/999999",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952042341,
+      "isPrivate": false
+    },
+    {
+      "_id": "req_34",
+      "_type": "request",
+      "parentId": "fld_32",
+      "name": "Id nao numerico -> 400",
+      "description": "O tipo do parametro na rota nao bate.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/reunioes/abc",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952042241,
+      "isPrivate": false
+    },
+    {
+      "_id": "req_35",
+      "_type": "request",
+      "parentId": "fld_32",
+      "name": "Rota inexistente -> 404",
+      "description": "Trata NoResourceFoundException. Antes caia no generico e virava 500.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/rota-que-nao-existe",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952042141,
+      "isPrivate": false
+    },
+    {
+      "_id": "req_36",
+      "_type": "request",
+      "parentId": "fld_32",
+      "name": "Metodo nao suportado -> 405",
+      "description": "A resposta informa quais metodos a rota aceita.",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/api/reunioes",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952042041,
+      "isPrivate": false
+    },
+    {
+      "_id": "req_37",
+      "_type": "request",
+      "parentId": "fld_32",
+      "name": "Query param obrigatorio ausente -> 400",
+      "description": "Falta o reuniaoId. A resposta diz qual parametro faltou.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/reunioes/acoes/reuniao",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952041941,
+      "isPrivate": false
+    },
+    {
+      "_id": "req_38",
+      "_type": "request",
+      "parentId": "fld_32",
+      "name": "Campos invalidos -> 400 com a lista",
+      "description": "Titulo com menos de 5 caracteres, data vazia e os dois status ausentes.\nA resposta traz um array campos, com campo e mensagem de cada reprovacao.",
+      "method": "POST",
+      "url": "{{ _.base_url }}/api/reunioes",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"titulo\": \"abc\",\n  \"data\": \"\",\n  \"areas\": [],\n  \"pontosChaves\": [],\n  \"participantes\": [],\n  \"acoes\": []\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952041841,
+      "isPrivate": false
+    },
+    {
+      "_id": "req_39",
+      "_type": "request",
+      "parentId": "fld_32",
+      "name": "JSON malformado -> 400",
+      "description": "Envie um corpo quebrado, por exemplo {\"titulo\": . A resposta e corpo-ilegivel.",
+      "method": "POST",
+      "url": "{{ _.base_url }}/api/reunioes",
+      "body": {},
+      "headers": [],
+      "parameters": [],
+      "authentication": {},
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952041741,
+      "isPrivate": false
+    },
+    {
+      "_id": "req_40",
+      "_type": "request",
+      "parentId": "fld_32",
+      "name": "Participante inexistente -> 404",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/api/reunioes",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"titulo\": \"Reuniao com participante invalido\",\n  \"data\": \"2026-09-20T10:00:00\",\n  \"statusTranscricao\": \"RECEBIDA\",\n  \"statusReuniao\": \"PENDENTE\",\n  \"areas\": [],\n  \"pontosChaves\": [],\n  \"participantes\": [\n    999999\n  ],\n  \"acoes\": []\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952041641,
+      "isPrivate": false
+    },
+    {
+      "_id": "req_41",
+      "_type": "request",
+      "parentId": "fld_32",
+      "name": "Colaborador sem papel -> 400",
+      "description": "Ate a correcao do @NotBlank em enum, este caso devolvia 500 generico.",
       "method": "POST",
       "url": "{{ _.base_url }}/api/reunioes/colaboradores",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n  \"nome\": \"Ana Beatriz Fontes\",\n  \"senha\": \"123456\",\n  \"monitorarReunioes\": true,\n  \"dataCadastro\": \"2026-08-17\"\n}"
+        "text": "{\n  \"nome\": \"Sem papel\",\n  \"email\": \"sem.papel@exemplo.com.br\",\n  \"senha\": \"senha123\",\n  \"monitorarReunioes\": false\n}"
       },
-      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
       "parameters": [],
       "authentication": {},
-      "metaSortKey": 100
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952041541,
+      "isPrivate": false
     },
     {
-      "_id": "req_0402",
+      "_id": "fld_42",
+      "_type": "request_group",
+      "parentId": "wrk_reunioes",
+      "name": "7. Fluxo completo de demonstracao",
+      "description": "Roteiro na ordem, do zero ate a reuniao montada. Bom para o pitch.",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1789952041441
+    },
+    {
+      "_id": "req_43",
       "_type": "request",
-      "parentId": "fld_04",
-      "name": "V2 - POST reuniao VAZIA (anote o id) -> 201",
+      "parentId": "fld_42",
+      "name": "Passo 1 - criar o colaborador (anote o id)",
+      "description": "Coloque o id devolvido em id_colaborador, no ambiente.",
       "method": "POST",
-      "url": "{{ _.base_url }}/",
+      "url": "{{ _.base_url }}/api/reunioes/colaboradores",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n  \"titulo\": \"Alinhamento semanal de Operacoes\",\n  \"data\": \"2026-08-18T09:00:00\",\n  \"status\": \"RECEBIDA\",\n  \"areas\": [\"Operacoes\"],\n  \"pontosChaves\": [],\n  \"participantes\": [],\n  \"acoes\": [],\n  \"totalAcoes\": 0\n}"
+        "text": "{\n  \"nome\": \"Mariana Souza\",\n  \"email\": \"mariana.souza@exemplo.com.br\",\n  \"senha\": \"senha123\",\n  \"papel\": \"ADMIN\",\n  \"monitorarReunioes\": true\n}"
       },
-      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
       "parameters": [],
       "authentication": {},
-      "metaSortKey": 110
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952041341,
+      "isPrivate": false
     },
     {
-      "_id": "req_0403",
+      "_id": "req_44",
       "_type": "request",
-      "parentId": "fld_04",
-      "name": "V3 - PATCH injeta o colaborador na reuniao -> 202",
-      "method": "PATCH",
-      "url": "{{ _.base_url }}/{{ _.id_reuniao }}",
+      "parentId": "fld_42",
+      "name": "Passo 2 - criar a reuniao com o participante (anote o id)",
+      "description": "Coloque o id devolvido em id_reuniao. Repare no header Location.",
+      "method": "POST",
+      "url": "{{ _.base_url }}/api/reunioes",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n  \"participantes\": [1]\n}"
+        "text": "{\n  \"titulo\": \"Planejamento do proximo trimestre\",\n  \"data\": \"2026-10-01T09:00:00\",\n  \"statusTranscricao\": \"RECEBIDA\",\n  \"statusReuniao\": \"PENDENTE\",\n  \"resumo\": \"Definicao das prioridades do trimestre.\",\n  \"areas\": [\n    \"Operacoes\"\n  ],\n  \"pontosChaves\": [\n    \"Revisar o orcamento\",\n    \"Definir as metas\"\n  ],\n  \"participantes\": [\n    \"{{ _.id_colaborador }}\"\n  ],\n  \"acoes\": []\n}"
       },
-      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
       "parameters": [],
       "authentication": {},
-      "metaSortKey": 120
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952041241,
+      "isPrivate": false
     },
     {
-      "_id": "req_0404",
+      "_id": "req_45",
       "_type": "request",
-      "parentId": "fld_04",
-      "name": "V4 - GET por id confirma o vinculo -> 200",
+      "parentId": "fld_42",
+      "name": "Passo 3 - criar a acao dentro da reuniao",
+      "description": "Coloque o id devolvido em id_acao.",
+      "method": "POST",
+      "url": "{{ _.base_url }}/api/reunioes/acoes/{{ _.id_reuniao }}",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"titulo\": \"Fechar o orcamento\",\n  \"descricao\": \"Consolidar os numeros e enviar para aprovacao.\",\n  \"tipo\": \"TAREFA\",\n  \"prazo\": \"2026-10-10\",\n  \"concluida\": false,\n  \"responsavel\": [\n    \"{{ _.id_colaborador }}\"\n  ]\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952041141,
+      "isPrivate": false
+    },
+    {
+      "_id": "req_46",
+      "_type": "request",
+      "parentId": "fld_42",
+      "name": "Passo 4 - a reuniao ja traz tudo",
+      "description": "Confirma que participante e acao foram gravados no banco, e nao so em memoria.",
       "method": "GET",
-      "url": "{{ _.base_url }}/{{ _.id_reuniao }}",
+      "url": "{{ _.base_url }}/api/reunioes/{{ _.id_reuniao }}",
       "body": {},
       "headers": [],
       "parameters": [],
       "authentication": {},
-      "metaSortKey": 130
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952041041,
+      "isPrivate": false
     },
     {
-      "_id": "req_0405",
+      "_id": "req_47",
       "_type": "request",
-      "parentId": "fld_04",
-      "name": "V5 - PATCH colaborador inexistente -> 404",
+      "parentId": "fld_42",
+      "name": "Passo 5 - concluir a acao",
+      "description": "",
       "method": "PATCH",
-      "url": "{{ _.base_url }}/{{ _.id_reuniao }}",
+      "url": "{{ _.base_url }}/api/reunioes/acoes/{{ _.id_acao }}",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n  \"participantes\": [999]\n}"
+        "text": "{\n  \"concluida\": true\n}"
       },
-      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
       "parameters": [],
       "authentication": {},
-      "metaSortKey": 140
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952040941,
+      "isPrivate": false
     },
     {
-      "_id": "req_0406",
+      "_id": "req_48",
       "_type": "request",
-      "parentId": "fld_04",
-      "name": "V6 - GET confirma que o 404 nao apagou o vinculo -> 200",
+      "parentId": "fld_42",
+      "name": "Passo 6 - relatorio consolidado",
+      "description": "",
       "method": "GET",
-      "url": "{{ _.base_url }}/{{ _.id_reuniao }}",
+      "url": "{{ _.base_url }}/api/reunioes/{{ _.id_reuniao }}/relatorio",
       "body": {},
       "headers": [],
       "parameters": [],
       "authentication": {},
-      "metaSortKey": 150
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952040841,
+      "isPrivate": false
     },
     {
-      "_id": "req_0407",
+      "_id": "req_49",
       "_type": "request",
-      "parentId": "fld_04",
-      "name": "V7 - PATCH lista vazia desvincula -> 202",
-      "method": "PATCH",
-      "url": "{{ _.base_url }}/{{ _.id_reuniao }}",
-      "body": {
-        "mimeType": "application/json",
-        "text": "{\n  \"participantes\": []\n}"
-      },
-      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "parentId": "fld_42",
+      "name": "Passo 7 - feriado pela BrasilAPI (Feign)",
+      "description": "Fecha a demonstracao mostrando a integracao com servico externo.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/reunioes/{{ _.id_reuniao }}/feriado",
+      "body": {},
+      "headers": [],
       "parameters": [],
       "authentication": {},
-      "metaSortKey": 160
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "metaSortKey": -1789952040741,
+      "isPrivate": false
     }
   ]
 }
