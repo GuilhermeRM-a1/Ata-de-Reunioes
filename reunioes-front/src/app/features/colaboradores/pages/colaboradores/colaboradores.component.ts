@@ -1,17 +1,22 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { MdbModalModule, MdbModalService } from 'mdb-angular-ui-kit/modal';
+import { MdbRippleModule } from 'mdb-angular-ui-kit/ripple';
 
 import { ColaboradorService } from '../../../../core/services/colaborador.service';
 import { AlertaService } from '../../../../core/services/alerta.service';
 import { AuthService, Papel } from '../../../../core/services/auth.service';
 import { Colaborador } from '../../../../core/models';
+import {
+  ColaboradorFormModalComponent,
+  ResultadoFormularioColaborador,
+} from '../../components/colaborador-form-modal/colaborador-form-modal.component';
 
 @Component({
   selector: 'app-colaboradores',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, MdbModalModule, MdbRippleModule],
   templateUrl: './colaboradores.component.html',
   styleUrl: './colaboradores.component.scss',
 })
@@ -20,23 +25,13 @@ export class ColaboradoresComponent implements OnInit {
   private readonly colaboradorService = inject(ColaboradorService);
   private readonly alerta = inject(AlertaService);
   private readonly router = inject(Router);
+  private readonly modalService = inject(MdbModalService);
 
   /** Publico: o template esconde a tela inteira para quem nao e admin. */
   protected readonly auth = inject(AuthService);
 
   readonly colaboradores = signal<Colaborador[]>([]);
   readonly carregando = signal(false);
-
-  /** null = formulario em modo "novo cadastro". */
-  edicaoId: number | null = null;
-
-  inputNome = '';
-  inputEmail = '';
-  inputSenha = '';
-  inputMonitorarReunioes = false;
-  inputPapel: Papel = 'USUARIO';
-
-  readonly papeis: Papel[] = ['ADMIN', 'USUARIO'];
 
   ngOnInit(): void {
     // Tela exclusiva de admin: quem nao for, volta para as reunioes.
@@ -66,37 +61,13 @@ export class ColaboradoresComponent implements OnInit {
     });
   }
 
+  /** Abre o formulario vazio: a tabela continua visivel atras do modal. */
+  novoColaborador(): void {
+    this.abrirFormulario(null);
+  }
+
   editar(colaborador: Colaborador): void {
-    this.edicaoId = colaborador.id ?? null;
-    this.inputNome = colaborador.nome;
-    this.inputEmail = colaborador.email;
-    this.inputMonitorarReunioes = colaborador.monitorarReunioes;
-    this.inputPapel = colaborador.papel;
-  }
-
-  cancelarEdicao(): void {
-    this.limparFormulario();
-  }
-
-  salvar(): void {
-    if (!this.formularioValido()) {
-      return;
-    }
-
-    const dados: Colaborador = {
-      nome: this.inputNome.trim(),
-      email: this.inputEmail.trim(),
-      monitorarReunioes: this.inputMonitorarReunioes,
-      papel: this.inputPapel,
-    };
-
-    if (this.edicaoId === null) {
-      // A senha so existe no cadastro: o back a exige no POST e nunca a devolve.
-      this.criar({ ...dados, senha: this.inputSenha });
-      return;
-    }
-
-    this.atualizar(this.edicaoId, dados);
+    this.abrirFormulario(colaborador);
   }
 
   async remover(colaborador: Colaborador): Promise<void> {
@@ -117,7 +88,6 @@ export class ColaboradoresComponent implements OnInit {
     this.colaboradorService.deletar(colaborador.id).subscribe({
       next: () => {
         this.alerta.sucesso('Colaborador excluído');
-        this.limparFormulario();
         this.listar();
       },
       error: () => {
@@ -130,11 +100,34 @@ export class ColaboradoresComponent implements OnInit {
     return papel === 'ADMIN' ? 'Administrador' : 'Usuário';
   }
 
+  private abrirFormulario(colaborador: Colaborador | null): void {
+    const modalRef = this.modalService.open(ColaboradorFormModalComponent, {
+      modalClass: 'modal-dialog-centered modal-lg',
+    });
+
+    if (colaborador) {
+      modalRef.component.preencher(colaborador);
+    }
+
+    modalRef.onClose.subscribe((resultado: ResultadoFormularioColaborador | undefined) => {
+      if (!resultado) {
+        return;
+      }
+
+      if (resultado.edicaoId === null) {
+        // A senha so existe no cadastro: o back a exige no POST e nunca a devolve.
+        this.criar({ ...resultado.dados, senha: resultado.senha });
+        return;
+      }
+
+      this.atualizar(resultado.edicaoId, resultado.dados);
+    });
+  }
+
   private criar(dados: Colaborador): void {
     this.colaboradorService.save(dados).subscribe({
       next: () => {
         this.alerta.sucesso('Colaborador cadastrado');
-        this.limparFormulario();
         this.listar();
       },
       error: (erro) => {
@@ -152,32 +145,12 @@ export class ColaboradoresComponent implements OnInit {
     this.colaboradorService.atualizarParcial(id, dados).subscribe({
       next: () => {
         this.alerta.sucesso('Colaborador atualizado');
-        this.limparFormulario();
         this.listar();
       },
       error: (erro) => {
         this.alerta.erro('Erro ao atualizar', this.mensagemDoErro(erro));
       },
     });
-  }
-
-  private formularioValido(): boolean {
-    if (this.inputNome.trim() === '') {
-      this.alerta.erro('Nome obrigatório', 'Informe o nome do colaborador.');
-      return false;
-    }
-
-    if (this.inputEmail.trim() === '') {
-      this.alerta.erro('E-mail obrigatório', 'Informe o e-mail do colaborador.');
-      return false;
-    }
-
-    if (this.edicaoId === null && this.inputSenha.trim() === '') {
-      this.alerta.erro('Senha obrigatória', 'Informe uma senha para o novo colaborador.');
-      return false;
-    }
-
-    return true;
   }
 
   /**
@@ -192,14 +165,5 @@ export class ColaboradoresComponent implements OnInit {
     }
 
     return erro?.error?.detail ?? 'Verifique os dados e tente novamente.';
-  }
-
-  private limparFormulario(): void {
-    this.edicaoId = null;
-    this.inputNome = '';
-    this.inputEmail = '';
-    this.inputSenha = '';
-    this.inputMonitorarReunioes = false;
-    this.inputPapel = 'USUARIO';
   }
 }

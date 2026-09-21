@@ -1,7 +1,7 @@
 <header class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
   <h1 class="h3 mb-0">Reuniões</h1>
   @if (auth.isAdmin) {
-    <button class="btn btn-primary" (click)="novaReuniao()">
+    <button class="btn btn-primary" mdbRipple (click)="novaReuniao()">
       <i class="fas fa-plus me-1"></i> Nova reunião
     </button>
   }
@@ -73,10 +73,10 @@
                       </td>
                       @if (auth.isAdmin) {
                         <td class="text-end text-nowrap pe-3">
-                          <button class="btn btn-sm btn-outline-secondary me-1" (click)="editarReuniao(reuniao.id, $event)" title="Editar">
+                          <button class="btn btn-sm btn-outline-secondary me-1" mdbRipple (click)="editarReuniao(reuniao.id, $event)" title="Editar">
                             <i class="fas fa-pen"></i>
                           </button>
-                          <button class="btn btn-sm btn-outline-danger" (click)="excluir(reuniao, $event)" title="Excluir">
+                          <button class="btn btn-sm btn-outline-danger" mdbRipple (click)="excluir(reuniao, $event)" title="Excluir">
                             <i class="fas fa-trash"></i>
                           </button>
                         </td>

@@ -23,10 +23,11 @@
           <a
             [routerLink]="['/reunioes', reuniao.id, 'editar']"
             class="btn btn-outline-primary"
+            mdbRipple
           >
             <i class="fas fa-pen me-1"></i> Editar
           </a>
-          <button class="btn btn-outline-danger" (click)="abrirModalExclusao()">
+          <button class="btn btn-outline-danger" mdbRipple (click)="abrirModalExclusao()">
             <i class="fas fa-trash me-1"></i> Excluir
           </button>
         </div>
@@ -143,52 +144,15 @@
 
     <section class="mb-4">
       <h2 class="h6 text-uppercase text-muted fw-semibold mb-3">Transcrição</h2>
-      <div class="accordion" id="accordionTranscricao">
-        <div class="accordion-item">
-          <h3 class="accordion-header">
-            <button
-              class="accordion-button"
-              [class.collapsed]="!transcricaoAberta()"
-              type="button"
-              (click)="alternarTranscricao()"
-            >
-              {{
-                transcricaoAberta()
-                  ? "Ocultar transcrição completa"
-                  : "Ver transcrição completa"
-              }}
-            </button>
-          </h3>
-          <div
-            id="collapseTranscricao"
-            class="accordion-collapse collapse"
-            [class.show]="transcricaoAberta()"
-          >
+      <mdb-accordion>
+        <mdb-accordion-item header="Ver transcrição completa">
+          <ng-template mdbAccordionItemBody>
             <!-- O back ainda nao devolve a transcricao pura; quando devolver, o corpo entra aqui. -->
-            <div class="accordion-body text-muted">Transcrição não disponível.</div>
-          </div>
-        </div>
-      </div>
+            <span class="text-muted">Transcrição não disponível.</span>
+          </ng-template>
+        </mdb-accordion-item>
+      </mdb-accordion>
     </section>
 
-    @if (auth.isAdmin && modalExclusaoAberto()) {
-      <div class="modal-backdrop-custom" (click)="cancelarExclusao()">
-        <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
-          <div class="modal-content border-0 shadow">
-            <div class="modal-header border-0">
-              <h5 class="modal-title">Confirmar exclusão</h5>
-            </div>
-            <div class="modal-body">
-              Tem certeza que deseja excluir a reunião
-              <strong>{{ reuniao.titulo }}</strong>? Essa ação não pode ser desfeita.
-            </div>
-            <div class="modal-footer border-0">
-              <button class="btn btn-secondary" (click)="cancelarExclusao()">Cancelar</button>
-              <button class="btn btn-danger" (click)="confirmarExclusao()">Excluir</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    }
   }
 }

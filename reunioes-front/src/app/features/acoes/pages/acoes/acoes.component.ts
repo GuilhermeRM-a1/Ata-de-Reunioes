@@ -1,6 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MdbRippleModule } from 'mdb-angular-ui-kit/ripple';
 import { Router } from '@angular/router';
 import { Acao } from '../../../../core/models';
 import { AcaoService } from '../../../../core/services/acao.service';
@@ -15,7 +16,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 @Component({
   selector: 'app-acoes',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MdbRippleModule],
   templateUrl: './acoes.component.html',
   styleUrls: ['./acoes.component.scss']
 })

@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
+import { MdbRippleModule } from 'mdb-angular-ui-kit/ripple';
 import { Router } from '@angular/router';
 import { ReuniaoService } from '../../../../core/services/reuniao.service';
 import { AlertaService } from '../../../../core/services/alerta.service';
@@ -17,7 +18,7 @@ interface GrupoReunioes {
 @Component({
   selector: 'app-reunioes',
   standalone: true,
-  imports: [CommonModule, DatePipe, StatusBadgeComponent],
+  imports: [CommonModule, DatePipe, StatusBadgeComponent, MdbRippleModule],
   templateUrl: './reunioes.component.html',
   styleUrl: './reunioes.component.scss'
 })

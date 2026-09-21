@@ -8,24 +8,27 @@
       class="navbar-toggler"
       type="button"
       aria-label="Abrir menu"
-      [attr.aria-expanded]="menuAberto()"
-      (click)="alternarMenu()"
+      [attr.aria-expanded]="!menu.collapsed"
+      (click)="menu.toggle()"
     >
-      <span class="navbar-toggler-icon"></span>
+      <!-- Icone do Font Awesome: o navbar-toggler-icon do Bootstrap depende de um
+           background-image que o tema do MDB nao fornece, e some na tela. -->
+      <i class="fas fa-bars"></i>
     </button>
 
-    <div class="collapse navbar-collapse" [class.show]="menuAberto()">
+    <!-- O collapse da navbar e do MDB (mdbCollapse), nao mais um signal na mao. -->
+    <div class="navbar-collapse" mdbCollapse #menu="mdbCollapse">
       <div class="navbar-nav me-auto">
-        <a class="nav-link" routerLink="/reunioes" routerLinkActive="active" (click)="fecharMenu()">
+        <a class="nav-link" routerLink="/reunioes" routerLinkActive="active" (click)="menu.hide()">
           <i class="fas fa-calendar-days me-2"></i>Reuniões
         </a>
 
-        <a class="nav-link" routerLink="/acoes" routerLinkActive="active" (click)="fecharMenu()">
+        <a class="nav-link" routerLink="/acoes" routerLinkActive="active" (click)="menu.hide()">
           <i class="fas fa-list-check me-2"></i>Ações
         </a>
 
         @if (auth.isAdmin) {
-          <a class="nav-link" routerLink="/colaboradores" routerLinkActive="active" (click)="fecharMenu()">
+          <a class="nav-link" routerLink="/colaboradores" routerLinkActive="active" (click)="menu.hide()">
             <i class="fas fa-users me-2"></i>Colaboradores
           </a>
         }
@@ -38,7 +41,7 @@
           </span>
         }
 
-        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="sair()">
+        <button type="button" class="btn btn-sm btn-outline-secondary" mdbRipple (click)="sair()">
           <i class="fas fa-right-from-bracket me-1"></i>Sair
         </button>
       </div>

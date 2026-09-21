@@ -1,11 +1,13 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { MdbCollapseModule } from 'mdb-angular-ui-kit/collapse';
+import { MdbRippleModule } from 'mdb-angular-ui-kit/ripple';
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, RouterOutlet],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet, MdbCollapseModule, MdbRippleModule],
   templateUrl: './shell.component.html',
   styleUrl: './shell.component.scss'
 })
@@ -14,17 +16,6 @@ export class ShellComponent {
   protected readonly auth = inject(AuthService);
 
   private readonly router = inject(Router);
-
-  /** So apresentacao: controla o collapse da navbar em tela estreita. */
-  readonly menuAberto = signal(false);
-
-  alternarMenu(): void {
-    this.menuAberto.update(aberto => !aberto);
-  }
-
-  fecharMenu(): void {
-    this.menuAberto.set(false);
-  }
 
   sair(): void {
     this.auth.sair();

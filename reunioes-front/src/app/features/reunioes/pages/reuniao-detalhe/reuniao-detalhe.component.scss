@@ -1,12 +1,1 @@
-// O modal e montado na mao (sem o JS do Bootstrap), entao o backdrop
-// e o unico bloco que ainda precisa de CSS proprio.
-.modal-backdrop-custom {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1050;
-  padding: 1rem;
-}
+// Sem CSS proprio: o modal de exclusao agora e do MdbModalService.
