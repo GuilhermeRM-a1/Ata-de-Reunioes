@@ -11,7 +11,9 @@
       [attr.aria-expanded]="!menu.collapsed"
       (click)="menu.toggle()"
     >
-      <span class="navbar-toggler-icon"></span>
+      <!-- Icone do Font Awesome: o navbar-toggler-icon do Bootstrap depende de um
+           background-image que o tema do MDB nao fornece, e some na tela. -->
+      <i class="fas fa-bars"></i>
     </button>
 
     <!-- O collapse da navbar e do MDB (mdbCollapse), nao mais um signal na mao. -->
