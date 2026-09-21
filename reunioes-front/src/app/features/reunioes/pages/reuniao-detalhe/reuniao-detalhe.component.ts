@@ -1,16 +1,28 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { MdbAccordionModule } from 'mdb-angular-ui-kit/accordion';
+import { MdbModalModule, MdbModalService } from 'mdb-angular-ui-kit/modal';
+import { MdbRippleModule } from 'mdb-angular-ui-kit/ripple';
 import { ReuniaoService } from '../../../../core/services/reuniao.service';
 import { AlertaService } from '../../../../core/services/alerta.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
+import { ConfirmacaoModalComponent } from '../../../../shared/components/confirmacao-modal/confirmacao-modal.component';
 import { ReuniaoApiDTO } from '../../../../core/models';
 
 @Component({
   selector: 'app-reuniao-detalhe',
   standalone: true,
-  imports: [CommonModule, DatePipe, RouterLink, StatusBadgeComponent],
+  imports: [
+    CommonModule,
+    DatePipe,
+    RouterLink,
+    StatusBadgeComponent,
+    MdbAccordionModule,
+    MdbModalModule,
+    MdbRippleModule
+  ],
   templateUrl: './reuniao-detalhe.component.html',
   styleUrl: './reuniao-detalhe.component.scss'
 })
@@ -22,12 +34,11 @@ export class ReuniaoDetalheComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly reuniaoService = inject(ReuniaoService);
   private readonly alerta = inject(AlertaService);
+  private readonly modalService = inject(MdbModalService);
 
   readonly reuniao = signal<ReuniaoApiDTO | undefined>(undefined);
   readonly reuniaoNaoEncontrada = signal(false);
   readonly carregando = signal(true);
-  readonly modalExclusaoAberto = signal(false);
-  readonly transcricaoAberta = signal(false);
 
   /** No back os pontos-chave ja vem como lista. */
   readonly pontosChaveLista = computed<string[]>(() => this.reuniao()?.pontosChaves ?? []);
@@ -55,13 +66,28 @@ export class ReuniaoDetalheComponent implements OnInit {
     });
   }
 
+  /** O modal de exclusao vem do MdbModalService, nao mais montado na mao. */
   abrirModalExclusao(): void {
     if (!this.auth.isAdmin) return;
-    this.modalExclusaoAberto.set(true);
-  }
 
-  cancelarExclusao(): void {
-    this.modalExclusaoAberto.set(false);
+    const atual = this.reuniao();
+    if (!atual) return;
+
+    const modalRef = this.modalService.open(ConfirmacaoModalComponent, {
+      modalClass: 'modal-dialog-centered'
+    });
+
+    modalRef.component.titulo = 'Confirmar exclusão';
+    modalRef.component.mensagem = 'Tem certeza que deseja excluir a reunião';
+    modalRef.component.destaque = atual.titulo;
+    modalRef.component.complemento = '? Essa ação não pode ser desfeita.';
+    modalRef.component.rotuloConfirmar = 'Excluir';
+
+    modalRef.onClose.subscribe((confirmado: boolean | undefined) => {
+      if (confirmado) {
+        this.confirmarExclusao();
+      }
+    });
   }
 
   confirmarExclusao(): void {
@@ -72,15 +98,10 @@ export class ReuniaoDetalheComponent implements OnInit {
 
     this.reuniaoService.remover(atual.id).subscribe({
       next: () => {
-        this.modalExclusaoAberto.set(false);
         this.alerta.sucesso('Reunião excluída', atual.titulo);
         this.router.navigate(['/reunioes']);
       },
       error: err => console.error('Erro ao excluir reunião', err)
     });
-  }
-
-  alternarTranscricao(): void {
-    this.transcricaoAberta.update(aberta => !aberta);
   }
 }

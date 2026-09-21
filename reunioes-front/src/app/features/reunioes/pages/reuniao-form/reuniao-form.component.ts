@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, forkJoin, of } from 'rxjs';
+import { MdbFormsModule } from 'mdb-angular-ui-kit/forms';
+import { MdbRippleModule } from 'mdb-angular-ui-kit/ripple';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { ReuniaoService } from '../../../../core/services/reuniao.service';
 import { AcaoService } from '../../../../core/services/acao.service';
@@ -14,7 +16,7 @@ import { AcaoRequestPayload, Colaborador, ReuniaoApiDTO, ReuniaoApiRequest } fro
 @Component({
   selector: 'app-reuniao-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, MdbFormsModule, MdbRippleModule],
   templateUrl: './reuniao-form.component.html',
   styleUrl: './reuniao-form.component.scss'
 })

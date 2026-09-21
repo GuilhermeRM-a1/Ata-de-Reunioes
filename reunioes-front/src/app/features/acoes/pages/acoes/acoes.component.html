@@ -48,10 +48,10 @@
                     <td class="text-nowrap">{{ acao.prazo ? (acao.prazo | date: 'dd/MM/yyyy') : '—' }}</td>
                     @if (auth.isAdmin) {
                       <td class="text-end text-nowrap pe-3" (click)="$event.stopPropagation()">
-                        <button class="btn btn-sm btn-outline-success me-1" (click)="mudarStatus(acao)" title="Concluir">
+                        <button class="btn btn-sm btn-outline-success me-1" mdbRipple (click)="mudarStatus(acao)" title="Concluir">
                           <i class="fas fa-check"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-danger" (click)="excluir(acao, $event)" title="Excluir">
+                        <button class="btn btn-sm btn-outline-danger" mdbRipple (click)="excluir(acao, $event)" title="Excluir">
                           <i class="fas fa-trash"></i>
                         </button>
                       </td>
@@ -103,10 +103,10 @@
                     <td class="text-nowrap">{{ acao.prazo ? (acao.prazo | date: 'dd/MM/yyyy') : '—' }}</td>
                     @if (auth.isAdmin) {
                       <td class="text-end text-nowrap pe-3" (click)="$event.stopPropagation()">
-                        <button class="btn btn-sm btn-outline-secondary me-1" (click)="mudarStatus(acao)" title="Reverter">
+                        <button class="btn btn-sm btn-outline-secondary me-1" mdbRipple (click)="mudarStatus(acao)" title="Reverter">
                           <i class="fas fa-undo-alt"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-danger" (click)="excluir(acao, $event)" title="Excluir">
+                        <button class="btn btn-sm btn-outline-danger" mdbRipple (click)="excluir(acao, $event)" title="Excluir">
                           <i class="fas fa-trash"></i>
                         </button>
                       </td>

@@ -1,99 +1,10 @@
 <header class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
   <h1 class="h3 mb-0">Colaboradores</h1>
+
+  <button type="button" class="btn btn-primary" mdbRipple (click)="novoColaborador()">
+    <i class="fas fa-plus me-1"></i> Novo colaborador
+  </button>
 </header>
-
-<div class="card border-0 shadow-sm mb-4">
-  <div class="card-body">
-    <h2 class="h6 text-uppercase text-muted fw-semibold mb-3">
-      {{ edicaoId === null ? 'Novo colaborador' : 'Editar colaborador' }}
-    </h2>
-
-    <form (ngSubmit)="salvar()">
-      <div class="row g-3">
-        <div class="col-12 col-md-6 col-lg-4">
-          <label for="nome" class="form-label">Nome</label>
-          <input
-            type="text"
-            id="nome"
-            name="nome"
-            class="form-control"
-            [(ngModel)]="inputNome"
-            required
-          />
-        </div>
-
-        <div class="col-12 col-md-6 col-lg-4">
-          <label for="email" class="form-label">E-mail</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            class="form-control"
-            [(ngModel)]="inputEmail"
-            required
-          />
-        </div>
-
-        @if (edicaoId === null) {
-          <div class="col-12 col-md-6 col-lg-4">
-            <label for="senha" class="form-label">Senha</label>
-            <input
-              type="password"
-              id="senha"
-              name="senha"
-              class="form-control"
-              [(ngModel)]="inputSenha"
-              required
-            />
-          </div>
-        }
-
-        <div class="col-12 col-md-6 col-lg-4">
-          <label for="papel" class="form-label">Papel</label>
-          <select
-            id="papel"
-            name="papel"
-            class="form-select"
-            [(ngModel)]="inputPapel"
-            required
-          >
-            @for (papel of papeis; track papel) {
-              <option [value]="papel">{{ rotuloPapel(papel) }}</option>
-            }
-          </select>
-        </div>
-
-        <div class="col-12 col-md-6 col-lg-4 d-flex align-items-end">
-          <div class="form-check mb-2">
-            <input
-              type="checkbox"
-              id="monitorar"
-              name="monitorar"
-              class="form-check-input"
-              [(ngModel)]="inputMonitorarReunioes"
-            />
-            <label class="form-check-label" for="monitorar">
-              Monitorar reuniões
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <div class="mt-4 d-flex flex-wrap gap-2">
-        <button type="submit" class="btn btn-primary">
-          <i class="fas fa-floppy-disk me-1"></i>
-          {{ edicaoId === null ? 'Cadastrar' : 'Salvar alterações' }}
-        </button>
-
-        @if (edicaoId !== null) {
-          <button type="button" class="btn btn-outline-secondary" (click)="cancelarEdicao()">
-            Cancelar
-          </button>
-        }
-      </div>
-    </form>
-  </div>
-</div>
 
 <section class="mb-4">
   <h2 class="h6 text-uppercase text-muted fw-semibold mb-3">Cadastrados</h2>
@@ -147,6 +58,7 @@
                     <button
                       type="button"
                       class="btn btn-sm btn-outline-secondary me-1"
+                      mdbRipple
                       (click)="editar(colaborador)"
                       title="Editar"
                     >
@@ -156,6 +68,7 @@
                     <button
                       type="button"
                       class="btn btn-sm btn-outline-danger"
+                      mdbRipple
                       (click)="remover(colaborador)"
                       title="Excluir"
                     >

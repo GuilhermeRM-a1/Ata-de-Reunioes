@@ -9,15 +9,18 @@
 
       <form [formGroup]="form" (ngSubmit)="login()">
 
-        <div class="mb-3">
-          <label for="email" class="form-label">E-mail</label>
-          <input
-            type="email"
-            id="email"
-            formControlName="email"
-            class="form-control"
-            [class.is-invalid]="email?.invalid && email?.touched"
-          />
+        <div class="mb-4">
+          <mdb-form-control>
+            <input
+              mdbInput
+              type="email"
+              id="email"
+              formControlName="email"
+              class="form-control"
+              [class.is-invalid]="email?.invalid && email?.touched"
+            />
+            <label mdbLabel class="form-label" for="email">E-mail</label>
+          </mdb-form-control>
 
           @if (email?.invalid && email?.touched) {
             <div class="invalid-feedback d-block">
@@ -30,15 +33,18 @@
           }
         </div>
 
-        <div class="mb-3">
-          <label for="senha" class="form-label">Senha</label>
-          <input
-            type="password"
-            id="senha"
-            formControlName="senha"
-            class="form-control"
-            [class.is-invalid]="senha?.invalid && senha?.touched"
-          />
+        <div class="mb-4">
+          <mdb-form-control>
+            <input
+              mdbInput
+              type="password"
+              id="senha"
+              formControlName="senha"
+              class="form-control"
+              [class.is-invalid]="senha?.invalid && senha?.touched"
+            />
+            <label mdbLabel class="form-label" for="senha">Senha</label>
+          </mdb-form-control>
 
           @if (senha?.invalid && senha?.touched) {
             <div class="invalid-feedback d-block">
@@ -53,7 +59,7 @@
           </div>
         }
 
-        <button type="submit" class="btn btn-primary w-100 mt-2">
+        <button type="submit" class="btn btn-primary w-100 mt-2" mdbRipple>
           <i class="fas fa-right-to-bracket me-1"></i> Entrar
         </button>
 

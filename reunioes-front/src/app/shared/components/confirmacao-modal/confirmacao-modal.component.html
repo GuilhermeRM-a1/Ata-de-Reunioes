@@ -1,0 +1,21 @@
+<div class="modal-header border-0">
+  <h5 class="modal-title">{{ titulo }}</h5>
+  <button
+    type="button"
+    class="btn-close"
+    aria-label="Fechar"
+    (click)="cancelar()"
+  ></button>
+</div>
+
+<!-- Tudo numa linha so: quebrar aqui inseriria espaco antes da pontuacao. -->
+<div class="modal-body">{{ mensagem }}@if (destaque) {<strong> {{ destaque }}</strong>}{{ complemento }}</div>
+
+<div class="modal-footer border-0">
+  <button type="button" class="btn btn-secondary" mdbRipple (click)="cancelar()">
+    {{ rotuloCancelar }}
+  </button>
+  <button type="button" class="btn btn-danger" mdbRipple (click)="confirmar()">
+    {{ rotuloConfirmar }}
+  </button>
+</div>
