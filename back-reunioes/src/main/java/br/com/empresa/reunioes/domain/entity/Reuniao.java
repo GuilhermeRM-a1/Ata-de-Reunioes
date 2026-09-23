@@ -1,5 +1,6 @@
 package br.com.empresa.reunioes.domain.entity;
 
+import br.com.empresa.reunioes.domain.enums.StatusReuniao;
 import br.com.empresa.reunioes.domain.enums.StatusTranscricao;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -32,10 +33,22 @@ public class Reuniao {
     private String transcricao;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status")
-    private StatusTranscricao status;
+    @Column(name = "status_transcricao")
+    private StatusTranscricao statusTranscricao;
 
-    @ManyToMany(mappedBy = "reunioes")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status_reuniao")
+    private StatusReuniao statusReuniao;
+
+    /**
+     * Lado dono da relacao: e a Reuniao que carrega o @JoinTable, porque e por
+     * ela que o vinculo e criado na API. Estava invertido, entao
+     * setParticipantes() nao gerava INSERT nenhum e a lista sumia no banco.
+     */
+    @ManyToMany
+    @JoinTable(name = "reuniao_participantes",
+            joinColumns = @JoinColumn(name = "reuniao_id"),
+            inverseJoinColumns = @JoinColumn(name = "participantes_id"))
     private List<Colaborador> participantes;
 
     @ElementCollection

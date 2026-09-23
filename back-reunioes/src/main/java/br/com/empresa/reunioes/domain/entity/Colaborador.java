@@ -40,10 +40,8 @@ public class Colaborador {
     private List<Acao> acoes;
 
 
-    @ManyToMany
-    @JoinTable(name = "reuniao_participantes",
-            joinColumns = @JoinColumn(name = "participantes_id"),
-            inverseJoinColumns = @JoinColumn(name = "reuniao_id"))
+    /** Lado inverso. Quem grava o vinculo e Reuniao.participantes. */
+    @ManyToMany(mappedBy = "participantes")
     private List<Reuniao> reunioes;
 
 }

@@ -9,6 +9,7 @@ import br.com.empresa.reunioes.domain.entity.Reuniao;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoDTO;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.RelatorioReuniaoResponse;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoFeriadoDTO;
+import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoPatchRequest;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoRequest;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoResumoRequest;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,11 +18,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import java.net.URI;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 
 @RestController
@@ -75,7 +78,13 @@ public class ReuniaoController {
         Reuniao reuniao = reuniaoService.salvar(request);
         ReuniaoDTO dto = mapper.toDTO(reuniao);
 
-        return new ResponseEntity<>(dto, HttpStatus.CREATED);
+        // 201 sem Location deixa o cliente sem saber onde o recurso foi parar.
+        URI endereco = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(dto.id())
+                .toUri();
+
+        return ResponseEntity.created(endereco).body(dto);
     }
 
     @Operation(summary = "Substitui uma reunião por completo")
@@ -104,8 +113,8 @@ public class ReuniaoController {
     })
     @PatchMapping("/{id}")
     public ResponseEntity<ReuniaoDTO> atualizarParcial(@PathVariable Long id,
-                                                       @Valid @RequestBody ReuniaoRequest request) {
-        Reuniao reuniao = reuniaoService.atualizarParcial(id, request);
+                                                       @Valid @RequestBody ReuniaoPatchRequest request) {
+        Reuniao reuniao = reuniaoService.atualizarParcial(id, request.paraRequest());
         ReuniaoDTO dto = mapper.toDTO(reuniao);
 
         return new ResponseEntity<>(dto, HttpStatus.OK);

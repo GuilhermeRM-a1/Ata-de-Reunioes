@@ -1,0 +1,7 @@
+// Sem utilitario equivalente: teto de largura do formulario para nao
+// esticar demais as linhas em monitor largo.
+:host {
+  display: block;
+  max-width: 960px;
+  margin: 0 auto;
+}

@@ -1,1 +1,86 @@
-<p>colaboradores works!</p>
+<header class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h1 class="h3 mb-0">Colaboradores</h1>
+
+  <button type="button" class="btn btn-primary" mdbRipple (click)="novoColaborador()">
+    <i class="fas fa-plus me-1"></i> Novo colaborador
+  </button>
+</header>
+
+<section class="mb-4">
+  <h2 class="h6 text-uppercase text-muted fw-semibold mb-3">Cadastrados</h2>
+
+  @if (carregando()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Carregando...</span>
+      </div>
+      <p class="text-muted mt-3 mb-0">Carregando colaboradores...</p>
+    </div>
+  } @else if (colaboradores().length === 0) {
+    <div class="card border-0 shadow-sm">
+      <div class="card-body text-center text-muted py-4">
+        <i class="fas fa-users fa-lg mb-2 d-block opacity-50"></i>
+        Nenhum colaborador cadastrado.
+      </div>
+    </div>
+  } @else {
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th class="ps-3">Nome</th>
+                <th>E-mail</th>
+                <th>Papel</th>
+                <th>Monitorar reuniões</th>
+                <th class="text-end pe-3">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (colaborador of colaboradores(); track colaborador.email) {
+                <tr>
+                  <td class="ps-3 fw-semibold">{{ colaborador.nome }}</td>
+                  <td class="text-secondary">{{ colaborador.email }}</td>
+                  <td>
+                    <span class="badge rounded-pill bg-light text-dark border">
+                      {{ rotuloPapel(colaborador.papel) }}
+                    </span>
+                  </td>
+                  <td>
+                    @if (colaborador.monitorarReunioes) {
+                      <span class="badge rounded-pill bg-success">Sim</span>
+                    } @else {
+                      <span class="badge rounded-pill bg-secondary">Não</span>
+                    }
+                  </td>
+                  <td class="text-end text-nowrap pe-3">
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-secondary me-1"
+                      mdbRipple
+                      (click)="editar(colaborador)"
+                      title="Editar"
+                    >
+                      <i class="fas fa-pen"></i>
+                    </button>
+
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-danger"
+                      mdbRipple
+                      (click)="remover(colaborador)"
+                      title="Excluir"
+                    >
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  }
+</section>

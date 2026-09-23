@@ -1,20 +1,24 @@
-export type StatusReuniao =
+export type StatusTranscricao =
   | 'RECEBIDA'
   | 'TRANSCREVENDO'
   | 'ANALISANDO'
   | 'CONCLUIDA'
   | 'ERRO';
 
+export type StatusReuniao =
+  | 'EM_ANDAMENTO'
+  | 'FINALIZADA'
+  | 'PENDENTE';
+
+/** Usado pelo teste do status-badge para cobrir todos os status. */
 export const STATUS_REUNIAO: StatusReuniao[] = [
-  'RECEBIDA',
-  'TRANSCREVENDO',
-  'ANALISANDO',
-  'CONCLUIDA',
-  'ERRO',
+  'EM_ANDAMENTO',
+  'FINALIZADA',
+  'PENDENTE',
 ];
 
 /** Rotulo legivel para exibicao — nunca mostrar a constante crua na tela. */
-export const STATUS_LABEL: Record<StatusReuniao, string> = {
+export const STATUS_TRANSCRICAO_LABEL: Record<StatusTranscricao, string> = {
   RECEBIDA: 'Recebida',
   TRANSCREVENDO: 'Transcrevendo',
   ANALISANDO: 'Analisando',
@@ -22,28 +26,20 @@ export const STATUS_LABEL: Record<StatusReuniao, string> = {
   ERRO: 'Erro',
 };
 
-export type TipoAcao = 'ACAO' | 'TAREFA';
-
-export interface Acao {
-  descricao: string;
-  tipo: TipoAcao;
-  prazo: string | null;
-  responsavel: string | null;
-}
+export const STATUS_REUNIAO_LABEL: Record<StatusReuniao, string> = {
+  EM_ANDAMENTO: 'Em Andamento',
+  PENDENTE: 'Pendente',
+  FINALIZADA: 'Finalizada',
+};
 
 export interface Reuniao {
   id: number;
   tituloReuniao: string;
   dataProcessamento: string;
   resumoExecutivo: string;
-  status: StatusReuniao;
+  statusReuniao: StatusReuniao;
+  statusTranscricao: StatusTranscricao;
   participantes: string[];
   areas: string[];
   totalAcoes: number;
-}
-
-export interface ReuniaoDetalhe extends Reuniao {
-  transcricaoPura: string;
-  pontosChave: string;
-  acoes: Acao[];
 }

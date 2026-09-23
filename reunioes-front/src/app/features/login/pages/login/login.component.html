@@ -1,20 +1,26 @@
-<div class="login-page">
-  <div class="card login-card">
-    <div class="card-body">
-      <h3 class="text-center mb-4">Ata de Reuniões</h3>
-      <p class="text-center text-muted mb-4">Faça login para continuar</p>
+<div class="min-vh-100 d-flex align-items-center justify-content-center bg-body-secondary p-3">
+  <div class="card border-0 shadow-sm login-card">
+    <div class="card-body p-4">
+      <div class="text-center mb-4">
+        <i class="fas fa-clipboard-list fa-2x text-primary mb-3"></i>
+        <h1 class="h4 mb-1">Ata de Reuniões</h1>
+        <p class="text-muted small mb-0">Faça login para continuar</p>
+      </div>
 
       <form [formGroup]="form" (ngSubmit)="login()">
 
-        <div class="mb-3">
-          <label for="email" class="form-label">E-mail</label>
-          <input
-            type="email"
-            id="email"
-            formControlName="email"
-            class="form-control"
-            [class.is-invalid]="email?.invalid && email?.touched"
-          />
+        <div class="mb-4">
+          <mdb-form-control>
+            <input
+              mdbInput
+              type="email"
+              id="email"
+              formControlName="email"
+              class="form-control"
+              [class.is-invalid]="email?.invalid && email?.touched"
+            />
+            <label mdbLabel class="form-label" for="email">E-mail</label>
+          </mdb-form-control>
 
           @if (email?.invalid && email?.touched) {
             <div class="invalid-feedback d-block">
@@ -27,15 +33,18 @@
           }
         </div>
 
-        <div class="mb-3">
-          <label for="senha" class="form-label">Senha</label>
-          <input
-            type="password"
-            id="senha"
-            formControlName="senha"
-            class="form-control"
-            [class.is-invalid]="senha?.invalid && senha?.touched"
-          />
+        <div class="mb-4">
+          <mdb-form-control>
+            <input
+              mdbInput
+              type="password"
+              id="senha"
+              formControlName="senha"
+              class="form-control"
+              [class.is-invalid]="senha?.invalid && senha?.touched"
+            />
+            <label mdbLabel class="form-label" for="senha">Senha</label>
+          </mdb-form-control>
 
           @if (senha?.invalid && senha?.touched) {
             <div class="invalid-feedback d-block">
@@ -45,13 +54,13 @@
         </div>
 
         @if (erroLogin) {
-          <div class="alert alert-danger" role="alert">
-            E-mail não encontrado. Verifique e tente novamente.
+          <div class="alert alert-danger py-2 small" role="alert">
+            {{ erroLogin }}
           </div>
         }
 
-        <button type="submit" class="btn btn-primary w-100 mt-2">
-          Entrar
+        <button type="submit" class="btn btn-primary w-100 mt-2" mdbRipple>
+          <i class="fas fa-right-to-bracket me-1"></i> Entrar
         </button>
 
       </form>

@@ -1,0 +1,158 @@
+@if (carregando()) {
+  <div class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Carregando...</span>
+    </div>
+    <p class="text-muted mt-3 mb-0">Carregando reunião...</p>
+  </div>
+} @else if (reuniaoNaoEncontrada()) {
+  <div class="text-center text-muted py-5">
+    <i class="fas fa-circle-question fa-2x mb-3 opacity-50"></i>
+    <p>Reunião não encontrada.</p>
+    <a routerLink="/reunioes" class="btn btn-primary">Voltar para a listagem</a>
+  </div>
+} @else {
+  @if (reuniao(); as reuniao) {
+    <header class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+      <a routerLink="/reunioes" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i> Voltar
+      </a>
+
+      @if (auth.isAdmin) {
+        <div class="d-flex flex-wrap gap-2">
+          <a
+            [routerLink]="['/reunioes', reuniao.id, 'editar']"
+            class="btn btn-outline-primary"
+            mdbRipple
+          >
+            <i class="fas fa-pen me-1"></i> Editar
+          </a>
+          <button class="btn btn-outline-danger" mdbRipple (click)="abrirModalExclusao()">
+            <i class="fas fa-trash me-1"></i> Excluir
+          </button>
+        </div>
+      }
+    </header>
+
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+          <div>
+            <h1 class="h3 mb-1">{{ reuniao.titulo }}</h1>
+            <p class="text-muted small mb-2">
+              <i class="fas fa-clock me-1"></i>{{ reuniao.data | date: "dd/MM/yyyy HH:mm" }}
+            </p>
+            <div>
+              @for (area of reuniao.areas; track area) {
+                <span class="badge rounded-pill bg-light text-dark border me-1">{{ area }}</span>
+              }
+            </div>
+          </div>
+
+          <div class="d-flex flex-column gap-2">
+            <div class="d-flex align-items-center gap-2">
+              <span class="text-muted small">Status da reunião</span>
+              <app-status-badge [status]="reuniao.statusReuniao" [tipo]="'reuniao'"></app-status-badge>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <span class="text-muted small">Status da transcrição</span>
+              <app-status-badge [status]="reuniao.statusTranscricao" [tipo]="'transcricao'"></app-status-badge>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <h2 class="h6 text-uppercase text-muted fw-semibold mb-3">Resumo executivo</h2>
+        @if (reuniao.resumo) {
+          <p class="mb-0">{{ reuniao.resumo }}</p>
+        } @else {
+          <p class="text-muted mb-0">Nenhum resumo registrado.</p>
+        }
+      </div>
+    </section>
+
+    <section class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <h2 class="h6 text-uppercase text-muted fw-semibold mb-3">Pontos-chave</h2>
+        @if (pontosChaveLista().length > 0) {
+          <ul class="mb-0 ps-3">
+            @for (ponto of pontosChaveLista(); track ponto) {
+              <li>{{ ponto }}</li>
+            }
+          </ul>
+        } @else {
+          <p class="text-muted mb-0">Nenhum ponto-chave registrado.</p>
+        }
+      </div>
+    </section>
+
+    <section class="card border-0 shadow-sm mb-4">
+      <div class="card-body pb-0">
+        <h2 class="h6 text-uppercase text-muted fw-semibold mb-3">Ações</h2>
+      </div>
+      @if (reuniao.acoes && reuniao.acoes.length > 0) {
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th class="ps-3">Descrição</th>
+                <th>Tipo</th>
+                <th>Prazo</th>
+                <th class="pe-3">Responsável</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (acao of reuniao.acoes; track acao.descricao) {
+                <tr>
+                  <td class="ps-3">{{ acao.descricao }}</td>
+                  <td>
+                    <span class="badge rounded-pill bg-light text-dark border">{{ acao.tipo }}</span>
+                  </td>
+                  <td class="text-nowrap">{{ acao.prazo ? (acao.prazo | date: "dd/MM/yyyy") : "—" }}</td>
+                  <td class="pe-3">{{ acao.responsavel.length ? acao.responsavel.join(", ") : "—" }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <div class="card-body pt-0 text-muted">Nenhuma ação registrada.</div>
+      }
+    </section>
+
+    <section class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <h2 class="h6 text-uppercase text-muted fw-semibold mb-3">Participantes</h2>
+        @if (reuniao.participantes.length > 0) {
+          <div class="mb-2">
+            @for (participante of reuniao.participantes; track participante) {
+              <span class="badge rounded-pill bg-secondary me-1 mb-1">{{ participante }}</span>
+            }
+          </div>
+          <p class="text-muted small mb-0">
+            <i class="fas fa-info-circle me-1"></i>
+            Nomes citados na transcrição — não representam presença confirmada.
+          </p>
+        } @else {
+          <p class="text-muted mb-0">Nenhum participante identificado.</p>
+        }
+      </div>
+    </section>
+
+    <section class="mb-4">
+      <h2 class="h6 text-uppercase text-muted fw-semibold mb-3">Transcrição</h2>
+      <mdb-accordion>
+        <mdb-accordion-item header="Ver transcrição completa">
+          <ng-template mdbAccordionItemBody>
+            <!-- O back ainda nao devolve a transcricao pura; quando devolver, o corpo entra aqui. -->
+            <span class="text-muted">Transcrição não disponível.</span>
+          </ng-template>
+        </mdb-accordion-item>
+      </mdb-accordion>
+    </section>
+
+  }
+}

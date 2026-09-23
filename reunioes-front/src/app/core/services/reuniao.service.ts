@@ -4,7 +4,7 @@ import { Observable, tap } from 'rxjs';
 import { ReuniaoApiDTO, ReuniaoApiRequest } from '../models/api/reuniao-api.model';
 
 @Injectable({ providedIn: 'root' })
-export class ReuniaoStoreService {
+export class ReuniaoService {
   private readonly apiUrl = 'http://localhost:8080/api/reunioes'; 
 
   constructor(private http: HttpClient) {

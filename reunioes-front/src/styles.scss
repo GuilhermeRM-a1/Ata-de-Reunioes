@@ -1,2 +1,7 @@
-/* You can add global styles to this file, and also import other style files */
-@import 'styles/status';
+/* Estilos globais. O Bootstrap 5 chega pelo mdb-angular-ui-kit (angular.json). */
+
+/* Densidade padrao das tabelas do sistema. */
+.table > :not(caption) > * > * {
+  padding-top: 0.65rem;
+  padding-bottom: 0.65rem;
+}

@@ -1,0 +1,134 @@
+<header class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h1 class="h3 mb-0">Ações</h1>
+</header>
+
+@if (carregando()) {
+  <div class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Carregando...</span>
+    </div>
+    <p class="text-muted mt-3 mb-0">Carregando ações...</p>
+  </div>
+} @else {
+
+  <section class="mb-4">
+    <h2 class="h6 text-uppercase text-muted fw-semibold mb-3">Ações pendentes</h2>
+
+    @if (acoesPendentes().length === 0) {
+      <div class="card border-0 shadow-sm">
+        <div class="card-body text-center text-muted py-4">
+          <i class="fas fa-list-check fa-lg mb-2 d-block opacity-50"></i>
+          Nenhuma ação pendente no momento.
+        </div>
+      </div>
+    } @else {
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th class="ps-3">Título</th>
+                  <th>Descrição</th>
+                  <th>Tipo</th>
+                  <th>Prazo</th>
+                  @if (auth.isAdmin) {
+                    <th class="text-end pe-3">Ações</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (acao of acoesPendentes(); track acao.id) {
+                  <tr class="cursor-pointer" (dblclick)="verReuniao(acao.reuniaoId)" title="Clique duas vezes para ver a reunião">
+                    <td class="ps-3 fw-semibold">{{ acao.titulo }}</td>
+                    <td class="text-secondary">{{ acao.descricao }}</td>
+                    <td>
+                      <span class="badge rounded-pill bg-light text-dark border">{{ acao.tipo || '—' }}</span>
+                    </td>
+                    <td class="text-nowrap">{{ acao.prazo ? (acao.prazo | date: 'dd/MM/yyyy') : '—' }}</td>
+                    @if (auth.isAdmin) {
+                      <td class="text-end text-nowrap pe-3" (click)="$event.stopPropagation()">
+                        <button class="btn btn-sm btn-outline-success me-1" mdbRipple (click)="mudarStatus(acao)" title="Concluir">
+                          <i class="fas fa-check"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" mdbRipple (click)="excluir(acao, $event)" title="Excluir">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    }
+  </section>
+
+  <section class="mb-4">
+    <h2 class="h6 text-uppercase text-muted fw-semibold mb-3">Ações concluídas</h2>
+
+    @if (acoesConcluidas().length === 0) {
+      <div class="card border-0 shadow-sm">
+        <div class="card-body text-center text-muted py-4">
+          <i class="fas fa-circle-check fa-lg mb-2 d-block opacity-50"></i>
+          Nenhuma ação concluída ainda.
+        </div>
+      </div>
+    } @else {
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th class="ps-3">Título</th>
+                  <th>Descrição</th>
+                  <th>Tipo</th>
+                  <th>Prazo</th>
+                  @if (auth.isAdmin) {
+                    <th class="text-end pe-3">Ações</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (acao of acoesConcluidas(); track acao.id) {
+                  <tr class="cursor-pointer opacity-75" (dblclick)="verReuniao(acao.reuniaoId)" title="Clique duas vezes para ver a reunião">
+                    <td class="ps-3 text-decoration-line-through">{{ acao.titulo }}</td>
+                    <td class="text-secondary text-decoration-line-through">{{ acao.descricao }}</td>
+                    <td>
+                      <span class="badge rounded-pill bg-light text-dark border">{{ acao.tipo || '—' }}</span>
+                    </td>
+                    <td class="text-nowrap">{{ acao.prazo ? (acao.prazo | date: 'dd/MM/yyyy') : '—' }}</td>
+                    @if (auth.isAdmin) {
+                      <td class="text-end text-nowrap pe-3" (click)="$event.stopPropagation()">
+                        <button class="btn btn-sm btn-outline-secondary me-1" mdbRipple (click)="mudarStatus(acao)" title="Reverter">
+                          <i class="fas fa-undo-alt"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" mdbRipple (click)="excluir(acao, $event)" title="Excluir">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    }
+  </section>
+
+  <nav class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-4" aria-label="Paginação">
+    <button class="btn btn-sm btn-outline-secondary" (click)="paginaAnterior()" [disabled]="paginaAtual() === 1">
+      <i class="fas fa-chevron-left me-1"></i> Anterior
+    </button>
+    <span class="text-muted small">Página {{ paginaAtual() }} de {{ totalPaginas() }}</span>
+    <button class="btn btn-sm btn-outline-secondary" (click)="proximaPagina()" [disabled]="paginaAtual() === totalPaginas()">
+      Próxima <i class="fas fa-chevron-right ms-1"></i>
+    </button>
+  </nav>
+
+}

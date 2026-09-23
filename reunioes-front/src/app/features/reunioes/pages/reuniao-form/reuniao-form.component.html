@@ -1,0 +1,183 @@
+@if (idNaoEncontrado()) {
+  <div class="text-center text-muted py-5">
+    <i class="fas fa-circle-question fa-2x mb-3 opacity-50"></i>
+    <p>Reunião não encontrada.</p>
+    <button type="button" class="btn btn-primary" (click)="cancelar()">Voltar para a listagem</button>
+  </div>
+} @else {
+  <header class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <h1 class="h3 mb-0">{{ idEditando() ? 'Editar reunião' : 'Nova reunião' }}</h1>
+  </header>
+
+  <form [formGroup]="form" (ngSubmit)="salvar()">
+
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <h2 class="h6 text-uppercase text-muted fw-semibold mb-3">Dados da reunião</h2>
+
+        <div class="row g-3">
+          <div class="col-12">
+            <mdb-form-control>
+              <input mdbInput type="text" id="tituloReuniao" formControlName="tituloReuniao" class="form-control"
+                [class.is-invalid]="form.get('tituloReuniao')?.invalid && form.get('tituloReuniao')?.touched" />
+              <label mdbLabel class="form-label" for="tituloReuniao">Título da reunião</label>
+            </mdb-form-control>
+            @if (form.get('tituloReuniao')?.invalid && form.get('tituloReuniao')?.touched) {
+              <div class="invalid-feedback d-block">O título é obrigatório e precisa ter no mínimo 5 caracteres.</div>
+            }
+          </div>
+
+          <div class="col-12 col-md-4">
+            <mdb-form-control>
+              <input mdbInput type="date" id="dataProcessamento" formControlName="dataProcessamento" class="form-control"
+                [class.is-invalid]="form.get('dataProcessamento')?.invalid && form.get('dataProcessamento')?.touched" />
+              <label mdbLabel class="form-label" for="dataProcessamento">Data</label>
+            </mdb-form-control>
+            @if (form.get('dataProcessamento')?.invalid && form.get('dataProcessamento')?.touched) {
+              <div class="invalid-feedback d-block">A data é obrigatória.</div>
+            }
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label class="form-label" for="statusTranscricao">Status da transcrição</label>
+            <select id="statusTranscricao" formControlName="statusTranscricao" class="form-select"
+              [class.is-invalid]="form.get('statusTranscricao')?.invalid && form.get('statusTranscricao')?.touched">
+              <option value="">Selecione...</option>
+              <option value="RECEBIDA">Recebida</option>
+              <option value="TRANSCREVENDO">Transcrevendo</option>
+              <option value="ANALISANDO">Analisando</option>
+              <option value="CONCLUIDA">Concluída</option>
+              <option value="ERRO">Erro</option>
+            </select>
+            @if (form.get('statusTranscricao')?.invalid && form.get('statusTranscricao')?.touched) {
+              <div class="invalid-feedback d-block">O status da transcrição é obrigatório.</div>
+            }
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label class="form-label" for="statusReuniao">Status da reunião</label>
+            <select id="statusReuniao" formControlName="statusReuniao" class="form-select"
+              [class.is-invalid]="form.get('statusReuniao')?.invalid && form.get('statusReuniao')?.touched">
+              <option value="">Selecione...</option>
+              <option value="EM_ANDAMENTO">Em Andamento</option>
+              <option value="PENDENTE">Pendente</option>
+              <option value="FINALIZADA">Finalizada</option>
+            </select>
+            @if (form.get('statusReuniao')?.invalid && form.get('statusReuniao')?.touched) {
+              <div class="invalid-feedback d-block">O status da reunião é obrigatório.</div>
+            }
+          </div>
+
+          <div class="col-12">
+            <mdb-form-control>
+              <textarea mdbInput id="resumoExecutivo" formControlName="resumoExecutivo" class="form-control" rows="3"></textarea>
+              <label mdbLabel class="form-label" for="resumoExecutivo">Resumo executivo</label>
+            </mdb-form-control>
+          </div>
+
+          <div class="col-12">
+            <mdb-form-control>
+              <textarea mdbInput id="pontosChave" formControlName="pontosChave" class="form-control" rows="3"></textarea>
+              <label mdbLabel class="form-label" for="pontosChave">Pontos-chave</label>
+            </mdb-form-control>
+            <div class="form-text">Uma linha por ponto.</div>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <mdb-form-control>
+              <input mdbInput type="text" id="areas" formControlName="areas" class="form-control" />
+              <label mdbLabel class="form-label" for="areas">Áreas</label>
+            </mdb-form-control>
+            <div class="form-text">Separadas por vírgula.</div>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <mdb-form-control>
+              <input mdbInput type="text" id="participantes" formControlName="participantes" class="form-control" />
+              <label mdbLabel class="form-label" for="participantes">Participantes</label>
+            </mdb-form-control>
+            <div class="form-text">Separados por vírgula.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4" formArrayName="acoes">
+      <div class="card-body">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+          <h2 class="h6 text-uppercase text-muted fw-semibold mb-0">Ações</h2>
+          <button type="button" class="btn btn-sm btn-outline-primary" mdbRipple (click)="adicionarAcao()">
+            <i class="fas fa-plus me-1"></i> Adicionar ação
+          </button>
+        </div>
+
+        @for (acao of acoes.controls; track acao; let i = $index) {
+          <div [formGroupName]="i" class="border rounded bg-light p-3 mb-3">
+            <div class="row g-3 align-items-start">
+              <div class="col-12 col-md-3">
+                <mdb-form-control>
+                  <input mdbInput type="text" [id]="'acaoTitulo' + i" formControlName="titulo" class="form-control form-control-sm"
+                    [class.is-invalid]="acoes.at(i).get('titulo')?.invalid && acoes.at(i).get('titulo')?.touched" />
+                  <label mdbLabel class="form-label small" [attr.for]="'acaoTitulo' + i">Título</label>
+                </mdb-form-control>
+                @if (acoes.at(i).get('titulo')?.invalid && acoes.at(i).get('titulo')?.touched) {
+                  <div class="invalid-feedback d-block">O título da ação é obrigatório.</div>
+                }
+              </div>
+              <div class="col-12 col-md-3">
+                <mdb-form-control>
+                  <input mdbInput type="text" [id]="'acaoDescricao' + i" formControlName="descricao" class="form-control form-control-sm"
+                    [class.is-invalid]="acoes.at(i).get('descricao')?.invalid && acoes.at(i).get('descricao')?.touched" />
+                  <label mdbLabel class="form-label small" [attr.for]="'acaoDescricao' + i">Descrição</label>
+                </mdb-form-control>
+                @if (acoes.at(i).get('descricao')?.invalid && acoes.at(i).get('descricao')?.touched) {
+                  <div class="invalid-feedback d-block">A descrição é obrigatória.</div>
+                }
+              </div>
+              <div class="col-6 col-md-2">
+                <label class="form-label small" [attr.for]="'acaoTipo' + i">Tipo</label>
+                <select [id]="'acaoTipo' + i" formControlName="tipo" class="form-select form-select-sm">
+                  <option value="ACAO">Ação</option>
+                  <option value="TAREFA">Tarefa</option>
+                </select>
+              </div>
+              <div class="col-6 col-md-2">
+                <mdb-form-control>
+                  <input mdbInput type="date" [id]="'acaoPrazo' + i" formControlName="prazo" class="form-control form-control-sm" />
+                  <label mdbLabel class="form-label small" [attr.for]="'acaoPrazo' + i">Prazo</label>
+                </mdb-form-control>
+              </div>
+              <div class="col-12 col-md-2">
+                <label class="form-label small" [attr.for]="'acaoResponsavel' + i">Responsável</label>
+                <select [id]="'acaoResponsavel' + i" formControlName="responsavel" class="form-select form-select-sm">
+                  <option [ngValue]="null">Selecione...</option>
+                  @for (colaborador of colaboradores(); track colaborador.id) {
+                    <option [ngValue]="colaborador.id">{{ colaborador.nome }}</option>
+                  }
+                </select>
+              </div>
+              <div class="col-12 text-end">
+                <button type="button" class="btn btn-sm btn-outline-danger" (click)="removerAcao(i)" title="Remover ação">
+                  <i class="fas fa-trash me-1"></i> Remover
+                </button>
+              </div>
+            </div>
+          </div>
+        } @empty {
+          <div class="text-center text-muted py-4">
+            <i class="fas fa-list-check fa-lg mb-2 d-block opacity-50"></i>
+            Nenhuma ação adicionada.
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="d-flex flex-wrap justify-content-end gap-2">
+      <button type="button" class="btn btn-outline-secondary" mdbRipple (click)="cancelar()">Cancelar</button>
+      <button type="submit" class="btn btn-primary" mdbRipple>
+        <i class="fas fa-floppy-disk me-1"></i> Salvar
+      </button>
+    </div>
+
+  </form>
+}

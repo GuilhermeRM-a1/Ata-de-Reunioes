@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { StatusReuniao, STATUS_LABEL } from '../../../core/models';
+import { StatusReuniao, STATUS_REUNIAO_LABEL, STATUS_TRANSCRICAO_LABEL, StatusTranscricao } from '../../../core/models';
 
 @Component({
   selector: 'app-status-badge',
@@ -10,13 +10,49 @@ import { StatusReuniao, STATUS_LABEL } from '../../../core/models';
   styleUrl: './status-badge.component.scss'
 })
 export class StatusBadgeComponent {
-  @Input({ required: true }) status!: StatusReuniao;
+  @Input({ required: true }) status!: StatusReuniao | StatusTranscricao;
+
+  @Input({ required: true }) tipo!: 'reuniao' | 'transcricao';
 
   get rotulo(): string {
-    return STATUS_LABEL[this.status];
+    if (!this.status) {
+      return 'Carregando...';
+    }
+
+    if (this.tipo === 'reuniao') {
+      return STATUS_REUNIAO_LABEL[this.status as StatusReuniao];
+    }
+    return STATUS_TRANSCRICAO_LABEL[this.status as StatusTranscricao];
   }
 
   get classeCss(): string {
-    return `status-badge status-badge--${this.status.toLowerCase()}`;
+    const classeBase = 'badge rounded-pill'; 
+
+    if (!this.status) {
+      return `${classeBase} bg-secondary`; 
+    }
+
+    switch (this.status) {
+      case 'FINALIZADA':
+      case 'CONCLUIDA':
+        return `${classeBase} bg-success`;
+        
+      case 'PENDENTE':
+        return `${classeBase} bg-warning text-dark`; 
+        
+      case 'EM_ANDAMENTO':
+      case 'TRANSCREVENDO':
+      case 'ANALISANDO':
+        return `${classeBase} bg-info`;
+        
+      case 'RECEBIDA':
+        return `${classeBase} bg-primary`;
+        
+      case 'ERRO':
+        return `${classeBase} bg-danger`;
+        
+      default:
+        return `${classeBase} bg-secondary`;
+    }
   }
 }
