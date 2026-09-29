@@ -1,6 +1,5 @@
 package br.com.empresa.reunioes.application.service;
 
-import br.com.empresa.reunioes.application.mapper.ColaboradorMapper;
 import br.com.empresa.reunioes.domain.entity.Colaborador;
 import br.com.empresa.reunioes.domain.repository.ColaboradorRepository;
 import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorPatchRequest;
@@ -15,13 +14,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static br.com.empresa.reunioes.application.mapper.ColaboradorMapper.*;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ColaboradorService {
 
     private final ColaboradorRepository colaboradorRepository;
-    private final ColaboradorMapper mapper;
     private final BCryptPasswordEncoder passwordEncoder;
 
     /**
@@ -32,7 +32,7 @@ public class ColaboradorService {
     public Colaborador salvar(ColaboradorRequest request) {
         log.info("Iniciando processo de salvar colaborador.");
 
-        Colaborador colaborador = mapper.toEntity(request);
+        Colaborador colaborador = colaboradorToEntity(request);
         log.debug("Requisição convertida para entidade.");
 
         log.debug("Verificando se o e-mail já está cadastrado.");
@@ -121,7 +121,7 @@ public class ColaboradorService {
         }
 
         log.debug("Atualizando colaborador com mapper: id={}", id);
-        mapper.updateEntity(colaborador, request);
+        colaboradorUpdateEntity(colaborador, request);
 
         Colaborador colaboradorAtualizado =
                 colaboradorRepository.save(colaborador);
@@ -155,7 +155,7 @@ public class ColaboradorService {
         }
 
         log.debug("Atualizando parcialmente o colaborador com mapper: id={}", id);
-        mapper.updateParcialEntity(colaborador, request);
+        colaboradorUpdateParcialEntity(colaborador, request);
 
         Colaborador colaboradorAtualizado =
                 colaboradorRepository.save(colaborador);

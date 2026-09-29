@@ -4,13 +4,12 @@ import br.com.empresa.reunioes.domain.entity.Colaborador;
 import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorDTO;
 import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorPatchRequest;
 import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorRequest;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ColaboradorMapper {
 
-    public Colaborador toEntity(ColaboradorRequest request) {
+    public static Colaborador colaboradorToEntity(ColaboradorRequest request) {
         Colaborador colaborador = new Colaborador();
 
         colaborador.setNome(request.nome());
@@ -23,7 +22,7 @@ public class ColaboradorMapper {
         return colaborador;
     }
 
-    public ColaboradorDTO toDTO(Colaborador colaborador) {
+    public static ColaboradorDTO colaboradorToDTO(Colaborador colaborador) {
 
         return new ColaboradorDTO(
                 colaborador.getId(),
@@ -35,7 +34,7 @@ public class ColaboradorMapper {
         );
     }
 
-    public void updateEntity(Colaborador colaborador, ColaboradorRequest request) {
+    public static void colaboradorUpdateEntity(Colaborador colaborador, ColaboradorRequest request) {
         colaborador.setNome(request.nome());
         colaborador.setEmail(request.email());
         colaborador.setSenha(request.senha());
@@ -44,7 +43,7 @@ public class ColaboradorMapper {
         colaborador.setDataCadastro(request.dataCadastro());
     }
 
-    public void updateParcialEntity(Colaborador colaborador, ColaboradorPatchRequest request) {
+    public static void colaboradorUpdateParcialEntity(Colaborador colaborador, ColaboradorPatchRequest request) {
 
         if (request.nome() != null)
             colaborador.setNome(request.nome());

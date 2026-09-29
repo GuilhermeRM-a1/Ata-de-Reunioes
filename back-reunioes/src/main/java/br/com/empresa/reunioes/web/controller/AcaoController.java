@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static br.com.empresa.reunioes.application.mapper.AcaoMapper.acaoToDTO;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/reunioes/acoes")
@@ -41,7 +43,7 @@ public class AcaoController {
     public ResponseEntity<AcaoDTO> salvar(@PathVariable Long reuniaoId,
                                           @Valid @RequestBody AcaoRequest request) {
         Acao acao = service.salvar(reuniaoId, request);
-        AcaoDTO dto = mapper.toDTO(acao);
+        AcaoDTO dto = acaoToDTO(acao);
 
         return new ResponseEntity<>(dto, HttpStatus.CREATED);
     }
@@ -53,7 +55,7 @@ public class AcaoController {
     public ResponseEntity<Page<AcaoDTO>> listar(Pageable paginacao) {
 
         Page<AcaoDTO> dto = service.listar(paginacao)
-                .map(mapper::toDTO);
+                .map(acao -> acaoToDTO(acao));
 
         return ResponseEntity.ok(dto);
     }
@@ -69,7 +71,7 @@ public class AcaoController {
 
         List<AcaoDTO> dto = service.listarPorReuniao(reuniaoId)
                 .stream()
-                .map(mapper::toDTO)
+                .map(acao -> acaoToDTO(acao))
                 .toList();
 
         return ResponseEntity.ok(dto);
@@ -84,7 +86,7 @@ public class AcaoController {
     @GetMapping("/{id}")
     public ResponseEntity<AcaoDTO> buscarPorId(@PathVariable Long id) {
         Acao acao = service.buscarPorId(id);
-        AcaoDTO dto = mapper.toDTO(acao);
+        AcaoDTO dto = acaoToDTO(acao);
 
         return ResponseEntity.ok(dto);
     }
@@ -99,7 +101,7 @@ public class AcaoController {
     public ResponseEntity<AcaoDTO> atualizar(@PathVariable Long id,
                                              @Valid @RequestBody AcaoRequest request) {
         Acao acao = service.atualizar(id, request);
-        AcaoDTO dto = mapper.toDTO(acao);
+        AcaoDTO dto = acaoToDTO(acao);
 
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
@@ -115,7 +117,7 @@ public class AcaoController {
             @PathVariable Long id,
             @Valid @RequestBody AcaoPatchRequest request) {
         Acao acao = service.atualizarParcial(id, request.paraRequest());
-        AcaoDTO dto = mapper.toDTO(acao);
+        AcaoDTO dto = acaoToDTO(acao);
 
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }

@@ -1,6 +1,5 @@
 package br.com.empresa.reunioes.web.controller;
 
-import br.com.empresa.reunioes.application.mapper.ReuniaoMapper;
 import br.com.empresa.reunioes.application.service.FeriadoService;
 import br.com.empresa.reunioes.application.service.IngestaoService;
 import br.com.empresa.reunioes.application.service.RelatorioService;
@@ -26,6 +25,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import static br.com.empresa.reunioes.application.mapper.ReuniaoMapper.reuniaoToDTO;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -35,7 +36,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 public class ReuniaoController {
 
     private final ReuniaoService reuniaoService;
-    private final ReuniaoMapper mapper;
     private final IngestaoService ingestaoService;
     private final RelatorioService relatorioService;
     private final FeriadoService feriadoService;
@@ -46,7 +46,7 @@ public class ReuniaoController {
     @GetMapping()
     public ResponseEntity<Page<ReuniaoDTO>> listar(Pageable paginacao) {
         Page<ReuniaoDTO> listagemDTO = reuniaoService.listar(paginacao)
-                .map(mapper::toDTO);
+                .map(reuniao -> reuniaoToDTO(reuniao));
 
         return ResponseEntity.ok(listagemDTO);
     }
@@ -61,7 +61,7 @@ public class ReuniaoController {
     @GetMapping("/{id}")
     public ResponseEntity<ReuniaoDTO> buscarPorId(@PathVariable Long id) {
         Reuniao reuniao = reuniaoService.buscarPorId(id);
-        ReuniaoDTO dto = mapper.toDTO(reuniao);
+        ReuniaoDTO dto = reuniaoToDTO(reuniao);
 
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
@@ -76,7 +76,7 @@ public class ReuniaoController {
     @PostMapping()
     public ResponseEntity<ReuniaoDTO> salvar(@Valid @RequestBody ReuniaoRequest request) {
         Reuniao reuniao = reuniaoService.salvar(request);
-        ReuniaoDTO dto = mapper.toDTO(reuniao);
+        ReuniaoDTO dto = reuniaoToDTO(reuniao);
 
         // 201 sem Location deixa o cliente sem saber onde o recurso foi parar.
         URI endereco = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -97,7 +97,7 @@ public class ReuniaoController {
     public ResponseEntity<ReuniaoDTO> atualizar(@PathVariable Long id,
                                                 @Valid @RequestBody ReuniaoRequest request) {
         Reuniao reuniao = reuniaoService.atualizar(id, request);
-        ReuniaoDTO dto = mapper.toDTO(reuniao);
+        ReuniaoDTO dto = reuniaoToDTO(reuniao);
 
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
@@ -115,7 +115,7 @@ public class ReuniaoController {
     public ResponseEntity<ReuniaoDTO> atualizarParcial(@PathVariable Long id,
                                                        @Valid @RequestBody ReuniaoPatchRequest request) {
         Reuniao reuniao = reuniaoService.atualizarParcial(id, request.paraRequest());
-        ReuniaoDTO dto = mapper.toDTO(reuniao);
+        ReuniaoDTO dto = reuniaoToDTO(reuniao);
 
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
@@ -135,7 +135,7 @@ public class ReuniaoController {
 
         Reuniao reuniao = ingestaoService.receberAnalise(id, request);
 
-        return new ResponseEntity<>(mapper.toDTO(reuniao), HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(reuniaoToDTO(reuniao), HttpStatus.ACCEPTED);
     }
 
     @Operation(summary = "Gera o relatório consolidado da reunião",

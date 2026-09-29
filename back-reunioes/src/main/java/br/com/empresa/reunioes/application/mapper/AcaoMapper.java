@@ -11,7 +11,7 @@ import java.util.List;
 @Component
 public class AcaoMapper {
 
-    public Acao toEntity(AcaoRequest request) {
+    public static Acao acaoToEntity(AcaoRequest request) {
         Acao acao = new Acao();
 
         acao.setTitulo(request.titulo());
@@ -23,7 +23,7 @@ public class AcaoMapper {
         return acao;
     }
 
-    public void updateEntity(Acao acao, AcaoRequest request) {
+    public static void acaoUpdateEntity(Acao acao, AcaoRequest request) {
         acao.setTitulo(request.titulo());
         acao.setDescricao(request.descricao());
         acao.setTipo(request.tipo());
@@ -31,7 +31,7 @@ public class AcaoMapper {
         acao.setConcluida(request.concluida() != null ? request.concluida() : false);
     }
 
-    public void updateParcialEntity(Acao acao, AcaoRequest request) {
+    public static void acaoUpdateParcialEntity(Acao acao, AcaoRequest request) {
         if (request.titulo() != null) {
             acao.setTitulo(request.titulo());
         }
@@ -53,7 +53,7 @@ public class AcaoMapper {
         }
     }
 
-    public  AcaoDTO toDTO(Acao acao) {
+    public static AcaoDTO acaoToDTO(Acao acao) {
         List<String> responsavelNomes = acao.getResponsavel() == null
                 ? List.of()
                 : acao.getResponsavel().stream().map(Colaborador::getNome).toList();
