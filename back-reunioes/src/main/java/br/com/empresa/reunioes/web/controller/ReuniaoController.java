@@ -25,6 +25,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import static br.com.empresa.reunioes.application.mapper.RelatorioMapper.montarRelatorio;
 import static br.com.empresa.reunioes.application.mapper.ReuniaoMapper.reuniaoToDTO;
 
 
@@ -149,8 +150,9 @@ public class ReuniaoController {
     })
     @GetMapping("/{id}/relatorio")
     public ResponseEntity<RelatorioReuniaoResponse> gerarRelatorio(@PathVariable Long id) {
+        Reuniao reuniaoValidada = relatorioService.validarReuniaoParaRelatorio(id);
 
-        return ResponseEntity.ok(relatorioService.gerar(id));
+        return ResponseEntity.ok(montarRelatorio(reuniaoValidada));
     }
 
     @Operation(summary = "Verifica se a reunião caiu em feriado nacional",
