@@ -1,8 +1,6 @@
 package br.com.empresa.reunioes.application.mapper;
 
 import br.com.empresa.reunioes.domain.entity.Reuniao;
-import br.com.empresa.reunioes.domain.enums.StatusReuniao;
-import br.com.empresa.reunioes.domain.enums.StatusTranscricao;
 import br.com.empresa.reunioes.web.controller.dto.Acao.AcaoDTO;
 import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorDTO;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.RelatorioReuniaoResponse;

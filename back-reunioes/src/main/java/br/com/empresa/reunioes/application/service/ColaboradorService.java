@@ -55,7 +55,6 @@ public class ColaboradorService {
         return colaboradorSalvo;
     }
 
-    @Transactional(readOnly = true)
     public Colaborador buscarPorId(Long id) {
         log.debug("Buscando colaborador por id={}", id);
 
@@ -69,7 +68,6 @@ public class ColaboradorService {
         return colaboradorEncontrado;
     }
 
-    @Transactional(readOnly = true)
     public Colaborador buscarPorEmail(String email) {
         log.info("Iniciando busca do colaborador pelo e-mail.");
 
@@ -87,7 +85,6 @@ public class ColaboradorService {
         return colaboradorEncontrado;
     }
 
-    @Transactional(readOnly = true)
     public Page<Colaborador> listar(Pageable paginacao) {
         log.info("Iniciando listagem paginada de colaboradores.");
 

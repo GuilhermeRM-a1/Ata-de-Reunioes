@@ -1,20 +1,11 @@
 package br.com.empresa.reunioes.application.service;
 
 import br.com.empresa.reunioes.domain.entity.Reuniao;
-import br.com.empresa.reunioes.web.controller.dto.Acao.AcaoDTO;
-import br.com.empresa.reunioes.web.controller.dto.Colaborador.ColaboradorDTO;
-import br.com.empresa.reunioes.web.controller.dto.Reuniao.RelatorioReuniaoResponse;
 import br.com.empresa.reunioes.web.exception.RelatorioIndisponivelException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-
-import static br.com.empresa.reunioes.application.mapper.AcaoMapper.acaoToDTO;
-import static br.com.empresa.reunioes.application.mapper.ColaboradorMapper.colaboradorToDTO;
-import static br.com.empresa.reunioes.application.mapper.RelatorioMapper.montarRelatorio;
 
 /**
  * Monta o relatorio consolidado da reuniao.
@@ -34,7 +25,6 @@ public class RelatorioService {
 
     private final ReuniaoService reuniaoService;
 
-    @Transactional(readOnly = true)
     public Reuniao validarReuniaoParaRelatorio(Long reuniaoId) {
         log.info("Gerando relatório consolidado da reunião {}.", reuniaoId);
 
