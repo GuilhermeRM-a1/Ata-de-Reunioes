@@ -14,7 +14,7 @@ public record PaginaResponse<T>(List<T> content,
                                 long totalElements,
                                 int totalPages) {
 
-    public static <T> PaginaResponse<T> de(Page<T> pagina) {
+    public static <T> PaginaResponse<T> construirPagina(Page<T> pagina) {
         return new PaginaResponse<>(
                 pagina.getContent(),
                 pagina.getNumber(),

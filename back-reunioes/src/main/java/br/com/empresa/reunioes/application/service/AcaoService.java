@@ -54,7 +54,6 @@ public class AcaoService {
         return acaoSalva;
     }
 
-    @Transactional(readOnly = true)
     public Acao buscarPorId(Long id) {
         log.debug("Buscando ação por id={}", id);
 
@@ -67,7 +66,6 @@ public class AcaoService {
         return acaoEncontrada;
     }
 
-    @Transactional(readOnly = true)
     public Page<Acao> listar(Pageable paginacao) {
         log.info("Iniciando listagem paginada de ações.");
 

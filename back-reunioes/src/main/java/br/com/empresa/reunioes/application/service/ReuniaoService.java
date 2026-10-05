@@ -61,7 +61,6 @@ public class ReuniaoService {
         return reuniaoSalva;
     }
 
-    @Transactional(readOnly = true)
     public Reuniao buscarPorId(Long id) {
         log.debug("Buscando reunião por id={}", id);
 
@@ -74,7 +73,6 @@ public class ReuniaoService {
         return reuniaoEncontrada;
     }
 
-    @Transactional(readOnly = true)
     public Page<Reuniao> listar(Pageable paginacao) {
         log.info("Iniciando listagem de reuniões.");
 
