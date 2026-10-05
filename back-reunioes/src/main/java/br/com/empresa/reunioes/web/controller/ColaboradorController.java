@@ -18,7 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import static br.com.empresa.reunioes.application.mapper.ColaboradorMapper.colaboradorToDTO;
 
 @RestController
 @RequestMapping("/api/reunioes/colaboradores")
@@ -40,7 +40,7 @@ public class ColaboradorController {
     public ResponseEntity<ColaboradorDTO> salvar(@Valid @RequestBody ColaboradorRequest request) {
 
         Colaborador colaborador = this.service.salvar(request);
-        ColaboradorDTO dto = mapper.toDTO(colaborador);
+        ColaboradorDTO dto = colaboradorToDTO(colaborador);
 
         return new ResponseEntity<>(dto, HttpStatus.CREATED);
     }
@@ -52,7 +52,7 @@ public class ColaboradorController {
     public ResponseEntity<Page<ColaboradorDTO>> listar(Pageable paginacao) {
 
         Page<ColaboradorDTO> listagemDTO = service.listar(paginacao)
-                .map(mapper::toDTO);
+                .map(colaborador -> colaboradorToDTO(colaborador));
 
         return ResponseEntity.ok(listagemDTO);
     }
@@ -65,7 +65,7 @@ public class ColaboradorController {
     @GetMapping("/{id}")
     public ResponseEntity<ColaboradorDTO> buscarPorId(@PathVariable Long id) {
         Colaborador colaborador = service.buscarPorId(id);
-        ColaboradorDTO dto = mapper.toDTO(colaborador);
+        ColaboradorDTO dto = colaboradorToDTO(colaborador);
 
         return ResponseEntity.ok(dto);
     }
@@ -78,7 +78,7 @@ public class ColaboradorController {
     @GetMapping("/email/{email}")
     public ResponseEntity<ColaboradorDTO> buscarPorEmail(@PathVariable String email) {
         Colaborador colaborador = service.buscarPorEmail(email);
-        ColaboradorDTO dto = mapper.toDTO(colaborador);
+        ColaboradorDTO dto = colaboradorToDTO(colaborador);
 
         return ResponseEntity.ok(dto);
     }
@@ -91,7 +91,7 @@ public class ColaboradorController {
     @GetMapping("/email")
     public ResponseEntity<ColaboradorDTO> buscarPorEmailRequestParam(@RequestParam String email) {
         Colaborador colaborador = service.buscarPorEmail(email);
-        ColaboradorDTO dto = mapper.toDTO(colaborador);
+        ColaboradorDTO dto = colaboradorToDTO(colaborador);
 
         return ResponseEntity.ok(dto);
     }
@@ -105,7 +105,7 @@ public class ColaboradorController {
     @PutMapping("/{id}")
     public ResponseEntity<ColaboradorDTO> atualizar(@PathVariable Long id, @Valid @RequestBody ColaboradorRequest request) {
         Colaborador colaborador = service.atualizar(id, request);
-        ColaboradorDTO dto = mapper.toDTO(colaborador);
+        ColaboradorDTO dto = colaboradorToDTO(colaborador);
 
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
@@ -123,7 +123,7 @@ public class ColaboradorController {
                                                            @Valid @RequestBody ColaboradorPatchRequest request) {
 
         Colaborador colaborador = service.atualizarParcial(id, request);
-        ColaboradorDTO dto = mapper.toDTO(colaborador);
+        ColaboradorDTO dto = colaboradorToDTO(colaborador);
 
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }

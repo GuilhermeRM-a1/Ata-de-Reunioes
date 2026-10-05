@@ -5,18 +5,16 @@ import br.com.empresa.reunioes.domain.entity.Reuniao;
 import br.com.empresa.reunioes.web.controller.dto.Acao.AcaoDTO;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoDTO;
 import br.com.empresa.reunioes.web.controller.dto.Reuniao.ReuniaoRequest;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+import static br.com.empresa.reunioes.application.mapper.AcaoMapper.acaoToDTO;
+
 @Component
-@RequiredArgsConstructor
 public class ReuniaoMapper {
 
-    private final AcaoMapper acaoMapper;
-
-    public Reuniao toEntity(ReuniaoRequest request) {
+    public static Reuniao reuniaoToEntity(ReuniaoRequest request) {
         Reuniao reuniao = new Reuniao();
 
         reuniao.setTitulo(request.titulo());
@@ -30,7 +28,7 @@ public class ReuniaoMapper {
         return reuniao;
     }
 
-    public ReuniaoDTO toDTO(Reuniao reuniao) {
+    public static ReuniaoDTO reuniaoToDTO(Reuniao reuniao) {
 
         // Registro antigo pode ter as colecoes nulas — sem isso a listagem quebra.
         List<String> participantes = reuniao.getParticipantes() == null
@@ -43,7 +41,7 @@ public class ReuniaoMapper {
 
         List<AcaoDTO> acoes = reuniao.getAcoes() != null
                 ? reuniao.getAcoes().stream()
-                .map(acao -> acaoMapper.toDTO(acao))
+                .map(acao -> acaoToDTO(acao))
                 .toList()
                 : List.of();
 
@@ -62,7 +60,7 @@ public class ReuniaoMapper {
                 reuniao.getTotalAcoes());
     }
 
-    public void updateEntity(Reuniao reuniao, ReuniaoRequest request) {
+    public static void reuniaoUpdateEntity(Reuniao reuniao, ReuniaoRequest request) {
 
         reuniao.setTitulo(request.titulo());
         reuniao.setData(request.data());
@@ -74,7 +72,7 @@ public class ReuniaoMapper {
 
     }
 
-    public void updateParcialEntity(Reuniao reuniao, ReuniaoRequest request) {
+    public static void reuniaoUpdateParcialEntity(Reuniao reuniao, ReuniaoRequest request) {
 
         if (request.titulo() != null)
             reuniao.setTitulo(request.titulo());

@@ -1,6 +1,5 @@
 package br.com.empresa.reunioes.application.service;
 
-import br.com.empresa.reunioes.application.mapper.ReuniaoMapper;
 import br.com.empresa.reunioes.domain.entity.Acao;
 import br.com.empresa.reunioes.domain.entity.Colaborador;
 import br.com.empresa.reunioes.domain.entity.Reuniao;
@@ -19,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
+import static br.com.empresa.reunioes.application.mapper.ReuniaoMapper.*;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -27,7 +28,6 @@ public class ReuniaoService {
     private final ReuniaoRepository reuniaoRepository;
     private final ColaboradorRepository colaboradorRepository;
     private final AcaoRepository acaoRepository;
-    private final ReuniaoMapper mapper;
 
     @Transactional
     public Reuniao salvar(ReuniaoRequest request) {
@@ -38,7 +38,7 @@ public class ReuniaoService {
                 request.data(),
                 request.participantes() != null ? request.participantes().size() : 0);
 
-        Reuniao reuniao = mapper.toEntity(request);
+        Reuniao reuniao = reuniaoToEntity(request);
         log.debug("Requisição convertida para entidade.");
 
         log.debug("Buscando e setando colaboradores.");
@@ -92,7 +92,7 @@ public class ReuniaoService {
 
         Reuniao reuniao = buscarPorId(id);
 
-        mapper.updateEntity(reuniao, request);
+        reuniaoUpdateEntity(reuniao, request);
 
         reuniao.setParticipantes(buscarColaboradores(request.participantes()));
         substituirAcoes(reuniao, buscarAcoes(request.acoes()));
@@ -112,7 +112,7 @@ public class ReuniaoService {
         Reuniao reuniao = buscarPorId(id);
 
         log.debug("Atualizando reunião parcialmente com mapper: id={}", id);
-        mapper.updateParcialEntity(reuniao, request);
+        reuniaoUpdateParcialEntity(reuniao, request);
 
         if (request.participantes() != null) {
             log.debug("Atualizando participantes da reunião: id={}", id);

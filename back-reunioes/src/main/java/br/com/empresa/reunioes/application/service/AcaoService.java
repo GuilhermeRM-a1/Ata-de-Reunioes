@@ -1,6 +1,5 @@
 package br.com.empresa.reunioes.application.service;
 
-import br.com.empresa.reunioes.application.mapper.AcaoMapper;
 import br.com.empresa.reunioes.domain.entity.Acao;
 import br.com.empresa.reunioes.domain.entity.Colaborador;
 import br.com.empresa.reunioes.domain.entity.Reuniao;
@@ -19,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
+import static br.com.empresa.reunioes.application.mapper.AcaoMapper.*;
+
 /**
  * Todo método público devolve Entidade.
  */
@@ -27,16 +28,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AcaoService {
 
-    private final AcaoRepository repository;
+    private final AcaoRepository acaoRepository;
     private final ColaboradorRepository colaboradorRepository;
     private final ReuniaoRepository reuniaoRepository;
-    private final AcaoMapper mapper;
 
     @Transactional
     public Acao salvar(Long reuniaoId, AcaoRequest request) {
         log.info("Iniciando processo de salvar ação: reuniaoId={}", reuniaoId);
 
-        Acao acao = mapper.toEntity(request);
+        Acao acao = acaoToEntity(request);
         log.debug("Requisição convertida para entidade.");
 
         log.debug("Buscando e setando responsáveis pela ação.");
@@ -46,7 +46,7 @@ public class AcaoService {
         acao.setReuniao(buscarReuniao(reuniaoId));
 
         log.debug("Salvando ação via repositório.");
-        Acao acaoSalva = repository.save(acao);
+        Acao acaoSalva = acaoRepository.save(acao);
 
         log.info("Ação salva com sucesso: id={}, reuniaoId={}",
                 acaoSalva.getId(), reuniaoId);
@@ -58,7 +58,7 @@ public class AcaoService {
     public Acao buscarPorId(Long id) {
         log.debug("Buscando ação por id={}", id);
 
-        Acao acaoEncontrada = repository.findById(id)
+        Acao acaoEncontrada = acaoRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException(
                         "Ação não encontrada"));
 
@@ -71,7 +71,7 @@ public class AcaoService {
     public Page<Acao> listar(Pageable paginacao) {
         log.info("Iniciando listagem paginada de ações.");
 
-        Page<Acao> pagina = repository.findAll(paginacao);
+        Page<Acao> pagina = acaoRepository.findAll(paginacao);
 
         log.debug("Listagem de ações concluída. Total encontrado: {}",
                 pagina.getTotalElements());
@@ -89,7 +89,7 @@ public class AcaoService {
                     "Reunião não encontrada.");
         }
 
-        List<Acao> lista = repository.findAllByReuniaoId(reuniaoId);
+        List<Acao> lista = acaoRepository.findAllByReuniaoId(reuniaoId);
 
         log.debug(
                 "Listagem de ações da reunião concluída: reuniaoId={}, total={}",
@@ -107,14 +107,14 @@ public class AcaoService {
         Acao acao = buscarPorId(id);
 
         log.debug("Atualizando ação com mapper: id={}", id);
-        mapper.updateEntity(acao, request);
+        acaoUpdateEntity(acao, request);
 
         log.debug("Atualizando responsáveis da ação: id={}", id);
         acao.setResponsavel(buscarResponsaveis(request.responsavel()));
 
         // Nunca atualiza a reunião.
 
-        Acao acaoAtualizada = repository.save(acao);
+        Acao acaoAtualizada = acaoRepository.save(acao);
 
         log.info("Ação atualizada com sucesso: id={}", id);
 
@@ -128,7 +128,7 @@ public class AcaoService {
         Acao acao = buscarPorId(id);
 
         log.debug("Atualizando ação parcialmente com mapper: id={}", id);
-        mapper.updateParcialEntity(acao, request);
+        acaoUpdateParcialEntity(acao, request);
 
         if (request.responsavel() != null) {
             log.debug("Atualizando responsáveis da ação: id={}", id);
@@ -137,7 +137,7 @@ public class AcaoService {
 
         // Nunca atualiza a reunião.
 
-        Acao acaoAtualizada = repository.save(acao);
+        Acao acaoAtualizada = acaoRepository.save(acao);
 
         log.info("Ação atualizada parcialmente com sucesso: id={}", id);
 
@@ -158,7 +158,7 @@ public class AcaoService {
 
         reuniao.getAcoes().remove(acao);
 
-        repository.delete(acao);
+        acaoRepository.delete(acao);
 
         log.info("Ação removida com sucesso: id={}", id);
     }

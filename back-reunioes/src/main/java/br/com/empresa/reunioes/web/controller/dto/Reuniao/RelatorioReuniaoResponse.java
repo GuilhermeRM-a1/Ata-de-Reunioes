@@ -17,29 +17,4 @@ public record RelatorioReuniaoResponse(String titulo,
                                        List<String> pontosChaves,
                                        List<AcaoDTO> acoes,
                                        Integer totalAcoes) {
-
-    public static RelatorioReuniaoResponse de(String titulo,
-                                              String data,
-                                              String resumo,
-                                              StatusTranscricao statusTranscricao,
-                                              StatusReuniao statusReuniao,
-                                              List<ColaboradorDTO> participantes,
-                                              List<String> areas,
-                                              List<String> pontosChaves,
-                                              List<AcaoDTO> acoes,
-                                              Integer totalAcoes){
-
-        return new RelatorioReuniaoResponse(
-                titulo,
-                data,
-                resumo,
-                statusTranscricao,
-                statusReuniao,
-                participantes,
-                areas,
-                pontosChaves,
-                acoes,
-                totalAcoes);
-
-    }
 }
