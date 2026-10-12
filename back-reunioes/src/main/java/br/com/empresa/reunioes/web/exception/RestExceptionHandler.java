@@ -1,5 +1,8 @@
 package br.com.empresa.reunioes.web.exception;
 
+import br.com.empresa.reunioes.domain.exception.EmailCadastradoExistenteException;
+import br.com.empresa.reunioes.domain.exception.RecursoNaoEncontradoException;
+import br.com.empresa.reunioes.domain.exception.RelatorioIndisponivelException;
 import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
