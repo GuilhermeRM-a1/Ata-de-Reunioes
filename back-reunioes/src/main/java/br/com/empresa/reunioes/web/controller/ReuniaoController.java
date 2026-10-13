@@ -30,7 +30,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RestController
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
-@RequestMapping("/api/reunioes")
+    @RequestMapping("/api/reunioes")
 @Tag(name = "Reuniões", description = "CRUD de reuniões e suas ações")
 public class ReuniaoController {
 
