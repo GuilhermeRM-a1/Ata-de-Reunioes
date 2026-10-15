@@ -146,7 +146,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.11</version> <!-- Versão estável e compatível com Java 17+ -->
+				<version>0.8.15</version> <!-- Versão estável e compatível com Java 17+ -->
 				<executions>
 					<execution>
 						<goals>
@@ -155,7 +155,7 @@
 					</execution>
 					<execution>
 						<id>report</id>
-						<phase>test</phase>
+						<phase>verify</phase>
 						<goals>
 							<goal>report</goal>
 						</goals>
