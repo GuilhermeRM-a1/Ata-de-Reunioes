@@ -20,6 +20,12 @@ import java.util.List;
 
 import static br.com.empresa.reunioes.application.reuniao.mapper.ReuniaoMapper.*;
 
+/**
+ * Todo metodo com retorn sempre retornará uma entidade
+ * O mapper faz o trabalho de converter a request para entidade pronta para uso ao criar uma reuniao
+ * Em alguns casos, metodos internos já fazem isso só pelo id por retornar um item existentes no banco
+ */
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -38,15 +44,17 @@ public class ReuniaoService {
                 request.data(),
                 request.participantes() != null ? request.participantes().size() : 0);
 
+        // convertendo dto para entidade com ReuniaoMapper
+        log.debug("Convertendo request para entity pronta para uso");
         Reuniao reuniao = reuniaoToEntity(request);
-        log.debug("Requisição convertida para entidade.");
 
         log.debug("Buscando e setando colaboradores.");
         reuniao.setParticipantes(buscarColaboradores(request.participantes()));
 
         log.debug("Buscando e setando ações.");
-        substituirAcoes(reuniao, buscarAcoes(request.acoes()));
+        reuniao.setAcoes(buscarAcoes(request.acoes()));
 
+        log.debug("Setando size de ações");
         reuniao.setTotalAcoes(reuniao.getAcoes().size());
 
         log.debug("Relacionamentos da reunião definidos: participantes={}, ações={}, totalAcoes={}",
@@ -54,6 +62,8 @@ public class ReuniaoService {
                 reuniao.getAcoes().size(),
                 reuniao.getTotalAcoes());
 
+
+        // salvando
         Reuniao reuniaoSalva = reuniaoRepository.save(reuniao);
 
         log.info("Reunião salva com sucesso: id={}", reuniaoSalva.getId());
@@ -88,14 +98,23 @@ public class ReuniaoService {
     public Reuniao atualizar(Long id, ReuniaoRequest request) {
         log.info("Iniciando atualização da reunião com id={}", id);
 
+        // TRAZENDO REUNIÃO
         Reuniao reuniao = buscarPorId(id);
 
-        reuniaoUpdateEntity(reuniao, request);
-
+        // ATUALIZANDO
+        log.debug("Atualizando reunião: id={}", id);
+        reuniao.setTitulo(request.titulo());
+        reuniao.setData(request.data());
+        reuniao.setStatusTranscricao(request.statusTranscricao());
+        reuniao.setStatusReuniao(request.statusReuniao());
+        reuniao.setAreas(request.areas());
+        reuniao.setPontosChaves(request.pontosChaves());
+        reuniao.setResumo(request.resumo());
         reuniao.setParticipantes(buscarColaboradores(request.participantes()));
         substituirAcoes(reuniao, buscarAcoes(request.acoes()));
         reuniao.setTotalAcoes(reuniao.getAcoes().size());
 
+        // SALVANDO
         Reuniao reuniaoAtualizada = reuniaoRepository.save(reuniao);
 
         log.info("Reunião atualizada com sucesso: id={}", id);
@@ -107,10 +126,46 @@ public class ReuniaoService {
     public Reuniao atualizarParcial(Long id, ReuniaoRequest request) {
         log.info("Iniciando atualização parcial da reunião com id={}", id);
 
+        // TRAZENDO REUNIÃO
         Reuniao reuniao = buscarPorId(id);
 
-        log.debug("Atualizando reunião parcialmente com mapper: id={}", id);
-        reuniaoUpdateParcialEntity(reuniao, request);
+        // ATUALIZANDO
+        log.debug("Atualizando reunião parcialmente: id={}", id);
+
+        if (request.titulo() != null) {
+            log.debug("Atualizando título");
+            reuniao.setTitulo(request.titulo());
+        }
+
+        if (request.data() != null) {
+            log.debug("Atualizando data");
+            reuniao.setData(request.data());
+        }
+
+        if (request.statusTranscricao() != null) {
+            log.debug("Atualizando status da transcrição");
+            reuniao.setStatusTranscricao(request.statusTranscricao());
+        }
+
+        if (request.statusReuniao() != null) {
+            log.debug("Atualizando status da reunião");
+            reuniao.setStatusReuniao(request.statusReuniao());
+        }
+
+        if (request.areas() != null) {
+            log.debug("Atualizando areas da reunião");
+            reuniao.setAreas(request.areas());
+        }
+
+        if (request.pontosChaves() != null) {
+            log.debug("Atualizando pontos chaves da reunião");
+            reuniao.setPontosChaves(request.pontosChaves());
+        }
+
+        if (request.resumo() != null) {
+            log.debug("Atualizando resumo da atualização");
+            reuniao.setResumo(request.resumo());
+        }
 
         if (request.participantes() != null) {
             log.debug("Atualizando participantes da reunião: id={}", id);
@@ -125,6 +180,7 @@ public class ReuniaoService {
             reuniao.setTotalAcoes(reuniao.getAcoes().size());
         }
 
+        // SALVANDO
         Reuniao reuniaoAtualizada = reuniaoRepository.save(reuniao);
 
         log.info("Reunião atualizada parcialmente com sucesso: id={}", id);
@@ -136,20 +192,23 @@ public class ReuniaoService {
     public void deletar(Long id) {
         log.info("Iniciando processo de remoção da reunião: id={}", id);
 
+        // trazendo reuniao
         Reuniao reuniao = buscarPorId(id);
 
+        // deletando
         reuniaoRepository.delete(reuniao);
 
         log.info("Reunião removida com sucesso: id={}", id);
     }
 
+    /** -------------= METODOS AUXILIARES =------------- */
 
     /**
      * Acoes usa orphanRemoval, e o Hibernate recusa que a colecao seja trocada
      * por outra instancia — quem faz isso leva "a collection with orphan
      * deletion was no longer referenced". Entao a lista existente e alterada
      * no lugar, e nao substituida.
-     *
+     * <p>
      * Atencao ao efeito: acao que nao vier na lista deixa de pertencer a
      * reuniao e o orphanRemoval a apaga. E a semantica do PUT, que substitui
      * o recurso inteiro.
@@ -167,6 +226,7 @@ public class ReuniaoService {
             reuniao.getAcoes().add(acao);
         }
     }
+
     private List<Colaborador> buscarColaboradores(List<Long> ids) {
 
         // ArrayList e nao List.of(): a colecao vai para uma entidade gerenciada

@@ -102,16 +102,18 @@ public class AcaoService {
     public Acao atualizar(Long id, AcaoRequest request) {
         log.info("Iniciando atualização da ação: id={}", id);
 
+        // trazendo acao
         Acao acao = buscarPorId(id);
 
-        log.debug("Atualizando ação com mapper: id={}", id);
-        acaoUpdateEntity(acao, request);
-
-        log.debug("Atualizando responsáveis da ação: id={}", id);
+        log.debug("Atualizando ação: id={}", id);
+        acao.setTitulo(request.titulo());
+        acao.setDescricao(request.descricao());
+        acao.setTipo(request.tipo());
+        acao.setPrazo(request.prazo());
+        acao.setConcluida(request.concluida() != null ? request.concluida() : false);
         acao.setResponsavel(buscarResponsaveis(request.responsavel()));
 
-        // Nunca atualiza a reunião.
-
+        // Atualizando ação.
         Acao acaoAtualizada = acaoRepository.save(acao);
 
         log.info("Ação atualizada com sucesso: id={}", id);
@@ -123,10 +125,35 @@ public class AcaoService {
     public Acao atualizarParcial(Long id, AcaoRequest request) {
         log.info("Iniciando atualização parcial da ação: id={}", id);
 
+        // trazendo acao
         Acao acao = buscarPorId(id);
 
-        log.debug("Atualizando ação parcialmente com mapper: id={}", id);
-        acaoUpdateParcialEntity(acao, request);
+        log.debug("Atualizando ação parcialmente: id={}", id);
+
+        if (request.titulo() != null) {
+            log.debug("Atualizando título");
+            acao.setTitulo(request.titulo());
+        }
+
+        if (request.descricao() != null) {
+            log.debug("Atualizando descrição");
+            acao.setDescricao(request.descricao());
+        }
+
+        if (request.tipo() != null) {
+            log.debug("Atualizando tipo");
+            acao.setTipo(request.tipo());
+        }
+
+        if (request.prazo() != null) {
+            log.debug("Atualizando prazo");
+            acao.setPrazo(request.prazo());
+        }
+
+        if (request.concluida() != null) {
+            log.debug("Atualizando status de conclusão");
+            acao.setConcluida(request.concluida());
+        }
 
         if (request.responsavel() != null) {
             log.debug("Atualizando responsáveis da ação: id={}", id);
