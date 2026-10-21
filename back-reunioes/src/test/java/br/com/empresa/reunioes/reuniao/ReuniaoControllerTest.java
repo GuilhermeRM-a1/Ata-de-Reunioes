@@ -1,4 +1,3 @@
-
 package br.com.empresa.reunioes.reuniao;
 
 import br.com.empresa.reunioes.application.reuniao.FeriadoService;
@@ -6,194 +5,252 @@ import br.com.empresa.reunioes.application.reuniao.IngestaoService;
 import br.com.empresa.reunioes.application.reuniao.RelatorioService;
 import br.com.empresa.reunioes.application.reuniao.ReuniaoService;
 import br.com.empresa.reunioes.domain.entity.Reuniao;
+import br.com.empresa.reunioes.domain.enums.StatusReuniao;
+import br.com.empresa.reunioes.domain.enums.StatusTranscricao;
+import br.com.empresa.reunioes.domain.exception.RecursoNaoEncontradoException;
 import br.com.empresa.reunioes.web.reuniao.ReuniaoController;
-import br.com.empresa.reunioes.web.reuniao.dto.*;
-import org.junit.jupiter.api.BeforeEach;
+import br.com.empresa.reunioes.web.reuniao.dto.ReuniaoPatchRequest;
+import br.com.empresa.reunioes.web.reuniao.dto.ReuniaoRequest;
+import br.com.empresa.reunioes.web.reuniao.dto.ReuniaoResumoRequest;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(ReuniaoController.class)
 class ReuniaoControllerTest {
 
-    @Mock
+    @Autowired
+    MockMvc mockMvc;
+
+    @Autowired
+    ObjectMapper objectMapper;
+
+    @MockitoBean
     ReuniaoService reuniaoService;
 
-    @Mock
+    @MockitoBean
     IngestaoService ingestaoService;
 
-    @Mock
+    @MockitoBean
     RelatorioService relatorioService;
 
-    @Mock
+    @MockitoBean
     FeriadoService feriadoService;
 
-    @InjectMocks
-    ReuniaoController controller;
+    private Reuniao criarReuniao() {
+        var reuniao = new Reuniao();
+        reuniao.setId(1L);
+        reuniao.setTitulo("Reunião de Alinhamento");
+        reuniao.setData("2026-06-01T10:00:00");
+        reuniao.setStatusTranscricao(StatusTranscricao.CONCLUIDA);
+        reuniao.setStatusReuniao(StatusReuniao.PENDENTE);
+        reuniao.setParticipantes(List.of());
+        reuniao.setAcoes(List.of());
+        reuniao.setAreas(List.of("TI"));
+        reuniao.setPontosChaves(List.of("Ponto chave 1"));
+        reuniao.setResumo("Resumo executivo");
+        return reuniao;
+    }
 
-    @BeforeEach
-    void setUp() {
-        var request = new MockHttpServletRequest();
-        request.setRequestURI("/api/reunioes");
-        RequestContextHolder.setRequestAttributes(
-                new ServletRequestAttributes(request)
+    private ReuniaoRequest requestValido() {
+        return new ReuniaoRequest(
+                "Reunião de Alinhamento",
+                "2026-06-01T10:00:00",
+                StatusTranscricao.CONCLUIDA,
+                StatusReuniao.PENDENTE,
+                List.of("TI"),
+                List.of("Ponto chave 1"),
+                List.of(),
+                List.of(),
+                "Resumo executivo"
         );
     }
 
-    @Test
-    void listarRetornaPaginaDeReunioes() {
-        var pageable = PageRequest.of(0, 10);
-        Page<Reuniao> pagina = new PageImpl<>(List.of());
+    private ReuniaoRequest requestInvalido() {
+        return new ReuniaoRequest(
+                "",
+                "",
+                null,
+                null,
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                null
+        );
+    }
 
-        when(reuniaoService.listar(pageable)).thenReturn(pagina);
-
-        ResponseEntity<Page<ReuniaoDTO>> response =
-                controller.listar(pageable);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(0, response.getBody().getTotalElements());
-        verify(reuniaoService).listar(pageable);
+    private String json(Object objeto) throws Exception {
+        return objectMapper.writeValueAsString(objeto);
     }
 
     @Test
-    void buscarPorIdRetornaReuniao() {
-        Reuniao reuniao = mock(Reuniao.class);
-        when(reuniaoService.buscarPorId(1L)).thenReturn(reuniao);
+    void listarRetornaPaginaDeReunioes() throws Exception {
+        when(reuniaoService.listar(any()))
+                .thenReturn(new PageImpl<>(List.of(criarReuniao())));
 
-        ResponseEntity<ReuniaoDTO> response =
-                controller.buscarPorId(1L);
+        mockMvc.perform(get("/api/reunioes")
+                        .param("page", "0")
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.totalElements").value(1));
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
+        verify(reuniaoService).listar(any());
+    }
+
+    @Test
+    void buscarPorIdRetornaReuniao() throws Exception {
+        when(reuniaoService.buscarPorId(1L))
+                .thenReturn(criarReuniao());
+
+        mockMvc.perform(get("/api/reunioes/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.titulo")
+                        .value("Reunião de Alinhamento"));
+
         verify(reuniaoService).buscarPorId(1L);
     }
 
     @Test
-    void salvarRetornaCreatedComLocation() {
-        Reuniao reuniao = mock(Reuniao.class);
-        ReuniaoRequest request = mock(ReuniaoRequest.class);
+    void buscarPorIdRetornaNotFoundQuandoReuniaoNaoExiste()
+            throws Exception {
+        when(reuniaoService.buscarPorId(99L))
+                .thenThrow(new RecursoNaoEncontradoException(
+                        "Reunião não encontrada"));
 
-        when(reuniao.getId()).thenReturn(1L);
+        mockMvc.perform(get("/api/reunioes/99"))
+                .andExpect(status().isNotFound());
 
-        when(reuniaoService.salvar(request)).thenReturn(reuniao);
-
-        ResponseEntity<ReuniaoDTO> response = controller.salvar(request);
-
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertNotNull(response.getHeaders().getLocation());
-        assertTrue(response.getHeaders().getLocation().getPath().endsWith("/api/reunioes/1"));
-        assertNotNull(response.getBody());
-        verify(reuniaoService).salvar(request);
+        verify(reuniaoService).buscarPorId(99L);
     }
 
     @Test
-    void atualizarRetornaReuniaoAtualizada() {
-        Reuniao reuniao = mock(Reuniao.class);
-        ReuniaoRequest request = mock(ReuniaoRequest.class);
+    void salvarRetornaCreatedComLocation() throws Exception {
+        when(reuniaoService.salvar(any()))
+                .thenReturn(criarReuniao());
 
-        when(reuniaoService.atualizar(1L, request))
+        mockMvc.perform(post("/api/reunioes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(requestValido())))
+                .andExpect(status().isCreated())
+                .andExpect(header().string(
+                        "Location",
+                        org.hamcrest.Matchers.endsWith(
+                                "/api/reunioes/1")))
+                .andExpect(jsonPath("$.titulo")
+                        .value("Reunião de Alinhamento"));
+
+        verify(reuniaoService).salvar(any());
+    }
+
+    @Test
+    void salvarRetornaBadRequestQuandoRequestInvalido()
+            throws Exception {
+        mockMvc.perform(post("/api/reunioes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(requestInvalido())))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(reuniaoService);
+    }
+
+    @Test
+    void atualizarRetornaReuniaoAtualizada() throws Exception {
+        when(reuniaoService.atualizar(eq(1L), any()))
+                .thenReturn(criarReuniao());
+
+        mockMvc.perform(put("/api/reunioes/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(requestValido())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.titulo")
+                        .value("Reunião de Alinhamento"));
+
+        verify(reuniaoService).atualizar(eq(1L), any());
+    }
+
+    @Test
+    void atualizarParcialRetornaReuniaoAtualizada() throws Exception {
+        Reuniao reuniao = criarReuniao();
+        ReuniaoPatchRequest request = new ReuniaoPatchRequest(
+                "Novo título", null, null, null,
+                null, null, null, null, null
+        );
+
+        when(reuniaoService.atualizarParcial(eq(1L), any()))
                 .thenReturn(reuniao);
 
-        ResponseEntity<ReuniaoDTO> response =
-                controller.atualizar(1L, request);
+        mockMvc.perform(patch("/api/reunioes/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(request)))
+                .andExpect(status().isOk());
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        verify(reuniaoService).atualizar(1L, request);
+        verify(reuniaoService).atualizarParcial(eq(1L), any());
     }
 
     @Test
-    void atualizarParcialRetornaReuniaoAtualizada() {
-        Reuniao reuniao = mock(Reuniao.class);
-        ReuniaoPatchRequest request = mock(ReuniaoPatchRequest.class);
-        ReuniaoRequest requestConvertido = mock(ReuniaoRequest.class);
+    void receberAnaliseRetornaAccepted() throws Exception {
+        ReuniaoResumoRequest request = new ReuniaoResumoRequest(
+                "Resumo executivo da reunião",
+                "Transcrição completa da reunião"
+        );
 
-        when(request.paraRequest()).thenReturn(requestConvertido);
-        when(reuniaoService.atualizarParcial(1L, requestConvertido))
-                .thenReturn(reuniao);
+        when(ingestaoService.receberAnalise(eq(1L), any()))
+                .thenReturn(criarReuniao());
 
-        ResponseEntity<ReuniaoDTO> response =
-                controller.atualizarParcial(1L, request);
+        mockMvc.perform(patch("/api/reunioes/1/ingestao")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(request)))
+                .andExpect(status().isAccepted());
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        verify(request).paraRequest();
-        verify(reuniaoService).atualizarParcial(1L, requestConvertido);
+        verify(ingestaoService).receberAnalise(eq(1L), any());
     }
 
     @Test
-    void receberAnaliseRetornaAccepted() {
-        Reuniao reuniao = mock(Reuniao.class);
-        ReuniaoResumoRequest request = mock(ReuniaoResumoRequest.class);
-
-        when(ingestaoService.receberAnalise(1L, request))
-                .thenReturn(reuniao);
-
-        ResponseEntity<ReuniaoDTO> response =
-                controller.receberAnalise(1L, request);
-
-        assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
-        assertNotNull(response.getBody());
-        verify(ingestaoService).receberAnalise(1L, request);
-    }
-
-    @Test
-    void gerarRelatorioRetornaRelatorio() {
-        Reuniao reuniao = mock(Reuniao.class);
-
+    void gerarRelatorioRetornaRelatorio() throws Exception {
         when(relatorioService.validarReuniaoParaRelatorio(1L))
-                .thenReturn(reuniao);
+                .thenReturn(criarReuniao());
 
-        ResponseEntity<RelatorioReuniaoResponse> response =
-                controller.gerarRelatorio(1L);
+        mockMvc.perform(get("/api/reunioes/1/relatorio"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.titulo")
+                        .value("Reunião de Alinhamento"));
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        verify(relatorioService).validarReuniaoParaRelatorio(1L);
+        verify(relatorioService)
+                .validarReuniaoParaRelatorio(1L);
     }
 
     @Test
-    void verificarFeriadoRetornaResultado() {
-        ReuniaoFeriadoDTO feriado = mock(ReuniaoFeriadoDTO.class);
-
+    void verificarFeriadoRetornaResultado() throws Exception {
         when(feriadoService.verificarReuniao(1L))
-                .thenReturn(feriado);
+                .thenReturn(null);
 
-        ResponseEntity<ReuniaoFeriadoDTO> response =
-                controller.verificarFeriado(1L);
+        mockMvc.perform(get("/api/reunioes/1/feriado"))
+                .andExpect(status().isOk());
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertSame(feriado, response.getBody());
         verify(feriadoService).verificarReuniao(1L);
     }
 
     @Test
-    void deletarRetornaNoContent() {
-        doNothing().when(reuniaoService).deletar(1L);
+    void deletarRetornaNoContent() throws Exception {
+        mockMvc.perform(delete("/api/reunioes/1"))
+                .andExpect(status().isNoContent())
+                .andExpect(content().string(""));
 
-        ResponseEntity<Void> response = controller.deletar(1L);
-
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        assertNull(response.getBody());
         verify(reuniaoService).deletar(1L);
     }
 }
