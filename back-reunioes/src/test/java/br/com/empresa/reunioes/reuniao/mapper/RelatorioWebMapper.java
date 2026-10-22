@@ -6,30 +6,43 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class RelatorioMapperTest {
 
     @Test
     void deveMontarRelatorioComListasVaziasQuandoForemNull() {
-        // Arrange
-        Reuniao reuniao = new Reuniao();
+        var reuniao = new Reuniao();
         reuniao.setTitulo("Reunião de planejamento");
         reuniao.setParticipantes(null);
         reuniao.setAcoes(null);
         reuniao.setAreas(null);
         reuniao.setPontosChaves(null);
 
-        // Act
         var relatorio = RelatorioMapper.montarRelatorio(reuniao);
 
-        // Assert
-        assertNotNull(relatorio);
-        assertEquals("Reunião de planejamento", relatorio.titulo());
-        assertTrue(relatorio.participantes().isEmpty());
-        assertTrue(relatorio.acoes().isEmpty());
-        assertTrue(relatorio.areas().isEmpty());
-        assertTrue(relatorio.pontosChaves().isEmpty());
-        assertEquals(0, relatorio.totalAcoes());
+        assertThat(relatorio.titulo()).isEqualTo("Reunião de planejamento");
+        assertThat(relatorio.participantes()).isEmpty();
+        assertThat(relatorio.acoes()).isEmpty();
+        assertThat(relatorio.areas()).isEmpty();
+        assertThat(relatorio.pontosChaves()).isEmpty();
+        assertThat(relatorio.totalAcoes()).isZero();
+    }
+
+    @Test
+    void deveMontarRelatorioComDadosDaReuniao() {
+        var reuniao = new Reuniao();
+        reuniao.setTitulo("Reunião de planejamento");
+        reuniao.setAreas(List.of("TI", "RH"));
+        reuniao.setPontosChaves(List.of("Definir metas"));
+        reuniao.setAcoes(List.of());
+        reuniao.setParticipantes(List.of());
+
+        var relatorio = RelatorioMapper.montarRelatorio(reuniao);
+
+        assertThat(relatorio.titulo()).isEqualTo("Reunião de planejamento");
+        assertThat(relatorio.areas()).containsExactly("TI", "RH");
+        assertThat(relatorio.pontosChaves()).containsExactly("Definir metas");
+        assertThat(relatorio.totalAcoes()).isEqualTo(reuniao.getAcoes().size());
     }
 }
