@@ -11,7 +11,7 @@ import java.util.List;
  * "nao mexer". Sem este record o PATCH reutilizava o ReuniaoRequest, que
  * cobra titulo, data e os dois status — mandar um campo so devolvia 400 e
  * a atualizacao parcial nao funcionava.
- *
+ * <p>
  * O que se valida aqui e o conteudo do campo QUE FOI enviado: @Size aceita
  * nulo e barra titulo curto demais.
  */
@@ -30,7 +30,9 @@ public record ReuniaoPatchRequest(@Size(min = 5, message = "O título deve ter a
                                   List<Long> acoes,
                                   String resumo) {
 
-    /** Adapta para o record completo, que e o que o service ja consome. */
+    /**
+     * Adapta para o record completo, que e o que o service ja consome.
+     */
     public ReuniaoRequest paraRequest() {
         return new ReuniaoRequest(titulo, data, statusTranscricao, statusReuniao,
                 areas, pontosChaves, participantes, acoes, resumo);
