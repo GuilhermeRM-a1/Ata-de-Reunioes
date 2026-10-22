@@ -1,22 +1,19 @@
 package br.com.empresa.reunioes.reuniao.mapper;
 
 import br.com.empresa.reunioes.application.reuniao.mapper.ReuniaoMapper;
-import br.com.empresa.reunioes.domain.entity.Reuniao;
 import br.com.empresa.reunioes.domain.enums.StatusReuniao;
 import br.com.empresa.reunioes.domain.enums.StatusTranscricao;
 import br.com.empresa.reunioes.web.reuniao.dto.ReuniaoRequest;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class ReuniaoMapperTest {
 
     @Test
     void deveConverterRequestParaEntity() {
-        // Arrange
         var request = new ReuniaoRequest(
                 "Reunião de planejamento",
                 "2026-10-19",
@@ -29,18 +26,15 @@ class ReuniaoMapperTest {
                 "Resumo da reunião"
         );
 
-        // Act
-        Reuniao reuniao = ReuniaoMapper.reuniaoToEntity(request);
+        var reuniao = ReuniaoMapper.reuniaoToEntity(request);
 
-        // Assert
-        assertAll(
-                () -> assertEquals(request.titulo(), reuniao.getTitulo()),
-                () -> assertEquals(request.data(), reuniao.getData()),
-                () -> assertEquals(request.statusTranscricao(), reuniao.getStatusTranscricao()),
-                () -> assertEquals(request.statusReuniao(), reuniao.getStatusReuniao()),
-                () -> assertEquals(request.areas(), reuniao.getAreas()),
-                () -> assertEquals(request.pontosChaves(), reuniao.getPontosChaves()),
-                () -> assertEquals(request.resumo(), reuniao.getResumo())
-        );
+        assertThat(reuniao.getId()).isNull();
+        assertThat(reuniao.getTitulo()).isEqualTo("Reunião de planejamento");
+        assertThat(reuniao.getData()).isEqualTo("2026-10-19");
+        assertThat(reuniao.getStatusTranscricao()).isEqualTo(StatusTranscricao.RECEBIDA);
+        assertThat(reuniao.getStatusReuniao()).isEqualTo(StatusReuniao.PENDENTE);
+        assertThat(reuniao.getAreas()).containsExactly("TI");
+        assertThat(reuniao.getPontosChaves()).containsExactly("Definir metas");
+        assertThat(reuniao.getResumo()).isEqualTo("Resumo da reunião");
     }
 }
