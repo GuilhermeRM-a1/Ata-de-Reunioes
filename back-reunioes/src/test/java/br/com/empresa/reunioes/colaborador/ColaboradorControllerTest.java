@@ -1,40 +1,35 @@
 package br.com.empresa.reunioes.colaborador;
 
+import br.com.empresa.reunioes.application.colaborador.ColaboradorService;
 import br.com.empresa.reunioes.domain.entity.Colaborador;
 import br.com.empresa.reunioes.domain.enums.Papel;
 import br.com.empresa.reunioes.domain.exception.RecursoNaoEncontradoException;
-import br.com.empresa.reunioes.domain.repository.ColaboradorRepository;
 import br.com.empresa.reunioes.web.colaborador.ColaboradorController;
 import br.com.empresa.reunioes.web.colaborador.dto.ColaboradorPatchRequest;
 import br.com.empresa.reunioes.web.colaborador.dto.ColaboradorRequest;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class ColaboradorControllerTest {
 
-    @Autowired
-    ColaboradorController colaboradorController;
+    @Mock
+    private ColaboradorService service;
 
-    @MockitoBean
-    ColaboradorRepository colaboradorRepository;
-
-    @MockitoBean
-    BCryptPasswordEncoder passwordEncoder;
+    @InjectMocks
+    private ColaboradorController colaboradorController;
 
     private ColaboradorRequest criarRequestValido() {
         return new ColaboradorRequest(
@@ -62,11 +57,9 @@ class ColaboradorControllerTest {
     @Test
     void deveSalvarColaborador() {
         var request = criarRequestValido();
-        var colaboradorSalvo = criarColaboradorValido();
+        var colaborador = criarColaboradorValido();
 
-        when(colaboradorRepository.existsByEmail("maria.souza@empresa.com")).thenReturn(false);
-        when(passwordEncoder.encode("senha123")).thenReturn("hash-bcrypt");
-        when(colaboradorRepository.save(any(Colaborador.class))).thenReturn(colaboradorSalvo);
+        when(service.salvar(request)).thenReturn(colaborador);
 
         var resposta = colaboradorController.salvar(request);
 
@@ -75,13 +68,15 @@ class ColaboradorControllerTest {
         assertNotNull(resposta.getBody());
         assertEquals(1L, resposta.getBody().id());
         assertEquals("Maria Souza", resposta.getBody().nome());
-        verify(colaboradorRepository).save(any(Colaborador.class));
+
+        verify(service).salvar(request);
     }
 
     @Test
     void deveBuscarPorId() {
         var colaborador = criarColaboradorValido();
-        when(colaboradorRepository.findById(1L)).thenReturn(Optional.of(colaborador));
+
+        when(service.buscarPorId(1L)).thenReturn(colaborador);
 
         var resposta = colaboradorController.buscarPorId(1L);
 
@@ -89,48 +84,67 @@ class ColaboradorControllerTest {
         assertEquals(HttpStatus.OK, resposta.getStatusCode());
         assertNotNull(resposta.getBody());
         assertEquals(1L, resposta.getBody().id());
-        verify(colaboradorRepository).findById(1L);
+
+        verify(service).buscarPorId(1L);
     }
 
     @Test
     void deveLancarExceptionCasoColaboradorNaoEncontradoPorId() {
-        when(colaboradorRepository.findById(99L)).thenReturn(Optional.empty());
+        when(service.buscarPorId(99L))
+                .thenThrow(new RecursoNaoEncontradoException(
+                        "Colaborador não encontrado com ID: 99"
+                ));
 
-        assertThrows(RecursoNaoEncontradoException.class, () -> colaboradorController.buscarPorId(99L));
+        assertThrows(
+                RecursoNaoEncontradoException.class,
+                () -> colaboradorController.buscarPorId(99L)
+        );
+
+        verify(service).buscarPorId(99L);
     }
 
     @Test
     void deveBuscarPorEmail() {
         var colaborador = criarColaboradorValido();
-        when(colaboradorRepository.findByEmail("maria.souza@empresa.com")).thenReturn(colaborador);
+        var email = "maria.souza@empresa.com";
 
-        var resposta = colaboradorController.buscarPorEmail("maria.souza@empresa.com");
+        when(service.buscarPorEmail(email)).thenReturn(colaborador);
+
+        var resposta = colaboradorController.buscarPorEmail(email);
 
         assertNotNull(resposta);
         assertEquals(HttpStatus.OK, resposta.getStatusCode());
         assertNotNull(resposta.getBody());
-        assertEquals("maria.souza@empresa.com", resposta.getBody().email());
-        verify(colaboradorRepository).findByEmail("maria.souza@empresa.com");
+        assertEquals(email, resposta.getBody().email());
+
+        verify(service).buscarPorEmail(email);
     }
 
     @Test
     void deveBuscarPorEmailRequestParam() {
         var colaborador = criarColaboradorValido();
-        when(colaboradorRepository.findByEmail("maria.souza@empresa.com")).thenReturn(colaborador);
+        var email = "maria.souza@empresa.com";
 
-        var resposta = colaboradorController.buscarPorEmailRequestParam("maria.souza@empresa.com");
+        when(service.buscarPorEmail(email)).thenReturn(colaborador);
+
+        var resposta =
+                colaboradorController.buscarPorEmailRequestParam(email);
 
         assertNotNull(resposta);
         assertEquals(HttpStatus.OK, resposta.getStatusCode());
         assertNotNull(resposta.getBody());
-        assertEquals("maria.souza@empresa.com", resposta.getBody().email());
-        verify(colaboradorRepository).findByEmail("maria.souza@empresa.com");
+        assertEquals(email, resposta.getBody().email());
+
+        verify(service).buscarPorEmail(email);
     }
 
     @Test
     void deveListarColaboradoresPaginados() {
         Pageable pageable = PageRequest.of(0, 10);
-        when(colaboradorRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(criarColaboradorValido())));
+        var colaborador = criarColaboradorValido();
+
+        when(service.listar(pageable))
+                .thenReturn(new PageImpl<>(List.of(colaborador)));
 
         var resposta = colaboradorController.listar(pageable);
 
@@ -138,51 +152,57 @@ class ColaboradorControllerTest {
         assertEquals(HttpStatus.OK, resposta.getStatusCode());
         assertNotNull(resposta.getBody());
         assertFalse(resposta.getBody().isEmpty());
-        verify(colaboradorRepository).findAll(pageable);
+
+        verify(service).listar(pageable);
     }
 
     @Test
     void deveAtualizarColaboradorCompleto() {
         var id = 1L;
         var request = criarRequestValido();
-        var colaboradorExistente = criarColaboradorValido();
+        var colaborador = criarColaboradorValido();
 
-        when(colaboradorRepository.findById(id)).thenReturn(Optional.of(colaboradorExistente));
-        when(colaboradorRepository.save(any(Colaborador.class))).thenReturn(colaboradorExistente);
+        when(service.atualizar(id, request)).thenReturn(colaborador);
 
         var resposta = colaboradorController.atualizar(id, request);
 
         assertNotNull(resposta);
         assertEquals(HttpStatus.OK, resposta.getStatusCode());
         assertNotNull(resposta.getBody());
-        verify(colaboradorRepository).save(colaboradorExistente);
+
+        verify(service).atualizar(id, request);
     }
 
     @Test
     void deveAtualizarParcial() {
         var id = 1L;
-        var request = new ColaboradorPatchRequest("Nome Alterado", null, null, null, null, null);
-        var colaboradorExistente = criarColaboradorValido();
+        var request = new ColaboradorPatchRequest(
+                "Nome Alterado", null, null, null, null, null
+        );
+        var colaborador = criarColaboradorValido();
 
-        when(colaboradorRepository.findById(id)).thenReturn(Optional.of(colaboradorExistente));
-        when(colaboradorRepository.save(any(Colaborador.class))).thenReturn(colaboradorExistente);
+        when(service.atualizarParcial(id, request))
+                .thenReturn(colaborador);
 
         var resposta = colaboradorController.atualizarParcial(id, request);
 
         assertNotNull(resposta);
         assertEquals(HttpStatus.OK, resposta.getStatusCode());
         assertNotNull(resposta.getBody());
-        verify(colaboradorRepository).save(colaboradorExistente);
+
+        verify(service).atualizarParcial(id, request);
     }
 
     @Test
     void deveDeletarColaborador() {
-        var colaborador = criarColaboradorValido();
-        when(colaboradorRepository.findById(1L)).thenReturn(Optional.of(colaborador));
+        var id = 1L;
 
-        var resposta = colaboradorController.deletar(1L);
+        doNothing().when(service).deletar(id);
+
+        var resposta = colaboradorController.deletar(id);
 
         assertEquals(HttpStatus.NO_CONTENT, resposta.getStatusCode());
-        verify(colaboradorRepository).delete(colaborador);
+
+        verify(service).deletar(id);
     }
 }

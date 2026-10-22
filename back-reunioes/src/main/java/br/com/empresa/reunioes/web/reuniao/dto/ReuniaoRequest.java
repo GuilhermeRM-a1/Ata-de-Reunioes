@@ -32,6 +32,6 @@ public record ReuniaoRequest(@NotBlank(message = "O título é obrigatório")
                              List<Long> acoes,
 
                              /** Resumo executivo. Opcional: nem toda reuniao ja foi transcrita. */
-                             String resumo){
+                             String resumo) {
 
 }

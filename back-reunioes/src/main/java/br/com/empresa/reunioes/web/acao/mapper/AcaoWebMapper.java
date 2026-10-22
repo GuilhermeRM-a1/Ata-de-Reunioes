@@ -14,7 +14,7 @@ public class AcaoWebMapper {
                 : acao.getResponsavel().stream().map(Colaborador::getNome).toList();
 
         return new AcaoDTO(
-                acao.getId() == null ? null : String.valueOf(acao.getId()),
+                acao.getId(),
                 acao.getTitulo(),
                 acao.getTipo(),
                 acao.getDescricao(),
