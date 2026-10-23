@@ -1,6 +1,5 @@
 package br.com.empresa.reunioes.web.colaborador;
 
-import br.com.empresa.reunioes.application.colaborador.mapper.ColaboradorMapper;
 import br.com.empresa.reunioes.application.colaborador.ColaboradorService;
 import br.com.empresa.reunioes.domain.entity.Colaborador;
 import br.com.empresa.reunioes.web.colaborador.dto.ColaboradorDTO;

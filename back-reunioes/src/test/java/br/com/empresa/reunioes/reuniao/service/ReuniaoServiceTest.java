@@ -1,7 +1,6 @@
 package br.com.empresa.reunioes.reuniao.service;
 
 import br.com.empresa.reunioes.application.reuniao.ReuniaoService;
-import br.com.empresa.reunioes.application.reuniao.mapper.ReuniaoMapper;
 import br.com.empresa.reunioes.domain.entity.Acao;
 import br.com.empresa.reunioes.domain.entity.Colaborador;
 import br.com.empresa.reunioes.domain.entity.Reuniao;

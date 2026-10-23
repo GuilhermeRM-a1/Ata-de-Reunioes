@@ -4,7 +4,6 @@ import br.com.empresa.reunioes.domain.entity.Reuniao;
 import br.com.empresa.reunioes.web.reuniao.dto.ReuniaoDTO;
 import br.com.empresa.reunioes.web.reuniao.mapper.ReuniaoWebMapper;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
