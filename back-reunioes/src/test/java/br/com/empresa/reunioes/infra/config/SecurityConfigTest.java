@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SpringJUnitConfig(SecurityConfig.class)
 @DisplayName("Configuração de segurança")
-public class SecurityConfigTest {
+class SecurityConfigTest {
 
     @Autowired
     BCryptPasswordEncoder encoderConfig;
