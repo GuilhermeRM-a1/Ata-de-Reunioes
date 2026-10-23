@@ -1,6 +1,5 @@
 package br.com.empresa.reunioes.web.acao;
 
-import br.com.empresa.reunioes.application.acao.mapper.AcaoMapper;
 import br.com.empresa.reunioes.application.acao.AcaoService;
 import br.com.empresa.reunioes.domain.entity.Acao;
 import br.com.empresa.reunioes.web.acao.dto.AcaoDTO;

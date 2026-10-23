@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.cloud.openfeign.support.SpringMvcContract;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;

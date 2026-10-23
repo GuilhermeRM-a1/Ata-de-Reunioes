@@ -1,6 +1,5 @@
 package br.com.empresa.reunioes.web.reuniao.dto;
 
-
 import br.com.empresa.reunioes.domain.enums.StatusReuniao;
 import br.com.empresa.reunioes.domain.enums.StatusTranscricao;
 import br.com.empresa.reunioes.web.acao.dto.AcaoDTO;

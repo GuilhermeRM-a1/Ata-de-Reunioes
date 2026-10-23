@@ -2,7 +2,6 @@ package br.com.empresa.reunioes.acao.mapper;
 
 import br.com.empresa.reunioes.application.acao.mapper.AcaoMapper;
 import br.com.empresa.reunioes.domain.entity.Acao;
-import br.com.empresa.reunioes.domain.entity.Colaborador;
 import br.com.empresa.reunioes.web.acao.dto.AcaoRequest;
 import org.junit.jupiter.api.Test;
 
