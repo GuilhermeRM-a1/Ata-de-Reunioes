@@ -25,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -67,6 +68,7 @@ public class AcaoControllerTest {
         acaoSimulacao = new Acao();
         acaoSimulacao.setId(1L);
         acaoSimulacao.setReuniao(reuniao);
+        acaoSimulacao.setResponsavel(new ArrayList<>());
 
     }
 
@@ -107,5 +109,15 @@ public class AcaoControllerTest {
         assertNotNull(retorno.getBody());
     }
 
-    // testes abaixo
+        @Test
+        void cenario_buscarPorId(){
+            when(acaoService.buscarPorId(idSimulacao)).thenReturn(acaoSimulacao);
+
+            ResponseEntity<AcaoDTO> retorno = acaoController.buscarPorId(idSimulacao);
+            assertNotNull(retorno);
+            assertEquals(HttpStatus.OK, retorno.getStatusCode());
+            assertNotNull(retorno.getBody());
+
+        }
+
 }
