@@ -23,12 +23,11 @@ import static br.com.empresa.reunioes.web.colaborador.mapper.ColaboradorWebMappe
 @RestController
 @RequestMapping("/api/reunioes/colaboradores")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "${app.cors.allowed-origins}")
 @Tag(name = "Colaboradores", description = "CRUD de colaboradores")
 public class ColaboradorController {
 
     private final ColaboradorService service;
-    private final ColaboradorMapper mapper;
 
     @Operation(summary = "Cria um colaborador",
             description = "A senha é gravada na entidade, mas nunca volta na resposta.")
