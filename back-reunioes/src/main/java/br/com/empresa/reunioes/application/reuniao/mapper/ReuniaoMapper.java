@@ -1,7 +1,7 @@
 package br.com.empresa.reunioes.application.reuniao.mapper;
 
 import br.com.empresa.reunioes.domain.entity.Reuniao;
-import br.com.empresa.reunioes.web.reuniao.dto.ReuniaoRequest;
+import br.com.empresa.reunioes.web.reuniao.dto.request.ReuniaoRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +13,11 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class ReuniaoMapper {
+public final class ReuniaoMapper {
+
+    private ReuniaoMapper() {
+
+    }
 
     public static Reuniao reuniaoToEntity(ReuniaoRequest request) {
         log.info("Mapper Convertendo...");

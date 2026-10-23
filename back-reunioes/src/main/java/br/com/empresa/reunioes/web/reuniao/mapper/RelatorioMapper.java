@@ -14,7 +14,11 @@ import static br.com.empresa.reunioes.web.colaborador.mapper.ColaboradorWebMappe
 
 @Slf4j
 @Component
-public class RelatorioMapper {
+public final class RelatorioMapper {
+
+    private RelatorioMapper() {
+
+    }
 
     public static RelatorioReuniaoResponse montarRelatorio(Reuniao reuniao) {
 

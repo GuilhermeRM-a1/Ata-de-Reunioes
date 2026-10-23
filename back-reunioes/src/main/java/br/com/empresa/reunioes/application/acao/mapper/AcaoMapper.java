@@ -1,13 +1,17 @@
 package br.com.empresa.reunioes.application.acao.mapper;
 
 import br.com.empresa.reunioes.domain.entity.Acao;
-import br.com.empresa.reunioes.web.acao.dto.AcaoRequest;
+import br.com.empresa.reunioes.web.acao.dto.request.AcaoRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class AcaoMapper {
+public final class AcaoMapper {
+
+    private AcaoMapper() {
+
+    }
 
     public static Acao acaoToEntity(AcaoRequest request) {
         log.info("Mapper convertendo...");

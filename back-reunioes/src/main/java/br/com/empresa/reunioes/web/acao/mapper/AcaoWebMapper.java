@@ -6,12 +6,15 @@ import br.com.empresa.reunioes.web.acao.dto.AcaoDTO;
 
 import java.util.List;
 
-public class AcaoWebMapper {
+public final class AcaoWebMapper {
+
+    private AcaoWebMapper() {
+    }
 
     public static AcaoDTO acaoToDTO(Acao acao) {
-        List<String> responsavelNomes = acao.getResponsavel() == null
-                ? List.of()
-                : acao.getResponsavel().stream().map(Colaborador::getNome).toList();
+        List<String> responsavelNomes = acao.getResponsavel().stream()
+                .map(Colaborador::getNome)
+                .toList();
 
         return new AcaoDTO(
                 acao.getId(),
@@ -24,5 +27,4 @@ public class AcaoWebMapper {
                 acao.getReuniao().getId()
         );
     }
-
 }
