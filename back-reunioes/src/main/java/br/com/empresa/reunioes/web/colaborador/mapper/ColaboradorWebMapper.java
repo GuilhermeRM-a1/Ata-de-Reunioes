@@ -3,7 +3,11 @@ package br.com.empresa.reunioes.web.colaborador.mapper;
 import br.com.empresa.reunioes.domain.entity.Colaborador;
 import br.com.empresa.reunioes.web.colaborador.dto.ColaboradorDTO;
 
-public class ColaboradorWebMapper {
+public final class ColaboradorWebMapper {
+
+    private ColaboradorWebMapper() {
+
+    }
 
     public static ColaboradorDTO colaboradorToDTO(Colaborador colaborador) {
 

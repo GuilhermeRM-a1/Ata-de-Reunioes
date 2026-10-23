@@ -1,13 +1,17 @@
 package br.com.empresa.reunioes.application.colaborador.mapper;
 
 import br.com.empresa.reunioes.domain.entity.Colaborador;
-import br.com.empresa.reunioes.web.colaborador.dto.ColaboradorRequest;
+import br.com.empresa.reunioes.web.colaborador.dto.request.ColaboradorRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class ColaboradorMapper {
+public final class ColaboradorMapper {
+
+    private ColaboradorMapper() {
+
+    }
 
     public static Colaborador colaboradorToEntity(ColaboradorRequest request) {
         log.info("Mapper convertendo...");
