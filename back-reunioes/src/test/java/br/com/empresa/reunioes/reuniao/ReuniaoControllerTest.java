@@ -54,6 +54,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DisplayName("Controller de reuniões")
 class ReuniaoControllerTest {
 
+    private static final String URL_BASE = "/api/reunioes";
+    private static final String URL_POR_ID = URL_BASE + "/{id}";
+    private static final String URL_INGESTAO = URL_POR_ID + "/ingestao";
+    private static final String URL_RELATORIO = URL_POR_ID + "/relatorio";
+    private static final String URL_FERIADO = URL_POR_ID + "/feriado";
+
     private static final String TITULO = "Reunião de Alinhamento";
     private static final String MENSAGEM_NAO_ENCONTRADA = "Reunião não encontrada.";
 
@@ -142,7 +148,7 @@ class ReuniaoControllerTest {
                     .thenReturn(new PageImpl<>(List.of(criarReuniao())));
 
 
-            ResultActions resposta = mockMvc.perform(get("/api/reunioes")
+            ResultActions resposta = mockMvc.perform(get(URL_BASE)
                     .param("page", "0")
                     .param("size", "10"));
 
@@ -165,7 +171,7 @@ class ReuniaoControllerTest {
             when(reuniaoService.buscarPorId(1L)).thenReturn(criarReuniao());
 
 
-            ResultActions resposta = mockMvc.perform(get("/api/reunioes/1"));
+            ResultActions resposta = mockMvc.perform(get(URL_POR_ID, 1L));
 
 
             resposta.andExpect(status().isOk())
@@ -183,7 +189,7 @@ class ReuniaoControllerTest {
                     .thenThrow(new RecursoNaoEncontradoException(MENSAGEM_NAO_ENCONTRADA));
 
 
-            ResultActions resposta = mockMvc.perform(get("/api/reunioes/99"));
+            ResultActions resposta = mockMvc.perform(get(URL_POR_ID, 99L));
 
 
             resposta.andExpect(status().isNotFound())
@@ -205,7 +211,7 @@ class ReuniaoControllerTest {
             when(reuniaoService.salvar(any())).thenReturn(criarReuniao());
 
 
-            ResultActions resposta = enviarJson(post("/api/reunioes"), requestValido());
+            ResultActions resposta = enviarJson(post(URL_BASE), requestValido());
 
 
             resposta.andExpect(status().isCreated())
@@ -224,7 +230,7 @@ class ReuniaoControllerTest {
             var request = requestInvalido();
 
 
-            ResultActions resposta = enviarJson(post("/api/reunioes"), request);
+            ResultActions resposta = enviarJson(post(URL_BASE), request);
 
 
             resposta.andExpect(status().isBadRequest())
@@ -246,7 +252,7 @@ class ReuniaoControllerTest {
             when(reuniaoService.atualizar(eq(1L), any())).thenReturn(criarReuniao());
 
 
-            ResultActions resposta = enviarJson(put("/api/reunioes/1"), requestValido());
+            ResultActions resposta = enviarJson(put(URL_POR_ID, 1L), requestValido());
 
 
             resposta.andExpect(status().isOk())
@@ -264,7 +270,7 @@ class ReuniaoControllerTest {
             var request = requestInvalido();
 
 
-            ResultActions resposta = enviarJson(put("/api/reunioes/1"), request);
+            ResultActions resposta = enviarJson(put(URL_POR_ID, 1L), request);
 
 
             resposta.andExpect(status().isBadRequest())
@@ -281,7 +287,7 @@ class ReuniaoControllerTest {
                     .thenThrow(new RecursoNaoEncontradoException(MENSAGEM_NAO_ENCONTRADA));
 
 
-            ResultActions resposta = enviarJson(put("/api/reunioes/99"), requestValido());
+            ResultActions resposta = enviarJson(put(URL_POR_ID, 99L), requestValido());
 
 
             resposta.andExpect(status().isNotFound())
@@ -299,7 +305,7 @@ class ReuniaoControllerTest {
             when(reuniaoService.atualizarParcial(eq(1L), any())).thenReturn(criarReuniao());
 
 
-            ResultActions resposta = enviarJson(patch("/api/reunioes/1"), request);
+            ResultActions resposta = enviarJson(patch(URL_POR_ID, 1L), request);
 
 
             resposta.andExpect(status().isOk())
@@ -321,7 +327,7 @@ class ReuniaoControllerTest {
             );
 
 
-            ResultActions resposta = enviarJson(patch("/api/reunioes/1"), request);
+            ResultActions resposta = enviarJson(patch(URL_POR_ID, 1L), request);
 
 
             resposta.andExpect(status().isBadRequest())
@@ -343,7 +349,7 @@ class ReuniaoControllerTest {
                     .thenThrow(new RecursoNaoEncontradoException(MENSAGEM_NAO_ENCONTRADA));
 
 
-            ResultActions resposta = enviarJson(patch("/api/reunioes/99"), request);
+            ResultActions resposta = enviarJson(patch(URL_POR_ID, 99L), request);
 
 
             resposta.andExpect(status().isNotFound())
@@ -366,7 +372,7 @@ class ReuniaoControllerTest {
             when(ingestaoService.receberAnalise(eq(1L), any())).thenReturn(criarReuniao());
 
 
-            ResultActions resposta = enviarJson(patch("/api/reunioes/1/ingestao"), request);
+            ResultActions resposta = enviarJson(patch(URL_INGESTAO, 1L), request);
 
 
             resposta.andExpect(status().isAccepted());
@@ -383,7 +389,7 @@ class ReuniaoControllerTest {
             var request = new ReuniaoResumoRequest("   ", "Transcrição");
 
 
-            ResultActions resposta = enviarJson(patch("/api/reunioes/1/ingestao"), request);
+            ResultActions resposta = enviarJson(patch(URL_INGESTAO, 1L), request);
 
 
             resposta.andExpect(status().isBadRequest())
@@ -402,7 +408,7 @@ class ReuniaoControllerTest {
 
 
             ResultActions resposta = enviarJson(
-                    patch("/api/reunioes/99/ingestao"),
+                    patch(URL_INGESTAO, 99L),
                     new ReuniaoResumoRequest("Resumo", null));
 
 
@@ -422,7 +428,7 @@ class ReuniaoControllerTest {
             when(relatorioService.validarReuniaoParaRelatorio(1L)).thenReturn(criarReuniao());
 
 
-            ResultActions resposta = mockMvc.perform(get("/api/reunioes/1/relatorio"));
+            ResultActions resposta = mockMvc.perform(get(URL_RELATORIO, 1L));
 
 
             resposta.andExpect(status().isOk())
@@ -440,7 +446,7 @@ class ReuniaoControllerTest {
                             "A reunião 1 ainda não recebeu o resumo da IA."));
 
 
-            ResultActions resposta = mockMvc.perform(get("/api/reunioes/1/relatorio"));
+            ResultActions resposta = mockMvc.perform(get(URL_RELATORIO, 1L));
 
 
             resposta.andExpect(status().isConflict())
@@ -458,7 +464,7 @@ class ReuniaoControllerTest {
                     .thenThrow(new RecursoNaoEncontradoException(MENSAGEM_NAO_ENCONTRADA));
 
 
-            ResultActions resposta = mockMvc.perform(get("/api/reunioes/99/relatorio"));
+            ResultActions resposta = mockMvc.perform(get(URL_RELATORIO, 99L));
 
 
             resposta.andExpect(status().isNotFound())
@@ -479,7 +485,7 @@ class ReuniaoControllerTest {
                             1L, TITULO, "2026-12-25", "Natal", "sexta-feira"));
 
 
-            ResultActions resposta = mockMvc.perform(get("/api/reunioes/1/feriado"));
+            ResultActions resposta = mockMvc.perform(get(URL_FERIADO, 1L));
 
 
             resposta.andExpect(status().isOk())
@@ -498,7 +504,7 @@ class ReuniaoControllerTest {
             when(feriadoService.verificarReuniao(1L)).thenReturn(null);
 
 
-            ResultActions resposta = mockMvc.perform(get("/api/reunioes/1/feriado"));
+            ResultActions resposta = mockMvc.perform(get(URL_FERIADO, 1L));
 
 
             resposta.andExpect(status().isOk())
@@ -516,7 +522,7 @@ class ReuniaoControllerTest {
                     .thenThrow(new RecursoNaoEncontradoException(detalhe));
 
 
-            ResultActions resposta = mockMvc.perform(get("/api/reunioes/1/feriado"));
+            ResultActions resposta = mockMvc.perform(get(URL_FERIADO, 1L));
 
 
             resposta.andExpect(status().isNotFound())
@@ -535,7 +541,7 @@ class ReuniaoControllerTest {
             doNothing().when(reuniaoService).deletar(1L);
 
 
-            ResultActions resposta = mockMvc.perform(delete("/api/reunioes/1"));
+            ResultActions resposta = mockMvc.perform(delete(URL_POR_ID, 1L));
 
 
             resposta.andExpect(status().isNoContent())
@@ -552,7 +558,7 @@ class ReuniaoControllerTest {
                     .when(reuniaoService).deletar(99L);
 
 
-            ResultActions resposta = mockMvc.perform(delete("/api/reunioes/99"));
+            ResultActions resposta = mockMvc.perform(delete(URL_POR_ID, 99L));
 
 
             resposta.andExpect(status().isNotFound())
