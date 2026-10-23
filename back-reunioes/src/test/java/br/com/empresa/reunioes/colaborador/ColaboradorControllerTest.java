@@ -3,38 +3,71 @@ package br.com.empresa.reunioes.colaborador;
 import br.com.empresa.reunioes.application.colaborador.ColaboradorService;
 import br.com.empresa.reunioes.domain.entity.Colaborador;
 import br.com.empresa.reunioes.domain.enums.Papel;
+import br.com.empresa.reunioes.domain.exception.EmailCadastradoExistenteException;
 import br.com.empresa.reunioes.domain.exception.RecursoNaoEncontradoException;
 import br.com.empresa.reunioes.web.colaborador.ColaboradorController;
 import br.com.empresa.reunioes.web.colaborador.dto.request.ColaboradorPatchRequest;
 import br.com.empresa.reunioes.web.colaborador.dto.request.ColaboradorRequest;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.ArgumentCaptor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(ColaboradorController.class)
+@DisplayName("Controller de colaboradores")
 class ColaboradorControllerTest {
 
-    @Mock
-    private ColaboradorService service;
+    private static final String URL_BASE = "/api/reunioes/colaboradores";
+    private static final String URL_POR_ID = URL_BASE + "/{id}";
+    private static final String URL_POR_EMAIL = URL_BASE + "/email/{email}";
+    private static final String URL_POR_EMAIL_PARAM = URL_BASE + "/email";
 
-    @InjectMocks
-    private ColaboradorController colaboradorController;
+    private static final String EMAIL = "maria.souza@empresa.com";
+    private static final String MENSAGEM_NAO_ENCONTRADO = "Colaborador não encontrado com ID: 99";
+    private static final String MENSAGEM_EMAIL_DUPLICADO = "Este e-mail já existe, cadastre outro.";
 
-    private ColaboradorRequest criarRequestValido() {
+    @Autowired
+    MockMvc mockMvc;
+
+    @Autowired
+    ObjectMapper objectMapper;
+
+    @MockitoBean
+    ColaboradorService service;
+
+    private ColaboradorRequest requestValido() {
         return new ColaboradorRequest(
                 "Maria Souza",
-                "maria.souza@empresa.com",
+                EMAIL,
                 "senha123",
                 Papel.USUARIO,
                 true,
@@ -42,11 +75,22 @@ class ColaboradorControllerTest {
         );
     }
 
-    private Colaborador criarColaboradorValido() {
+    private ColaboradorRequest requestInvalido() {
+        return new ColaboradorRequest(
+                "",
+                "nao-e-um-email",
+                "",
+                Papel.USUARIO,
+                true,
+                "2026-02-01"
+        );
+    }
+
+    private Colaborador criarColaborador() {
         var colaborador = new Colaborador();
         colaborador.setId(1L);
         colaborador.setNome("Maria Souza");
-        colaborador.setEmail("maria.souza@empresa.com");
+        colaborador.setEmail(EMAIL);
         colaborador.setSenha("hash-bcrypt");
         colaborador.setPapel(Papel.USUARIO);
         colaborador.setMonitorarReunioes(true);
@@ -54,155 +98,299 @@ class ColaboradorControllerTest {
         return colaborador;
     }
 
-    @Test
-    void deveSalvarColaborador() {
-        var request = criarRequestValido();
-        var colaborador = criarColaboradorValido();
-
-        when(service.salvar(request)).thenReturn(colaborador);
-
-        var resposta = colaboradorController.salvar(request);
-
-        assertNotNull(resposta);
-        assertEquals(HttpStatus.CREATED, resposta.getStatusCode());
-        assertNotNull(resposta.getBody());
-        assertEquals(1L, resposta.getBody().id());
-        assertEquals("Maria Souza", resposta.getBody().nome());
-
-        verify(service).salvar(request);
+    private String json(Object objeto) {
+        return objectMapper.writeValueAsString(objeto);
     }
 
-    @Test
-    void deveBuscarPorId() {
-        var colaborador = criarColaboradorValido();
-
-        when(service.buscarPorId(1L)).thenReturn(colaborador);
-
-        var resposta = colaboradorController.buscarPorId(1L);
-
-        assertNotNull(resposta);
-        assertEquals(HttpStatus.OK, resposta.getStatusCode());
-        assertNotNull(resposta.getBody());
-        assertEquals(1L, resposta.getBody().id());
-
-        verify(service).buscarPorId(1L);
+    private ResultActions enviarJson(MockHttpServletRequestBuilder metodo, Object corpo) throws Exception {
+        return mockMvc.perform(metodo
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(corpo)));
     }
 
-    @Test
-    void deveLancarExceptionCasoColaboradorNaoEncontradoPorId() {
-        when(service.buscarPorId(99L))
-                .thenThrow(new RecursoNaoEncontradoException(
-                        "Colaborador não encontrado com ID: 99"
-                ));
+    @Nested
+    @DisplayName("Cadastro de colaboradores")
+    class Cadastro {
 
-        assertThrows(
-                RecursoNaoEncontradoException.class,
-                () -> colaboradorController.buscarPorId(99L)
-        );
+        @Test
+        @DisplayName("Dada requisição válida, quando cadastrar, então retorna 201 com os dados e entrega a requisição ao service")
+        void requisicaoValida_deveRetornarCreated() throws Exception {
+            when(service.salvar(any())).thenReturn(criarColaborador());
 
-        verify(service).buscarPorId(99L);
+            ResultActions resposta = enviarJson(post(URL_BASE), requestValido());
+
+            resposta.andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.id").value(1))
+                    .andExpect(jsonPath("$.nome").value("Maria Souza"))
+                    .andExpect(jsonPath("$.email").value(EMAIL))
+                    .andExpect(jsonPath("$.senha").doesNotExist());
+
+            ArgumentCaptor<ColaboradorRequest> captor = ArgumentCaptor.forClass(ColaboradorRequest.class);
+            verify(service).salvar(captor.capture());
+            assertThat(captor.getValue().nome()).isEqualTo("Maria Souza");
+            assertThat(captor.getValue().email()).isEqualTo(EMAIL);
+        }
+
+        @Test
+        @DisplayName("Dada requisição inválida, quando cadastrar, então retorna 400 com os campos inválidos e não chama o service")
+        void requisicaoInvalida_deveRetornarBadRequest() throws Exception {
+            ResultActions resposta = enviarJson(post(URL_BASE), requestInvalido());
+
+            resposta.andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.title").value("Campos inválidos"))
+                    .andExpect(jsonPath("$.campos").isArray());
+
+            verifyNoInteractions(service);
+        }
+
+        @Test
+        @DisplayName("Dado e-mail já cadastrado, quando cadastrar, então retorna 409 com a mensagem")
+        void emailJaCadastrado_deveRetornarConflict() throws Exception {
+            when(service.salvar(any()))
+                    .thenThrow(new EmailCadastradoExistenteException(MENSAGEM_EMAIL_DUPLICADO));
+
+            ResultActions resposta = enviarJson(post(URL_BASE), requestValido());
+
+            resposta.andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.status").value(409))
+                    .andExpect(jsonPath("$.detail").value(MENSAGEM_EMAIL_DUPLICADO));
+        }
     }
 
-    @Test
-    void deveBuscarPorEmail() {
-        var colaborador = criarColaboradorValido();
-        var email = "maria.souza@empresa.com";
+    @Nested
+    @DisplayName("Consultas de colaboradores")
+    class Consultas {
 
-        when(service.buscarPorEmail(email)).thenReturn(colaborador);
+        @Test
+        @DisplayName("Dado id existente, quando buscar, então retorna 200 com os dados do colaborador")
+        void idExistente_deveRetornarColaborador() throws Exception {
+            when(service.buscarPorId(1L)).thenReturn(criarColaborador());
 
-        var resposta = colaboradorController.buscarPorEmail(email);
+            ResultActions resposta = mockMvc.perform(get(URL_POR_ID, 1L));
 
-        assertNotNull(resposta);
-        assertEquals(HttpStatus.OK, resposta.getStatusCode());
-        assertNotNull(resposta.getBody());
-        assertEquals(email, resposta.getBody().email());
+            resposta.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(1))
+                    .andExpect(jsonPath("$.email").value(EMAIL))
+                    .andExpect(jsonPath("$.senha").doesNotExist());
 
-        verify(service).buscarPorEmail(email);
+            verify(service).buscarPorId(1L);
+        }
+
+        @Test
+        @DisplayName("Dado id inexistente, quando buscar, então retorna 404 com a mensagem")
+        void idInexistente_deveRetornarNotFound() throws Exception {
+            when(service.buscarPorId(99L))
+                    .thenThrow(new RecursoNaoEncontradoException(MENSAGEM_NAO_ENCONTRADO));
+
+            ResultActions resposta = mockMvc.perform(get(URL_POR_ID, 99L));
+
+            resposta.andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.status").value(404))
+                    .andExpect(jsonPath("$.detail").value(MENSAGEM_NAO_ENCONTRADO));
+        }
+
+        @Test
+        @DisplayName("Dado e-mail cadastrado, quando buscar pelo caminho, então retorna 200 com o colaborador")
+        void emailNoCaminho_deveRetornarColaborador() throws Exception {
+            when(service.buscarPorEmail(EMAIL)).thenReturn(criarColaborador());
+
+            ResultActions resposta = mockMvc.perform(get(URL_POR_EMAIL, EMAIL));
+
+            resposta.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.email").value(EMAIL));
+
+            verify(service).buscarPorEmail(EMAIL);
+        }
+
+        @Test
+        @DisplayName("Dado e-mail cadastrado, quando buscar pelo parâmetro, então retorna 200 com o colaborador")
+        void emailNoParametro_deveRetornarColaborador() throws Exception {
+            when(service.buscarPorEmail(EMAIL)).thenReturn(criarColaborador());
+
+            ResultActions resposta = mockMvc.perform(get(URL_POR_EMAIL_PARAM).param("email", EMAIL));
+
+            resposta.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.email").value(EMAIL));
+
+            verify(service).buscarPorEmail(EMAIL);
+        }
+
+        @Test
+        @DisplayName("Dado e-mail não cadastrado, quando buscar, então retorna 404")
+        void emailNaoCadastrado_deveRetornarNotFound() throws Exception {
+            when(service.buscarPorEmail("ninguem@empresa.com"))
+                    .thenThrow(new RecursoNaoEncontradoException(
+                            "Colaborador com e-mail ninguem@empresa.com não encontrado"));
+
+            ResultActions resposta = mockMvc.perform(get(URL_POR_EMAIL, "ninguem@empresa.com"));
+
+            resposta.andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.status").value(404));
+        }
+
+        @Test
+        @DisplayName("Dada paginação, quando listar, então retorna 200 com a página e repassa page e size ao service")
+        void paginacao_deveRetornarPaginaDeColaboradores() throws Exception {
+            when(service.listar(any()))
+                    .thenReturn(new PageImpl<>(List.of(criarColaborador())));
+
+            ResultActions resposta = mockMvc.perform(get(URL_BASE)
+                    .param("page", "0")
+                    .param("size", "10"));
+
+            resposta.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.content").isArray())
+                    .andExpect(jsonPath("$.content[0].email").value(EMAIL))
+                    .andExpect(jsonPath("$.totalElements").value(1));
+
+            ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+            verify(service).listar(captor.capture());
+            assertThat(captor.getValue().getPageNumber()).isZero();
+            assertThat(captor.getValue().getPageSize()).isEqualTo(10);
+        }
     }
 
-    @Test
-    void deveBuscarPorEmailRequestParam() {
-        var colaborador = criarColaboradorValido();
-        var email = "maria.souza@empresa.com";
+    @Nested
+    @DisplayName("Atualização de colaboradores")
+    class Atualizacao {
 
-        when(service.buscarPorEmail(email)).thenReturn(colaborador);
+        @Test
+        @DisplayName("Dada requisição válida, quando atualizar, então retorna 200 e entrega a requisição ao service")
+        void requisicaoValida_deveRetornarColaboradorAtualizado() throws Exception {
+            when(service.atualizar(eq(1L), any())).thenReturn(criarColaborador());
 
-        var resposta =
-                colaboradorController.buscarPorEmailRequestParam(email);
+            ResultActions resposta = enviarJson(put(URL_POR_ID, 1L), requestValido());
 
-        assertNotNull(resposta);
-        assertEquals(HttpStatus.OK, resposta.getStatusCode());
-        assertNotNull(resposta.getBody());
-        assertEquals(email, resposta.getBody().email());
+            resposta.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(1))
+                    .andExpect(jsonPath("$.nome").value("Maria Souza"));
 
-        verify(service).buscarPorEmail(email);
+            ArgumentCaptor<ColaboradorRequest> captor = ArgumentCaptor.forClass(ColaboradorRequest.class);
+            verify(service).atualizar(eq(1L), captor.capture());
+            assertThat(captor.getValue().email()).isEqualTo(EMAIL);
+        }
+
+        @Test
+        @DisplayName("Dada requisição inválida, quando atualizar, então retorna 400 e não chama o service")
+        void requisicaoInvalida_deveRetornarBadRequest() throws Exception {
+            ResultActions resposta = enviarJson(put(URL_POR_ID, 1L), requestInvalido());
+
+            resposta.andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.title").value("Campos inválidos"));
+
+            verifyNoInteractions(service);
+        }
+
+        @Test
+        @DisplayName("Dado id inexistente, quando atualizar, então retorna 404")
+        void idInexistente_deveRetornarNotFound() throws Exception {
+            when(service.atualizar(eq(99L), any()))
+                    .thenThrow(new RecursoNaoEncontradoException(MENSAGEM_NAO_ENCONTRADO));
+
+            ResultActions resposta = enviarJson(put(URL_POR_ID, 99L), requestValido());
+
+            resposta.andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.status").value(404));
+        }
+
+        @Test
+        @DisplayName("Dado e-mail de outro colaborador, quando atualizar, então retorna 409")
+        void emailDeOutroColaborador_deveRetornarConflict() throws Exception {
+            when(service.atualizar(eq(1L), any()))
+                    .thenThrow(new EmailCadastradoExistenteException(MENSAGEM_EMAIL_DUPLICADO));
+
+            ResultActions resposta = enviarJson(put(URL_POR_ID, 1L), requestValido());
+
+            resposta.andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.detail").value(MENSAGEM_EMAIL_DUPLICADO));
+        }
+
+        @Test
+        @DisplayName("Dado apenas o nome, quando atualizar parcialmente, então retorna 200 e entrega só o nome ao service")
+        void apenasNome_deveRetornarColaboradorAtualizado() throws Exception {
+            var request = new ColaboradorPatchRequest("Nome Alterado", null, null, null, null, null);
+            when(service.atualizarParcial(eq(1L), any())).thenReturn(criarColaborador());
+
+            ResultActions resposta = enviarJson(patch(URL_POR_ID, 1L), request);
+
+            resposta.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(1));
+
+            ArgumentCaptor<ColaboradorPatchRequest> captor = ArgumentCaptor.forClass(ColaboradorPatchRequest.class);
+            verify(service).atualizarParcial(eq(1L), captor.capture());
+            assertThat(captor.getValue().nome()).isEqualTo("Nome Alterado");
+            assertThat(captor.getValue().email()).isNull();
+        }
+
+        @Test
+        @DisplayName("Dado nome vazio, quando atualizar parcialmente, então retorna 400 e não chama o service")
+        void nomeVazio_aoAtualizarParcialmente_deveRetornarBadRequest() throws Exception {
+            var request = new ColaboradorPatchRequest("", null, null, null, null, null);
+
+            ResultActions resposta = enviarJson(patch(URL_POR_ID, 1L), request);
+
+            resposta.andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.title").value("Campos inválidos"));
+
+            verifyNoInteractions(service);
+        }
+
+        @Test
+        @DisplayName("Dado id inexistente, quando atualizar parcialmente, então retorna 404")
+        void idInexistente_aoAtualizarParcialmente_deveRetornarNotFound() throws Exception {
+            var request = new ColaboradorPatchRequest("Nome Alterado", null, null, null, null, null);
+            when(service.atualizarParcial(eq(99L), any()))
+                    .thenThrow(new RecursoNaoEncontradoException(MENSAGEM_NAO_ENCONTRADO));
+
+            ResultActions resposta = enviarJson(patch(URL_POR_ID, 99L), request);
+
+            resposta.andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.status").value(404));
+        }
+
+        @Test
+        @DisplayName("Dado e-mail de outro colaborador, quando atualizar parcialmente, então retorna 409")
+        void emailDeOutroColaborador_aoAtualizarParcialmente_deveRetornarConflict() throws Exception {
+            var request = new ColaboradorPatchRequest(null, EMAIL, null, null, null, null);
+            when(service.atualizarParcial(eq(1L), any()))
+                    .thenThrow(new EmailCadastradoExistenteException(MENSAGEM_EMAIL_DUPLICADO));
+
+            ResultActions resposta = enviarJson(patch(URL_POR_ID, 1L), request);
+
+            resposta.andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.status").value(409));
+        }
     }
 
-    @Test
-    void deveListarColaboradoresPaginados() {
-        Pageable pageable = PageRequest.of(0, 10);
-        var colaborador = criarColaboradorValido();
+    @Nested
+    @DisplayName("Exclusão de colaboradores")
+    class Exclusao {
 
-        when(service.listar(pageable))
-                .thenReturn(new PageImpl<>(List.of(colaborador)));
+        @Test
+        @DisplayName("Dado id existente, quando excluir, então retorna 204 sem corpo")
+        void idExistente_deveRetornarNoContent() throws Exception {
+            doNothing().when(service).deletar(1L);
 
-        var resposta = colaboradorController.listar(pageable);
+            ResultActions resposta = mockMvc.perform(delete(URL_POR_ID, 1L));
 
-        assertNotNull(resposta);
-        assertEquals(HttpStatus.OK, resposta.getStatusCode());
-        assertNotNull(resposta.getBody());
-        assertFalse(resposta.getBody().isEmpty());
+            resposta.andExpect(status().isNoContent())
+                    .andExpect(content().string(""));
 
-        verify(service).listar(pageable);
-    }
+            verify(service).deletar(1L);
+        }
 
-    @Test
-    void deveAtualizarColaboradorCompleto() {
-        var id = 1L;
-        var request = criarRequestValido();
-        var colaborador = criarColaboradorValido();
+        @Test
+        @DisplayName("Dado id inexistente, quando excluir, então retorna 404")
+        void idInexistente_deveRetornarNotFound() throws Exception {
+            doThrow(new RecursoNaoEncontradoException(MENSAGEM_NAO_ENCONTRADO))
+                    .when(service).deletar(99L);
 
-        when(service.atualizar(id, request)).thenReturn(colaborador);
+            ResultActions resposta = mockMvc.perform(delete(URL_POR_ID, 99L));
 
-        var resposta = colaboradorController.atualizar(id, request);
+            resposta.andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.status").value(404));
 
-        assertNotNull(resposta);
-        assertEquals(HttpStatus.OK, resposta.getStatusCode());
-        assertNotNull(resposta.getBody());
-
-        verify(service).atualizar(id, request);
-    }
-
-    @Test
-    void deveAtualizarParcial() {
-        var id = 1L;
-        var request = new ColaboradorPatchRequest(
-                "Nome Alterado", null, null, null, null, null
-        );
-        var colaborador = criarColaboradorValido();
-
-        when(service.atualizarParcial(id, request))
-                .thenReturn(colaborador);
-
-        var resposta = colaboradorController.atualizarParcial(id, request);
-
-        assertNotNull(resposta);
-        assertEquals(HttpStatus.OK, resposta.getStatusCode());
-        assertNotNull(resposta.getBody());
-
-        verify(service).atualizarParcial(id, request);
-    }
-
-    @Test
-    void deveDeletarColaborador() {
-        var id = 1L;
-
-        doNothing().when(service).deletar(id);
-
-        var resposta = colaboradorController.deletar(id);
-
-        assertEquals(HttpStatus.NO_CONTENT, resposta.getStatusCode());
-
-        verify(service).deletar(id);
+            verify(service).deletar(99L);
+        }
     }
 }

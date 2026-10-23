@@ -39,6 +39,7 @@ import static org.mockito.Mockito.when;
 class ColaboradorServiceTest {
 
     private static final String MENSAGEM_EMAIL_DUPLICADO = "Este e-mail já existe, cadastre outro.";
+    private static final String MENSAGEM_ID_99_NAO_ENCONTRADO = "Colaborador não encontrado com ID: 99";
 
     @Mock
     private ColaboradorRepository colaboradorRepository;
@@ -60,12 +61,29 @@ class ColaboradorServiceTest {
         return colaborador;
     }
 
+    private Colaborador anaExistente() {
+        return colaborador(1L, "Ana Lima", "ana.lima@empresa.com");
+    }
+
     private ColaboradorRequest requisicao(String nome, String email) {
         return new ColaboradorRequest(nome, email, "senha123", Papel.USUARIO, true, "2026-02-01");
     }
 
     private ColaboradorPatchRequest requisicaoParcial(String nome, String email) {
         return new ColaboradorPatchRequest(nome, email, null, null, null, null);
+    }
+
+    private void simularColaboradorExistente(Colaborador existente) {
+        when(colaboradorRepository.findById(existente.getId())).thenReturn(Optional.of(existente));
+    }
+
+    private void simularIdInexistente(Long id) {
+        when(colaboradorRepository.findById(id)).thenReturn(Optional.empty());
+    }
+
+    private void simularSalvarRetornandoArgumento() {
+        when(colaboradorRepository.save(any(Colaborador.class)))
+                .thenAnswer(invocacao -> invocacao.getArgument(0));
     }
 
     @Nested
@@ -117,8 +135,8 @@ class ColaboradorServiceTest {
         @Test
         @DisplayName("Dado id existente, quando buscar, então retorna o colaborador encontrado")
         void idExistente_deveRetornarColaborador() {
-            Colaborador existente = colaborador(1L, "Ana Lima", "ana.lima@empresa.com");
-            when(colaboradorRepository.findById(1L)).thenReturn(Optional.of(existente));
+            Colaborador existente = anaExistente();
+            simularColaboradorExistente(existente);
 
             Colaborador resultado = service.buscarPorId(1L);
 
@@ -129,11 +147,11 @@ class ColaboradorServiceTest {
         @Test
         @DisplayName("Dado id inexistente, quando buscar, então lança RecursoNaoEncontradoException com o id na mensagem")
         void idInexistente_deveLancarRecursoNaoEncontrado() {
-            when(colaboradorRepository.findById(99L)).thenReturn(Optional.empty());
+            simularIdInexistente(99L);
 
             assertThatThrownBy(() -> service.buscarPorId(99L))
                     .isInstanceOf(RecursoNaoEncontradoException.class)
-                    .hasMessage("Colaborador não encontrado com ID: 99");
+                    .hasMessage(MENSAGEM_ID_99_NAO_ENCONTRADO);
         }
     }
 
@@ -172,7 +190,7 @@ class ColaboradorServiceTest {
         @DisplayName("Dada paginação válida, quando listar, então devolve a página do repositório sem alterar o conteúdo")
         void paginacaoValida_deveDevolverPaginaDoRepositorio() {
             Pageable paginacao = PageRequest.of(0, 10);
-            Colaborador primeiro = colaborador(1L, "Ana Lima", "ana.lima@empresa.com");
+            Colaborador primeiro = anaExistente();
             Colaborador segundo = colaborador(2L, "Bruno Alves", "bruno.alves@empresa.com");
             Page<Colaborador> pagina = new PageImpl<>(List.of(primeiro, segundo), paginacao, 2);
             when(colaboradorRepository.findAll(paginacao)).thenReturn(pagina);
@@ -203,10 +221,10 @@ class ColaboradorServiceTest {
         @Test
         @DisplayName("Dado o mesmo e-mail, quando atualizar, então altera todos os dados, criptografa a senha e não consulta duplicidade")
         void mesmoEmail_deveAtualizarTodosOsCamposSemConsultarDuplicidade() {
-            Colaborador existente = colaborador(1L, "Ana Lima", "ana.lima@empresa.com");
-            when(colaboradorRepository.findById(1L)).thenReturn(Optional.of(existente));
+            Colaborador existente = anaExistente();
+            simularColaboradorExistente(existente);
             when(passwordEncoder.encode("senha123")).thenReturn("hash-novo");
-            when(colaboradorRepository.save(any(Colaborador.class))).thenAnswer(invocacao -> invocacao.getArgument(0));
+            simularSalvarRetornandoArgumento();
             ColaboradorRequest request = requisicao("Ana Lima Santos", "ana.lima@empresa.com");
 
             Colaborador resultado = service.atualizar(1L, request);
@@ -224,10 +242,9 @@ class ColaboradorServiceTest {
         @Test
         @DisplayName("Dado novo e-mail inédito, quando atualizar, então verifica duplicidade e grava o novo e-mail")
         void novoEmailInedito_deveAtualizarEmail() {
-            Colaborador existente = colaborador(1L, "Ana Lima", "ana.lima@empresa.com");
-            when(colaboradorRepository.findById(1L)).thenReturn(Optional.of(existente));
+            simularColaboradorExistente(anaExistente());
             when(colaboradorRepository.existsByEmail("ana.nova@empresa.com")).thenReturn(false);
-            when(colaboradorRepository.save(any(Colaborador.class))).thenAnswer(invocacao -> invocacao.getArgument(0));
+            simularSalvarRetornandoArgumento();
             ColaboradorRequest request = requisicao("Ana Lima", "ana.nova@empresa.com");
 
             Colaborador resultado = service.atualizar(1L, request);
@@ -239,8 +256,8 @@ class ColaboradorServiceTest {
         @Test
         @DisplayName("Dado novo e-mail de outro colaborador, quando atualizar, então lança exceção e não grava")
         void novoEmailDeOutroColaborador_deveLancarExcecaoENaoGravar() {
-            Colaborador existente = colaborador(1L, "Ana Lima", "ana.lima@empresa.com");
-            when(colaboradorRepository.findById(1L)).thenReturn(Optional.of(existente));
+            Colaborador existente = anaExistente();
+            simularColaboradorExistente(existente);
             when(colaboradorRepository.existsByEmail("bruno.alves@empresa.com")).thenReturn(true);
             ColaboradorRequest request = requisicao("Ana Lima", "bruno.alves@empresa.com");
 
@@ -255,12 +272,12 @@ class ColaboradorServiceTest {
         @Test
         @DisplayName("Dado id inexistente, quando atualizar, então lança RecursoNaoEncontradoException e não grava")
         void idInexistente_deveLancarRecursoNaoEncontrado() {
-            when(colaboradorRepository.findById(99L)).thenReturn(Optional.empty());
+            simularIdInexistente(99L);
             ColaboradorRequest request = requisicao("Ana Lima", "ana.lima@empresa.com");
 
             assertThatThrownBy(() -> service.atualizar(99L, request))
                     .isInstanceOf(RecursoNaoEncontradoException.class)
-                    .hasMessage("Colaborador não encontrado com ID: 99");
+                    .hasMessage(MENSAGEM_ID_99_NAO_ENCONTRADO);
 
             verify(colaboradorRepository, never()).save(any());
         }
@@ -273,9 +290,8 @@ class ColaboradorServiceTest {
         @Test
         @DisplayName("Dado apenas o nome, quando atualizar parcialmente, então altera só o nome e não toca em e-mail nem senha")
         void apenasNome_deveAlterarNomeEManterDemaisCampos() {
-            Colaborador existente = colaborador(1L, "Ana Lima", "ana.lima@empresa.com");
-            when(colaboradorRepository.findById(1L)).thenReturn(Optional.of(existente));
-            when(colaboradorRepository.save(any(Colaborador.class))).thenAnswer(invocacao -> invocacao.getArgument(0));
+            simularColaboradorExistente(anaExistente());
+            simularSalvarRetornandoArgumento();
 
             Colaborador resultado = service.atualizarParcial(1L, requisicaoParcial("Ana Santos", null));
 
@@ -289,9 +305,8 @@ class ColaboradorServiceTest {
         @Test
         @DisplayName("Dado o mesmo e-mail, quando atualizar parcialmente, então não consulta duplicidade")
         void mesmoEmail_naoDeveConsultarDuplicidade() {
-            Colaborador existente = colaborador(1L, "Ana Lima", "ana.lima@empresa.com");
-            when(colaboradorRepository.findById(1L)).thenReturn(Optional.of(existente));
-            when(colaboradorRepository.save(any(Colaborador.class))).thenAnswer(invocacao -> invocacao.getArgument(0));
+            simularColaboradorExistente(anaExistente());
+            simularSalvarRetornandoArgumento();
 
             Colaborador resultado = service.atualizarParcial(1L, requisicaoParcial(null, "ana.lima@empresa.com"));
 
@@ -300,27 +315,28 @@ class ColaboradorServiceTest {
         }
 
         @Test
-        @DisplayName("Dado novo e-mail inédito, quando atualizar parcialmente, então grava o novo e-mail")
+        @DisplayName("Dado novo e-mail inédito, quando atualizar parcialmente, então grava o novo e-mail e mantém o nome")
         void novoEmailInedito_deveAtualizarEmail() {
-            Colaborador existente = colaborador(1L, "Ana Lima", "ana.lima@empresa.com");
-            when(colaboradorRepository.findById(1L)).thenReturn(Optional.of(existente));
+            simularColaboradorExistente(anaExistente());
             when(colaboradorRepository.existsByEmail("ana.nova@empresa.com")).thenReturn(false);
-            when(colaboradorRepository.save(any(Colaborador.class))).thenAnswer(invocacao -> invocacao.getArgument(0));
+            simularSalvarRetornandoArgumento();
 
             Colaborador resultado = service.atualizarParcial(1L, requisicaoParcial(null, "ana.nova@empresa.com"));
 
             assertThat(resultado.getEmail()).isEqualTo("ana.nova@empresa.com");
             assertThat(resultado.getNome()).isEqualTo("Ana Lima");
+            verify(colaboradorRepository).existsByEmail("ana.nova@empresa.com");
         }
 
         @Test
         @DisplayName("Dado novo e-mail de outro colaborador, quando atualizar parcialmente, então lança exceção e não grava")
         void novoEmailDeOutroColaborador_deveLancarExcecaoENaoGravar() {
-            Colaborador existente = colaborador(1L, "Ana Lima", "ana.lima@empresa.com");
-            when(colaboradorRepository.findById(1L)).thenReturn(Optional.of(existente));
+            Colaborador existente = anaExistente();
+            simularColaboradorExistente(existente);
             when(colaboradorRepository.existsByEmail("bruno.alves@empresa.com")).thenReturn(true);
+            ColaboradorPatchRequest request = requisicaoParcial(null, "bruno.alves@empresa.com");
 
-            assertThatThrownBy(() -> service.atualizarParcial(1L, requisicaoParcial(null, "bruno.alves@empresa.com")))
+            assertThatThrownBy(() -> service.atualizarParcial(1L, request))
                     .isInstanceOf(EmailCadastradoExistenteException.class)
                     .hasMessage(MENSAGEM_EMAIL_DUPLICADO);
 
@@ -331,11 +347,10 @@ class ColaboradorServiceTest {
         @Test
         @DisplayName("Dados todos os campos, quando atualizar parcialmente, então altera todos e criptografa a senha")
         void todosOsCampos_deveAlterarTudoECriptografarSenha() {
-            Colaborador existente = colaborador(1L, "Ana Lima", "ana.lima@empresa.com");
-            when(colaboradorRepository.findById(1L)).thenReturn(Optional.of(existente));
+            simularColaboradorExistente(anaExistente());
             when(colaboradorRepository.existsByEmail("ana.nova@empresa.com")).thenReturn(false);
             when(passwordEncoder.encode("novaSenha")).thenReturn("hash-novo");
-            when(colaboradorRepository.save(any(Colaborador.class))).thenAnswer(invocacao -> invocacao.getArgument(0));
+            simularSalvarRetornandoArgumento();
             ColaboradorPatchRequest request = new ColaboradorPatchRequest(
                     "Ana Santos", "ana.nova@empresa.com", "novaSenha", Papel.USUARIO, true, "2026-03-15");
 
@@ -350,12 +365,14 @@ class ColaboradorServiceTest {
         }
 
         @Test
-        @DisplayName("Dado id inexistente, quando atualizar parcialmente, então lança RecursoNaoEncontradoException")
+        @DisplayName("Dado id inexistente, quando atualizar parcialmente, então lança RecursoNaoEncontradoException e não grava")
         void idInexistente_deveLancarRecursoNaoEncontrado() {
-            when(colaboradorRepository.findById(99L)).thenReturn(Optional.empty());
+            simularIdInexistente(99L);
+            ColaboradorPatchRequest request = requisicaoParcial("Qualquer", null);
 
-            assertThatThrownBy(() -> service.atualizarParcial(99L, requisicaoParcial("Qualquer", null)))
-                    .isInstanceOf(RecursoNaoEncontradoException.class);
+            assertThatThrownBy(() -> service.atualizarParcial(99L, request))
+                    .isInstanceOf(RecursoNaoEncontradoException.class)
+                    .hasMessage(MENSAGEM_ID_99_NAO_ENCONTRADO);
 
             verify(colaboradorRepository, never()).save(any());
         }
@@ -368,8 +385,8 @@ class ColaboradorServiceTest {
         @Test
         @DisplayName("Dado id existente, quando deletar, então remove exatamente o colaborador encontrado")
         void idExistente_deveRemoverColaborador() {
-            Colaborador existente = colaborador(1L, "Ana Lima", "ana.lima@empresa.com");
-            when(colaboradorRepository.findById(1L)).thenReturn(Optional.of(existente));
+            Colaborador existente = anaExistente();
+            simularColaboradorExistente(existente);
 
             service.deletar(1L);
 
@@ -379,11 +396,11 @@ class ColaboradorServiceTest {
         @Test
         @DisplayName("Dado id inexistente, quando deletar, então lança RecursoNaoEncontradoException e não remove nada")
         void idInexistente_deveLancarRecursoNaoEncontradoENaoRemover() {
-            when(colaboradorRepository.findById(99L)).thenReturn(Optional.empty());
+            simularIdInexistente(99L);
 
             assertThatThrownBy(() -> service.deletar(99L))
                     .isInstanceOf(RecursoNaoEncontradoException.class)
-                    .hasMessage("Colaborador não encontrado com ID: 99");
+                    .hasMessage(MENSAGEM_ID_99_NAO_ENCONTRADO);
 
             verify(colaboradorRepository, never()).delete(any());
         }
