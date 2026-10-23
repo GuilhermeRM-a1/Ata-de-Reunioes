@@ -299,14 +299,21 @@ public class AcaoServiceTest {
     void cenario_buscarReuniao_Erro() {
         Long idInexistente = 0L;
 
-        when(reuniaoRepository.existsById(idInexistente)).thenReturn(false);
+
+        AcaoRequest request = new AcaoRequest("Título Atualizado",
+                "Descrição",
+                "Tecnica",
+                "2026-10-20",
+                false,
+                null);
+
+        when(reuniaoRepository.findById(idInexistente)).thenReturn(Optional.empty());
 
         assertThrows(RecursoNaoEncontradoException.class, () -> {
-            acaoService.listarPorReuniao(idInexistente);
+            acaoService.salvar(idInexistente, request);
         });
 
-        verify(reuniaoRepository, times(1)).existsById(idInexistente);
-    }
+        verify(reuniaoRepository, times(1)).findById(idInexistente);    }
 
     @Test
     void cenario_buscarReuniao() {
