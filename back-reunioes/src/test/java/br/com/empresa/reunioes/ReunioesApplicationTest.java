@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Import;
 
 @SpringBootTest
 @Import(TestcontainersConfiguration.class)
-public class ReunioesApplicationTest {
+class ReunioesApplicationTest {
 
     @Test
     @DisplayName("Deve carregar o contexto da aplicação")

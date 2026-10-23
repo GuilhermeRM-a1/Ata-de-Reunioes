@@ -1,10 +1,8 @@
 package br.com.empresa.reunioes.acao;
 
 import br.com.empresa.reunioes.application.acao.AcaoService;
-import br.com.empresa.reunioes.application.reuniao.ReuniaoService;
 import br.com.empresa.reunioes.domain.entity.Acao;
 import br.com.empresa.reunioes.domain.entity.Reuniao;
-import br.com.empresa.reunioes.domain.repository.AcaoRepository;
 import br.com.empresa.reunioes.web.acao.AcaoController;
 import br.com.empresa.reunioes.web.acao.dto.AcaoDTO;
 import br.com.empresa.reunioes.web.acao.dto.request.AcaoRequest;
@@ -14,16 +12,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.test.context.SpringBootTest;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+
 
 import java.util.List;
 
@@ -33,7 +29,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class AcaoControllerTest {
+class AcaoControllerTest {
 
 
 
