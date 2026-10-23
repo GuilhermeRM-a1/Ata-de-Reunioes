@@ -12,7 +12,9 @@ public final class AcaoWebMapper {
     }
 
     public static AcaoDTO acaoToDTO(Acao acao) {
-        List<String> responsavelNomes = acao.getResponsavel().stream()
+        List<String> responsavelNomes = acao.getResponsavel() == null
+                ? List.of()
+                : acao.getResponsavel().stream()
                 .map(Colaborador::getNome)
                 .toList();
 
