@@ -50,7 +50,3 @@ api:
 spring.cloud.openfeign.client.config.default:
   connectTimeout: 3000
   readTimeout: 5000
-
-app:
-  cors:
-    allowed-origins: http://localhost:4200

@@ -9,11 +9,7 @@ import java.util.List;
 
 import static br.com.empresa.reunioes.web.acao.mapper.AcaoWebMapper.acaoToDTO;
 
-public final class ReuniaoWebMapper {
-
-    private ReuniaoWebMapper() {
-
-    }
+public class ReuniaoWebMapper {
 
     public static ReuniaoDTO reuniaoToDTO(Reuniao reuniao) {
 

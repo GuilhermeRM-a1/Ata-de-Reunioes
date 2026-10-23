@@ -9,15 +9,6 @@ RUN mvn clean package -DskipTests -B
 # Etapa 2: runtime
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
-
-# Criar grupo e utilizador não-root
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-
-# Copiar o JAR garantindo que o novo utilizador é o proprietário
-COPY --from=build --chown=appuser:appgroup /app/target/*.jar app.jar
-
-# Alternar para o utilizador não-privilegiado
-USER appuser
-
+COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]

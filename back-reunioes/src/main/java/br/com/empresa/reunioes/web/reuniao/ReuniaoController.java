@@ -8,18 +8,16 @@ import br.com.empresa.reunioes.domain.entity.Reuniao;
 import br.com.empresa.reunioes.web.reuniao.dto.ReuniaoDTO;
 import br.com.empresa.reunioes.web.reuniao.dto.RelatorioReuniaoResponse;
 import br.com.empresa.reunioes.web.reuniao.dto.ReuniaoFeriadoDTO;
-import br.com.empresa.reunioes.web.reuniao.dto.request.ReuniaoPatchRequest;
-import br.com.empresa.reunioes.web.reuniao.dto.request.ReuniaoRequest;
-import br.com.empresa.reunioes.web.reuniao.dto.request.ReuniaoResumoRequest;
+import br.com.empresa.reunioes.web.reuniao.dto.ReuniaoPatchRequest;
+import br.com.empresa.reunioes.web.reuniao.dto.ReuniaoRequest;
+import br.com.empresa.reunioes.web.reuniao.dto.ReuniaoResumoRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
 import java.net.URI;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -33,7 +31,7 @@ import static br.com.empresa.reunioes.web.reuniao.mapper.ReuniaoWebMapper.reunia
 
 @RestController
 @RequiredArgsConstructor
-@CrossOrigin(origins = "${app.cors.allowed-origins}")
+@CrossOrigin(origins = "*")
 @RequestMapping("/api/reunioes")
 @Tag(name = "Reuniões", description = "CRUD de reuniões e suas ações")
 public class ReuniaoController {

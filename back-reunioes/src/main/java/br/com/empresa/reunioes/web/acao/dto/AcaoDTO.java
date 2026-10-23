@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import java.util.List;
 
 public record AcaoDTO(
-        Long id,
+        String id,
         String titulo,
         String tipo,
         String descricao,
