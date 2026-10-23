@@ -2,10 +2,16 @@ spring:
   application:
     name: reunioes
 
+#  datasource:
+#    url: ${DB_URL:jdbc:postgresql://localhost:5432/reunioes_dev}
+#    username: ${DB_USER:postgres}
+#    password: ${DB_PASSWORD:postgres}
+#    driver-class-name: org.postgresql.Driver
+
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/reunioes_dev}
-    username: ${DB_USER:postgres}
-    password: ${DB_PASSWORD:postgres}
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/reunioes_dev}
+    username: ${DB_USER:admin}
+    password: ${DB_PASSWORD:0000}
     driver-class-name: org.postgresql.Driver
 
   jpa:

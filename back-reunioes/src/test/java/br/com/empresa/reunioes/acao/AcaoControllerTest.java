@@ -1,12 +1,11 @@
 package br.com.empresa.reunioes.acao;
 
 import br.com.empresa.reunioes.application.acao.AcaoService;
-import br.com.empresa.reunioes.application.reuniao.ReuniaoService;
 import br.com.empresa.reunioes.domain.entity.Acao;
 import br.com.empresa.reunioes.domain.entity.Reuniao;
-import br.com.empresa.reunioes.domain.repository.AcaoRepository;
 import br.com.empresa.reunioes.web.acao.AcaoController;
 import br.com.empresa.reunioes.web.acao.dto.AcaoDTO;
+import br.com.empresa.reunioes.web.acao.dto.request.AcaoPatchRequest;
 import br.com.empresa.reunioes.web.acao.dto.request.AcaoRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,16 +13,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +26,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,6 +42,7 @@ public class AcaoControllerTest {
 
     private Long idSimulacao;
     private AcaoRequest request;
+    private AcaoPatchRequest requestParcial;
     private Reuniao reuniao;
     private Acao acaoSimulacao;
 
@@ -58,6 +55,15 @@ public class AcaoControllerTest {
                 "Descrição",
                 "Tecnica",
                 "2026-10-20",
+                false,
+                null
+        );
+
+         requestParcial = new AcaoPatchRequest(
+                "Título Novo Parcial",
+                null,
+                null,
+                null,
                 false,
                 null
         );
@@ -118,6 +124,43 @@ public class AcaoControllerTest {
             assertEquals(HttpStatus.OK, retorno.getStatusCode());
             assertNotNull(retorno.getBody());
 
+        }
+
+        @Test
+        void cenario_atualizar(){
+
+
+            when(acaoService.atualizar(eq(idSimulacao), any(AcaoRequest.class))).thenReturn(acaoSimulacao);
+
+            ResponseEntity<AcaoDTO> retorno = acaoController.atualizar(idSimulacao, request);
+
+            assertNotNull(retorno);
+            assertEquals(HttpStatus.OK, retorno.getStatusCode());
+            assertNotNull(retorno.getBody());
+
+        }
+
+        @Test
+        void cenario_atualizarParcial(){
+            when(acaoService.atualizarParcial(eq(idSimulacao), any(AcaoRequest.class))).thenReturn(acaoSimulacao);
+
+            ResponseEntity<AcaoDTO> retorno = acaoController.atualizarParcial(idSimulacao, requestParcial);
+
+            assertNotNull(retorno);
+            assertEquals(HttpStatus.OK, retorno.getStatusCode());
+            assertNotNull(retorno.getBody());
+
+        }
+
+        @Test
+        void cenario_deletar()
+        {
+
+            ResponseEntity<Void> retorno = acaoController.deletar(idSimulacao);
+
+            assertNotNull(retorno);
+            assertEquals(HttpStatus.NO_CONTENT, retorno.getStatusCode());
+            assertNull(retorno.getBody());
         }
 
 }
