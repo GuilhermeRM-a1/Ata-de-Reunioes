@@ -1,6 +1,7 @@
 package br.com.empresa.reunioes.acao;
 
 import br.com.empresa.reunioes.application.acao.AcaoService;
+import br.com.empresa.reunioes.application.reuniao.ReuniaoService;
 import br.com.empresa.reunioes.domain.entity.Acao;
 import br.com.empresa.reunioes.domain.entity.Reuniao;
 import br.com.empresa.reunioes.domain.repository.AcaoRepository;
@@ -16,12 +17,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -37,34 +43,67 @@ public class AcaoControllerTest {
     @InjectMocks
     private AcaoController acaoController;
 
+    private Long idSimulacao;
+    private AcaoRequest request;
+    private Reuniao reuniao;
+    private Acao acaoSimulacao;
 
-    @Test
-    void cenario_salvarAcao(){
+    @BeforeEach
+    void setup() {
+        idSimulacao = 1L;
 
-        Long idSimulacao = 1L;
-
-
-        AcaoRequest request = new AcaoRequest("Título Atualizado",
+        request = new AcaoRequest(
+                "Título Atualizado",
                 "Descrição",
                 "Tecnica",
                 "2026-10-20",
                 false,
-                null);
+                null
+        );
 
-        Reuniao reuniao = new Reuniao();
+        reuniao = new Reuniao();
         reuniao.setId(idSimulacao);
 
-        Acao acaoSimulacao = new Acao();
+        acaoSimulacao = new Acao();
         acaoSimulacao.setId(1L);
         acaoSimulacao.setReuniao(reuniao);
+
+    }
+
+    @Test
+    void cenario_salvarAcao(){
         when(acaoService.salvar(eq(idSimulacao), any(AcaoRequest.class))).thenReturn(acaoSimulacao);
-
-
-
         ResponseEntity<AcaoDTO> retorno = acaoController.salvar(idSimulacao, request);
 
         assertNotNull(retorno);
         assertEquals(HttpStatus.CREATED, retorno.getStatusCode());
+        assertNotNull(retorno.getBody());
+    }
+
+    @Test
+    void cenario_listarAcao(){
+        PageRequest pageable = PageRequest.of(0, 10, Sort.by("id").descending());
+        Page<Acao> paginaDeAcoes = new PageImpl<>(List.of(acaoSimulacao));
+
+        when(acaoService.listar(pageable)).thenReturn(paginaDeAcoes);
+
+        ResponseEntity<Page<AcaoDTO>> retorno = acaoController.listar(pageable);
+
+        assertNotNull(retorno);
+        assertEquals(HttpStatus.OK, retorno.getStatusCode());
+        assertNotNull(retorno.getBody());
+    }
+
+    @Test
+    void cenario_listarPorReuniao(){
+        List<Acao> listaDeAcoes = List.of(acaoSimulacao);
+
+        when(acaoService.listarPorReuniao(idSimulacao)).thenReturn(listaDeAcoes);
+
+        ResponseEntity<List<AcaoDTO>> retorno = acaoController.listarPorReuniao(idSimulacao);
+
+        assertNotNull(retorno);
+        assertEquals(HttpStatus.OK, retorno.getStatusCode());
         assertNotNull(retorno.getBody());
     }
 
