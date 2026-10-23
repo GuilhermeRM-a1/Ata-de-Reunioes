@@ -9,7 +9,6 @@ import br.com.empresa.reunioes.domain.repository.AcaoRepository;
 import br.com.empresa.reunioes.domain.repository.ColaboradorRepository;
 import br.com.empresa.reunioes.domain.repository.ReuniaoRepository;
 import br.com.empresa.reunioes.web.acao.dto.AcaoRequest;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.testcontainers.shaded.org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +59,6 @@ public class AcaoServiceTest {
     // BuscarResponsaveis
 
     @Test
-    @DisplayName("Testando o processo de salvar ação")
     void cenario_salvar() {
 
         Long reuniaoId = 1L;
@@ -91,7 +90,6 @@ public class AcaoServiceTest {
 
 
     @Test
-    @DisplayName("")
     void cenario_buscarPorId() {
         Long idDeBusca = 10L;
 
@@ -113,7 +111,6 @@ public class AcaoServiceTest {
 
 
     @Test
-    @DisplayName("")
     void cenario_buscarPorId_Error() {
         Long idDeBusca = 10L;
 
@@ -125,7 +122,6 @@ public class AcaoServiceTest {
     }
 
     @Test
-    @DisplayName("")
     void cenario_listar() {
         PageRequest pageable = PageRequest.of(0, 10, Sort.by("id").descending());
         Acao acao = new Acao();
@@ -145,7 +141,6 @@ public class AcaoServiceTest {
     }
 
     @Test
-    @DisplayName("")
     void cenario_listarPorReuniao() {
         Long idSimulacao = 1L;
 
@@ -169,7 +164,6 @@ public class AcaoServiceTest {
     }
 
     @Test
-    @DisplayName("Deve lançar exceção se tentar listar ações de uma reunião que não existe")
     void cenario_listarPorReuniao_Error() {
         Long idSimulacao = 1L;
 
@@ -183,7 +177,6 @@ public class AcaoServiceTest {
 
 
     @Test
-    @DisplayName("")
     void cenario_atualizarAcao() {
         Long idSimulacao = 1L;
         List<Long> listaTeste = List.of(123L);
@@ -215,7 +208,6 @@ public class AcaoServiceTest {
     }
 
     @Test
-    @DisplayName("")
     void cenario_atualizarAcaoParcial() {
         Long idSimulacao = 1L;
 
@@ -233,63 +225,58 @@ public class AcaoServiceTest {
                 null);
 
 
-
         when(acaoRepository.findById(idSimulacao)).thenReturn(Optional.of(acaoSimulacao));
 
         when(acaoRepository.save(any(Acao.class))).thenReturn(acaoSimulacao);
 
-        Acao resultado = acaoService.atualizarParcial(idSimulacao,request);
+        Acao resultado = acaoService.atualizarParcial(idSimulacao, request);
 
         assertNotNull(resultado);
-        assertEquals("Título Novo",resultado.getTitulo());
-        assertEquals("Descrição Antiga",resultado.getDescricao());
-        assertEquals("Tecnica",resultado.getTipo());
+        assertEquals("Título Novo", resultado.getTitulo());
+        assertEquals("Descrição Antiga", resultado.getDescricao());
+        assertEquals("Tecnica", resultado.getTipo());
 
         verify(acaoRepository, times(1)).findById(idSimulacao);
-        verify(acaoRepository,times(1)).save(any(Acao.class));
+        verify(acaoRepository, times(1)).save(any(Acao.class));
 
     }
 
     @Test
-    @DisplayName("Deve atualizar os responsáveis da ação quando a lista for enviada no request")
-    void cenario_atualizarAcaoComResponsaveis() {
+    void cenario_atualizarResponsaveis_ComSucesso(){
         Long idSimulacao = 1L;
-        List<Long> listaResponsaveisIds = List.of(10L, 20L);
-
 
         Acao acaoSimulacao = new Acao();
         acaoSimulacao.setId(idSimulacao);
-        acaoSimulacao.setTitulo("Título Original");
 
+        List<Long> idsResponsaveis = List.of(12L,80L);
 
-        AcaoRequest request = new AcaoRequest(
-                null,
-                null,
-                null,
-                null,
+        AcaoRequest request = new AcaoRequest("Título Atualizado",
+                "Descrição",
+                "Tecnica",
+                "2026-10-20",
                 false,
-                listaResponsaveisIds
-        );
+                idsResponsaveis);
+
+        Colaborador c1 = new Colaborador();
+        c1.setId(10L);
+        Colaborador c2 = new Colaborador();
+        c2.setId(20L);
 
         when(acaoRepository.findById(idSimulacao)).thenReturn(Optional.of(acaoSimulacao));
 
-        List<Colaborador> colaboradoresSimulados = List.of(new Colaborador(), new Colaborador());
-        when(colaboradorRepository.findAllById(listaResponsaveisIds)).thenReturn(colaboradoresSimulados);
+        when(colaboradorRepository.findAllById(any())).thenReturn(List.of(c1,c2));
 
-        when(acaoRepository.save(any(Acao.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(acaoRepository.save(any(Acao.class))).thenReturn(acaoSimulacao);
 
         Acao resultado = acaoService.atualizarParcial(idSimulacao, request);
 
-
         assertNotNull(resultado);
         verify(acaoRepository, times(1)).findById(idSimulacao);
-        verify(colaboradorRepository, times(1)).findAllById(listaResponsaveisIds);
         verify(acaoRepository, times(1)).save(any(Acao.class));
     }
 
     @Test
-    @DisplayName("")
-    void cenario_deletar(){
+    void cenario_deletar() {
         Long idSimulacao = 1L;
 
         Acao acaoSimulacao = new Acao();
@@ -309,9 +296,8 @@ public class AcaoServiceTest {
     }
 
     @Test
-    @DisplayName("Deve lançar exceção quando a reunião não for encontrada")
-    void cenario_buscarReuniao_Erro_NaoEncontrada() {
-        Long idInexistente = 99L;
+    void cenario_buscarReuniao_Erro() {
+        Long idInexistente = 0L;
 
         when(reuniaoRepository.existsById(idInexistente)).thenReturn(false);
 
@@ -323,27 +309,83 @@ public class AcaoServiceTest {
     }
 
     @Test
-    @DisplayName("Deve lançar exceção quando algum colaborador informado não for encontrado")
-    void cenario_buscarResponsaveis_Erro_ColaboradorNaoEncontrado() {
-        Long idAcao = 1L;
-        List<Long> idsEnviados = List.of(10L, 20L);
-
-        AcaoRequest request = new AcaoRequest(
-                "Título", "Descrição", "Tecnica", "2026-10-20", false, idsEnviados
-        );
+    void cenario_buscarReuniao() {
+        Long idSimulacao = 1L;
+        Reuniao reuniaoSimulacao = new Reuniao();
+        reuniaoSimulacao.setId(idSimulacao);
 
         Acao acaoSimulacao = new Acao();
-        acaoSimulacao.setId(idAcao);
+        acaoSimulacao.setId(idSimulacao);
 
-        when(acaoRepository.findById(idAcao)).thenReturn(Optional.of(acaoSimulacao));
+        when(reuniaoRepository.findById(idSimulacao)).thenReturn(Optional.of(reuniaoSimulacao));
 
-        when(colaboradorRepository.findAllById(idsEnviados)).thenReturn(List.of(new Colaborador()));
+        when(acaoRepository.save(any(Acao.class))).thenReturn(acaoSimulacao);
+
+
+        AcaoRequest request = new AcaoRequest("Título", "Desc", "Tec", "2026-10-20", false, List.of());
+
+        Acao resultado = acaoService.salvar(idSimulacao,request);
+
+        assertNotNull(resultado);
+
+        verify(reuniaoRepository, times(1)).findById(idSimulacao);
+        verify(acaoRepository, times(1)).save(any(Acao.class));
+    }
+
+    @Test
+    void Cenario_buscarResponsaveis(){
+
+
+        List<Long> idsResponsaveis = List.of(20L, 2L);
+        Colaborador c1 = new Colaborador();
+        c1.setId(10L);
+
+        AcaoRequest request = new AcaoRequest("Revisar código",
+                "Revisar o PR do módulo de relatórios",
+                "Tecnica",
+                "2026-10-20",
+                false,
+                idsResponsaveis);
+
+        Long idSimulacao = 1L;
+
+        Reuniao reuniaoSimulacao = new Reuniao();
+        reuniaoSimulacao.setId(idSimulacao);
+
+        when(colaboradorRepository.findAllById(request.responsavel())).thenReturn(List.of(new Colaborador()));
 
         assertThrows(RecursoNaoEncontradoException.class, () -> {
-            acaoService.atualizarParcial(idAcao, request);
+            acaoService.salvar(idSimulacao, request);
         });
 
-        verify(colaboradorRepository, times(1)).findAllById(idsEnviados);
+        verify(colaboradorRepository, times(1)).findAllById(idsResponsaveis);
+        
+
+    }
+
+
+    @Test
+    void Cenario_buscarResponsaveis_Error() {
+
+        Long idReuniao = 1L;
+
+        Reuniao reuniaoSimulacao = new Reuniao();
+        reuniaoSimulacao.setId(idReuniao);
+        when(reuniaoRepository.findById(idReuniao)).thenReturn(Optional.of(reuniaoSimulacao));
+
+        AcaoRequest request = new AcaoRequest(
+                "Título", "Desc", "Tec", "2026-10-20", false, null
+        );
+        Acao acaoSalvaMock = new Acao();
+        acaoSalvaMock.setId(10L);
+
+        when(acaoRepository.save(any(Acao.class))).thenReturn(acaoSalvaMock);
+
+        Acao resultado = acaoService.salvar(idReuniao, request);
+
+        assertNotNull(resultado);
+        verify(reuniaoRepository, times(1)).findById(idReuniao);
+        verify(acaoRepository, times(1)).save(any(Acao.class));
     }
 
 
