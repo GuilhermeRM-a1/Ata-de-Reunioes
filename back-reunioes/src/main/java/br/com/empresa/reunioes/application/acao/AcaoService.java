@@ -84,7 +84,7 @@ public class AcaoService {
         if (!reuniaoRepository.existsById(reuniaoId)) {
             log.warn("Reunião não encontrada: id={}", reuniaoId);
             throw new RecursoNaoEncontradoException(
-                    "Reunião não encontrada.");
+                    "Reunião não encontrada");
         }
 
         List<Acao> lista = acaoRepository.findAllByReuniaoId(reuniaoId);
