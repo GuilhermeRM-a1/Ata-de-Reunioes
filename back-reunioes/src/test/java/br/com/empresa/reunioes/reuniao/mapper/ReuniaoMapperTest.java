@@ -3,7 +3,7 @@ package br.com.empresa.reunioes.reuniao.mapper;
 import br.com.empresa.reunioes.application.reuniao.mapper.ReuniaoMapper;
 import br.com.empresa.reunioes.domain.enums.StatusReuniao;
 import br.com.empresa.reunioes.domain.enums.StatusTranscricao;
-import br.com.empresa.reunioes.web.reuniao.dto.ReuniaoRequest;
+import br.com.empresa.reunioes.web.reuniao.dto.request.ReuniaoRequest;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

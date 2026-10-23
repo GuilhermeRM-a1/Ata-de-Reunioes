@@ -5,7 +5,7 @@ import br.com.empresa.reunioes.application.reuniao.ReuniaoService;
 import br.com.empresa.reunioes.domain.entity.Reuniao;
 import br.com.empresa.reunioes.domain.exception.RecursoNaoEncontradoException;
 import br.com.empresa.reunioes.domain.repository.ReuniaoRepository;
-import br.com.empresa.reunioes.web.reuniao.dto.ReuniaoResumoRequest;
+import br.com.empresa.reunioes.web.reuniao.dto.request.ReuniaoResumoRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

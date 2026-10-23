@@ -1,4 +1,4 @@
-package br.com.empresa.reunioes.web.reuniao.dto;
+package br.com.empresa.reunioes.web.reuniao.dto.request;
 
 import br.com.empresa.reunioes.domain.enums.StatusReuniao;
 import br.com.empresa.reunioes.domain.enums.StatusTranscricao;
