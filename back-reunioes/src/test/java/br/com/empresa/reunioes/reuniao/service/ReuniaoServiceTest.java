@@ -293,7 +293,7 @@ class ReuniaoServiceTest {
     }
 
     @Test
-    void deveIgnorarBuscaDeParticipantesEAcoesQuandoIdsForemNulos() {
+    void deveRetornarListasVaziasQuandoIdsForemNulos() {
         var request = new ReuniaoRequest(
                 "Reunião",
                 "2026-06-01T10:00:00",
@@ -304,14 +304,14 @@ class ReuniaoServiceTest {
         var reuniaoSalva = new Reuniao();
         reuniaoSalva.setId(1L);
 
+        // metodo salvar chama os metodos buscarColaboradores e buscarAcoes ao setar os dados
         when(reuniaoRepository.save(any(Reuniao.class)))
                 .thenReturn(reuniaoSalva);
 
         var resultado = reuniaoService.salvar(request);
 
         assertNotNull(resultado);
-
-        verify(colaboradorRepository, never()).findAllById(any());
-        verify(acaoRepository, never()).findAllById(any());
+        assertEquals(List.of(), resultado.getParticipantes());
+        assertEquals(List.of(), resultado.getAcoes());
     }
 }

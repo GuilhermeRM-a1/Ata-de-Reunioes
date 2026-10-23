@@ -215,16 +215,12 @@ public class ReuniaoService {
      */
     private void substituirAcoes(Reuniao reuniao, List<Acao> novas) {
 
-        if (reuniao.getAcoes() == null) {
-            reuniao.setAcoes(new ArrayList<>());
-        }
+            reuniao.getAcoes().clear();
 
-        reuniao.getAcoes().clear();
-
-        for (Acao acao : novas) {
-            acao.setReuniao(reuniao);
-            reuniao.getAcoes().add(acao);
-        }
+            for (Acao acao : novas) {
+                acao.setReuniao(reuniao);
+                reuniao.getAcoes().add(acao);
+            }
     }
 
     private List<Colaborador> buscarColaboradores(List<Long> ids) {
