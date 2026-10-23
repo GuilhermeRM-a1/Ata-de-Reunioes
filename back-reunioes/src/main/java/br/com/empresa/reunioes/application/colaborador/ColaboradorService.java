@@ -120,7 +120,7 @@ public class ColaboradorService {
         log.debug("Atualizando colaborador: id={}", id);
         colaborador.setNome(request.nome());
         colaborador.setEmail(request.email());
-        colaborador.setSenha(request.senha());
+        colaborador.setSenha(passwordEncoder.encode(request.senha()));
         colaborador.setPapel(request.papel());
         colaborador.setMonitorarReunioes(request.monitorarReunioes());
         colaborador.setDataCadastro(request.dataCadastro());
@@ -163,7 +163,7 @@ public class ColaboradorService {
         if (request.email() != null)
             colaborador.setEmail(request.email());
         if (request.senha() != null)
-            colaborador.setSenha(request.senha());
+            colaborador.setSenha(passwordEncoder.encode(request.senha()));
         if (request.papel() != null)
             colaborador.setPapel(request.papel());
         if (request.monitorarReunioes() != null)
