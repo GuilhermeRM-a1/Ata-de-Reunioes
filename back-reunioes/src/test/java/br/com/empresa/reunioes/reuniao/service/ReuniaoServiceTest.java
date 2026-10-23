@@ -314,4 +314,27 @@ class ReuniaoServiceTest {
         assertEquals(List.of(), resultado.getParticipantes());
         assertEquals(List.of(), resultado.getAcoes());
     }
+
+    @Test
+    void deveRetornarListaVaziaSeIdsEstiveremVazios() {
+        var request = new ReuniaoRequest(
+                "Reunião",
+                "2026-06-01T10:00:00",
+                StatusTranscricao.CONCLUIDA,
+                StatusReuniao.PENDENTE,
+                null, null, List.of(), List.of(), null
+        );
+        var reuniaoSalva = new Reuniao();
+        reuniaoSalva.setId(1L);
+
+        // metodo salvar chama os metodos buscarColaboradores e buscarAcoes ao setar os dados
+        when(reuniaoRepository.save(any(Reuniao.class)))
+                .thenReturn(reuniaoSalva);
+
+        var resultado = reuniaoService.salvar(request);
+
+        assertNotNull(resultado);
+        assertEquals(List.of(), resultado.getParticipantes());
+        assertEquals(List.of(), resultado.getAcoes());
+    }
 }

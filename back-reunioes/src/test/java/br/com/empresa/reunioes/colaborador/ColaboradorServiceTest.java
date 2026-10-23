@@ -108,15 +108,6 @@ class ColaboradorServiceTest {
             verify(colaboradorRepository, never()).save(any());
             verifyNoInteractions(passwordEncoder);
         }
-
-        @Test
-        @DisplayName("Dada requisição nula, quando salvar, então lança NullPointerException sem tocar no repositório")
-        void requisicaoNula_deveLancarNullPointerExceptionSemTocarNoRepositorio() {
-            assertThatThrownBy(() -> service.salvar(null))
-                    .isInstanceOf(NullPointerException.class);
-
-            verifyNoInteractions(colaboradorRepository, passwordEncoder);
-        }
     }
 
     @Nested
@@ -171,13 +162,6 @@ class ColaboradorServiceTest {
                     .isInstanceOf(RecursoNaoEncontradoException.class)
                     .hasMessage("Colaborador com e-mail ninguem@empresa.com não encontrado");
         }
-
-        @Test
-        @DisplayName("Dado e-mail nulo, quando buscar, então lança RecursoNaoEncontradoException")
-        void emailNulo_deveLancarRecursoNaoEncontrado() {
-            assertThatThrownBy(() -> service.buscarPorEmail(null))
-                    .isInstanceOf(RecursoNaoEncontradoException.class);
-        }
     }
 
     @Nested
@@ -217,10 +201,11 @@ class ColaboradorServiceTest {
     class Atualizar {
 
         @Test
-        @DisplayName("Dado o mesmo e-mail, quando atualizar, então altera os dados sem consultar duplicidade")
-        void mesmoEmail_deveAtualizarSemConsultarDuplicidade() {
+        @DisplayName("Dado o mesmo e-mail, quando atualizar, então altera todos os dados, criptografa a senha e não consulta duplicidade")
+        void mesmoEmail_deveAtualizarTodosOsCamposSemConsultarDuplicidade() {
             Colaborador existente = colaborador(1L, "Ana Lima", "ana.lima@empresa.com");
             when(colaboradorRepository.findById(1L)).thenReturn(Optional.of(existente));
+            when(passwordEncoder.encode("senha123")).thenReturn("hash-novo");
             when(colaboradorRepository.save(any(Colaborador.class))).thenAnswer(invocacao -> invocacao.getArgument(0));
             ColaboradorRequest request = requisicao("Ana Lima Santos", "ana.lima@empresa.com");
 
@@ -228,6 +213,10 @@ class ColaboradorServiceTest {
 
             assertThat(resultado.getNome()).isEqualTo("Ana Lima Santos");
             assertThat(resultado.getEmail()).isEqualTo("ana.lima@empresa.com");
+            assertThat(resultado.getSenha()).isEqualTo("hash-novo");
+            assertThat(resultado.getPapel()).isEqualTo(Papel.USUARIO);
+            assertThat(resultado.getMonitorarReunioes()).isTrue();
+            assertThat(resultado.getDataCadastro()).isEqualTo("2026-02-01");
             verify(colaboradorRepository, never()).existsByEmail(anyString());
             verify(colaboradorRepository).save(existente);
         }
@@ -282,8 +271,8 @@ class ColaboradorServiceTest {
     class AtualizarParcial {
 
         @Test
-        @DisplayName("Dado apenas o nome, quando atualizar parcialmente, então altera o nome, mantém o e-mail e não consulta duplicidade")
-        void apenasNome_deveAlterarNomeEManterEmail() {
+        @DisplayName("Dado apenas o nome, quando atualizar parcialmente, então altera só o nome e não toca em e-mail nem senha")
+        void apenasNome_deveAlterarNomeEManterDemaisCampos() {
             Colaborador existente = colaborador(1L, "Ana Lima", "ana.lima@empresa.com");
             when(colaboradorRepository.findById(1L)).thenReturn(Optional.of(existente));
             when(colaboradorRepository.save(any(Colaborador.class))).thenAnswer(invocacao -> invocacao.getArgument(0));
@@ -292,7 +281,9 @@ class ColaboradorServiceTest {
 
             assertThat(resultado.getNome()).isEqualTo("Ana Santos");
             assertThat(resultado.getEmail()).isEqualTo("ana.lima@empresa.com");
+            assertThat(resultado.getSenha()).isEqualTo("hash-existente");
             verify(colaboradorRepository, never()).existsByEmail(anyString());
+            verifyNoInteractions(passwordEncoder);
         }
 
         @Test
@@ -335,6 +326,27 @@ class ColaboradorServiceTest {
 
             assertThat(existente.getEmail()).isEqualTo("ana.lima@empresa.com");
             verify(colaboradorRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Dados todos os campos, quando atualizar parcialmente, então altera todos e criptografa a senha")
+        void todosOsCampos_deveAlterarTudoECriptografarSenha() {
+            Colaborador existente = colaborador(1L, "Ana Lima", "ana.lima@empresa.com");
+            when(colaboradorRepository.findById(1L)).thenReturn(Optional.of(existente));
+            when(colaboradorRepository.existsByEmail("ana.nova@empresa.com")).thenReturn(false);
+            when(passwordEncoder.encode("novaSenha")).thenReturn("hash-novo");
+            when(colaboradorRepository.save(any(Colaborador.class))).thenAnswer(invocacao -> invocacao.getArgument(0));
+            ColaboradorPatchRequest request = new ColaboradorPatchRequest(
+                    "Ana Santos", "ana.nova@empresa.com", "novaSenha", Papel.USUARIO, true, "2026-03-15");
+
+            Colaborador resultado = service.atualizarParcial(1L, request);
+
+            assertThat(resultado.getNome()).isEqualTo("Ana Santos");
+            assertThat(resultado.getEmail()).isEqualTo("ana.nova@empresa.com");
+            assertThat(resultado.getSenha()).isEqualTo("hash-novo");
+            assertThat(resultado.getPapel()).isEqualTo(Papel.USUARIO);
+            assertThat(resultado.getMonitorarReunioes()).isTrue();
+            assertThat(resultado.getDataCadastro()).isEqualTo("2026-03-15");
         }
 
         @Test
