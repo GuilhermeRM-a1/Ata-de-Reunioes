@@ -1,4 +1,4 @@
-package br.com.empresa.reunioes.web.reuniao.dto;
+package br.com.empresa.reunioes.web.reuniao.dto.request;
 
 import br.com.empresa.reunioes.domain.enums.StatusReuniao;
 import br.com.empresa.reunioes.domain.enums.StatusTranscricao;
@@ -32,6 +32,6 @@ public record ReuniaoRequest(@NotBlank(message = "O título é obrigatório")
                              List<Long> acoes,
 
                              /** Resumo executivo. Opcional: nem toda reuniao ja foi transcrita. */
-                             String resumo){
+                             String resumo) {
 
 }

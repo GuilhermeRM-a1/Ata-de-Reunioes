@@ -1,4 +1,4 @@
-package br.com.empresa.reunioes.web.acao.dto;
+package br.com.empresa.reunioes.web.acao.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 

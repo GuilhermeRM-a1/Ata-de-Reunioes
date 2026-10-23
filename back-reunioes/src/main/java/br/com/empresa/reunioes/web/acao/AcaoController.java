@@ -1,11 +1,10 @@
 package br.com.empresa.reunioes.web.acao;
 
-import br.com.empresa.reunioes.application.acao.mapper.AcaoMapper;
 import br.com.empresa.reunioes.application.acao.AcaoService;
 import br.com.empresa.reunioes.domain.entity.Acao;
 import br.com.empresa.reunioes.web.acao.dto.AcaoDTO;
-import br.com.empresa.reunioes.web.acao.dto.AcaoPatchRequest;
-import br.com.empresa.reunioes.web.acao.dto.AcaoRequest;
+import br.com.empresa.reunioes.web.acao.dto.request.AcaoPatchRequest;
+import br.com.empresa.reunioes.web.acao.dto.request.AcaoRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -25,12 +24,11 @@ import static br.com.empresa.reunioes.web.acao.mapper.AcaoWebMapper.acaoToDTO;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/reunioes/acoes")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "${app.cors.allowed-origins}")
 @Tag(name = "Ações", description = "CRUD de ações")
 public class AcaoController {
 
     private final AcaoService service;
-    private final AcaoMapper mapper;
 
     @Operation(summary = "Cria uma ação",
             description = "Os ids dos responsáveis e da reunião são resolvidos para as entidades correspondentes.")

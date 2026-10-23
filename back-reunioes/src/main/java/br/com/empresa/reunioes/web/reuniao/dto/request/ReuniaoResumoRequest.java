@@ -1,10 +1,10 @@
-package br.com.empresa.reunioes.web.reuniao.dto;
+package br.com.empresa.reunioes.web.reuniao.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 
 /**
  * Entrada da ingestao: o que a IA devolve depois de processar o audio.
- *
+ * <p>
  * Sao os unicos dois textos que chegam de fora. Todo o resto do relatorio a
  * propria API monta com o que o administrador registrou na reuniao.
  */

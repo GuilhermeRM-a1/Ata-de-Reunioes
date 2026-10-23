@@ -1,11 +1,10 @@
 package br.com.empresa.reunioes.web.colaborador;
 
-import br.com.empresa.reunioes.application.colaborador.mapper.ColaboradorMapper;
 import br.com.empresa.reunioes.application.colaborador.ColaboradorService;
 import br.com.empresa.reunioes.domain.entity.Colaborador;
 import br.com.empresa.reunioes.web.colaborador.dto.ColaboradorDTO;
-import br.com.empresa.reunioes.web.colaborador.dto.ColaboradorPatchRequest;
-import br.com.empresa.reunioes.web.colaborador.dto.ColaboradorRequest;
+import br.com.empresa.reunioes.web.colaborador.dto.request.ColaboradorPatchRequest;
+import br.com.empresa.reunioes.web.colaborador.dto.request.ColaboradorRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -23,12 +22,11 @@ import static br.com.empresa.reunioes.web.colaborador.mapper.ColaboradorWebMappe
 @RestController
 @RequestMapping("/api/reunioes/colaboradores")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "${app.cors.allowed-origins}")
 @Tag(name = "Colaboradores", description = "CRUD de colaboradores")
 public class ColaboradorController {
 
     private final ColaboradorService service;
-    private final ColaboradorMapper mapper;
 
     @Operation(summary = "Cria um colaborador",
             description = "A senha é gravada na entidade, mas nunca volta na resposta.")

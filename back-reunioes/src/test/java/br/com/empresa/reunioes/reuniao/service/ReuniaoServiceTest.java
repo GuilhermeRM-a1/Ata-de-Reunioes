@@ -10,7 +10,7 @@ import br.com.empresa.reunioes.domain.exception.RecursoNaoEncontradoException;
 import br.com.empresa.reunioes.domain.repository.AcaoRepository;
 import br.com.empresa.reunioes.domain.repository.ColaboradorRepository;
 import br.com.empresa.reunioes.domain.repository.ReuniaoRepository;
-import br.com.empresa.reunioes.web.reuniao.dto.ReuniaoRequest;
+import br.com.empresa.reunioes.web.reuniao.dto.request.ReuniaoRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,9 +21,11 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -63,16 +65,21 @@ class ReuniaoServiceTest {
         var reuniaoSalva = new Reuniao();
         reuniaoSalva.setId(1L);
 
-        when(colaboradorRepository.findAllById(any())).thenReturn(List.of(new Colaborador()));
-        when(acaoRepository.findAllById(any())).thenReturn(List.of(new Acao()));
-        when(reuniaoRepository.save(any(Reuniao.class))).thenReturn(reuniaoSalva);
+        when(colaboradorRepository.findAllById(any()))
+                .thenReturn(List.of(new Colaborador()));
+        when(acaoRepository.findAllById(any()))
+                .thenReturn(List.of(new Acao()));
+        when(reuniaoRepository.save(any(Reuniao.class)))
+                .thenReturn(reuniaoSalva);
 
         var resultado = reuniaoService.salvar(request);
 
         assertNotNull(resultado);
-        assertNotNull(resultado.getAcoes());
-        assertNotNull(resultado.getParticipantes());
         assertEquals(1L, resultado.getId());
+        assertNotNull(resultado.getParticipantes());
+        assertNotNull(resultado.getAcoes());
+
+        verify(reuniaoRepository).save(any(Reuniao.class));
     }
 
     @Test
@@ -80,7 +87,8 @@ class ReuniaoServiceTest {
         var reuniao = new Reuniao();
         reuniao.setId(1L);
 
-        when(reuniaoRepository.findById(1L)).thenReturn(Optional.of(reuniao));
+        when(reuniaoRepository.findById(1L))
+                .thenReturn(Optional.of(reuniao));
 
         var resultado = reuniaoService.buscarPorId(1L);
 
@@ -89,20 +97,29 @@ class ReuniaoServiceTest {
     }
 
     @Test
-    void deveLancarExceptionCasoReuniaoNaoEncontrada() {
-        when(reuniaoRepository.findById(99L)).thenReturn(Optional.empty());
+    void deveLancarExcecaoQuandoReuniaoNaoEncontrada() {
+        when(reuniaoRepository.findById(1L))
+                .thenReturn(Optional.empty());
 
-        assertThrows(RecursoNaoEncontradoException.class, () -> reuniaoService.buscarPorId(99L));
+        assertThrows(
+                RecursoNaoEncontradoException.class,
+                () -> reuniaoService.buscarPorId(1L)
+        );
     }
 
     @Test
     void deveListarReunioesPaginadas() {
         Pageable pageable = PageRequest.of(0, 10);
-        when(reuniaoRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(new Reuniao())));
+        var reuniao = new Reuniao();
+
+        when(reuniaoRepository.findAll(pageable))
+                .thenReturn(new PageImpl<>(List.of(reuniao)));
 
         Page<Reuniao> resultado = reuniaoService.listar(pageable);
 
         assertFalse(resultado.isEmpty());
+        assertEquals(1, resultado.getTotalElements());
+
         verify(reuniaoRepository).findAll(pageable);
     }
 
@@ -113,32 +130,124 @@ class ReuniaoServiceTest {
         var reuniaoExistente = new Reuniao();
         reuniaoExistente.setId(id);
 
-        when(reuniaoRepository.findById(id)).thenReturn(Optional.of(reuniaoExistente));
-        when(colaboradorRepository.findAllById(any())).thenReturn(List.of(new Colaborador()));
-        when(acaoRepository.findAllById(any())).thenReturn(List.of(new Acao()));
-        when(reuniaoRepository.save(any(Reuniao.class))).thenReturn(reuniaoExistente);
+        when(reuniaoRepository.findById(id))
+                .thenReturn(Optional.of(reuniaoExistente));
+        when(colaboradorRepository.findAllById(any()))
+                .thenReturn(List.of(new Colaborador()));
+        when(acaoRepository.findAllById(any()))
+                .thenReturn(List.of(new Acao()));
+        when(reuniaoRepository.save(any(Reuniao.class)))
+                .thenAnswer(invocacao -> invocacao.getArgument(0));
 
         var resultado = reuniaoService.atualizar(id, request);
 
         assertNotNull(resultado);
+        assertEquals(id, resultado.getId());
+
         verify(reuniaoRepository).save(reuniaoExistente);
     }
 
     @Test
-    void deveAtualizarParcial() {
+    void deveAtualizarParcialmenteReuniaoComTodosOsValoresNulos() {
         var id = 1L;
-        var request = new ReuniaoRequest("Parcial", null, null, null, null, null, List.of(), List.of(), null);
+        var request = new ReuniaoRequest(
+                null, null, null, null,
+                null, null, null, null, null
+        );
+
+        var colaborador = new Colaborador();
+        colaborador.setId(1L);
+
+        var acao = new Acao();
+        acao.setId(1L);
+
         var reuniaoExistente = new Reuniao();
         reuniaoExistente.setId(id);
+        reuniaoExistente.setTitulo("Título original");
+        reuniaoExistente.setData("2026-01-10");
+        reuniaoExistente.setStatusTranscricao(StatusTranscricao.RECEBIDA);
+        reuniaoExistente.setStatusReuniao(StatusReuniao.PENDENTE);
+        reuniaoExistente.setAreas(List.of("Tecnologia", "Gestão"));
+        reuniaoExistente.setPontosChaves(List.of("Definir requisitos", "Estabelecer prazos"));
+        reuniaoExistente.setResumo("Resumo executivo da reunião original");
+        reuniaoExistente.setParticipantes(new ArrayList<>(List.of(colaborador)));
+        reuniaoExistente.setAcoes(new ArrayList<>(List.of(acao)));
+        reuniaoExistente.setTotalAcoes(1);
 
-        when(reuniaoRepository.findById(id)).thenReturn(Optional.of(reuniaoExistente));
-        when(reuniaoRepository.save(any(Reuniao.class))).thenReturn(reuniaoExistente);
+        when(reuniaoRepository.findById(id))
+                .thenReturn(Optional.of(reuniaoExistente));
+        when(reuniaoRepository.save(any(Reuniao.class)))
+                .thenAnswer(invocacao -> invocacao.getArgument(0));
 
         var resultado = reuniaoService.atualizarParcial(id, request);
 
         assertNotNull(resultado);
+        assertNotNull(resultado.getTitulo());
+        assertNotNull(resultado.getData());
+        assertNotNull(resultado.getStatusTranscricao());
+        assertNotNull(resultado.getStatusReuniao());
+        assertNotNull(resultado.getAreas());
+        assertNotNull(resultado.getPontosChaves());
+        assertNotNull(resultado.getResumo());
         assertNotNull(resultado.getParticipantes());
         assertNotNull(resultado.getAcoes());
+        assertNotNull(resultado.getTotalAcoes());
+
+        verify(reuniaoRepository).save(reuniaoExistente);
+    }
+
+    @Test
+    void deveAtualizarParcialmenteReuniaoComTodosOsValores() {
+
+        var id = 1L;
+        var request = criarRequestValido();
+
+        var colaborador = new Colaborador();
+        colaborador.setId(1L);
+
+        var acao = new Acao();
+        acao.setId(10L);
+
+        var reuniaoExistente = new Reuniao();
+        reuniaoExistente.setId(id);
+        reuniaoExistente.setTitulo("Título original");
+        reuniaoExistente.setData("2026-01-10");
+        reuniaoExistente.setStatusTranscricao(StatusTranscricao.RECEBIDA);
+        reuniaoExistente.setStatusReuniao(StatusReuniao.PENDENTE);
+        reuniaoExistente.setAreas(List.of("Tecnologia", "Gestão"));
+        reuniaoExistente.setPontosChaves(List.of("Definir requisitos", "Estabelecer prazos"));
+        reuniaoExistente.setResumo("Resumo executivo da reunião original");
+        reuniaoExistente.setParticipantes(new ArrayList<>(List.of(colaborador)));
+        reuniaoExistente.setAcoes(new ArrayList<>(List.of(acao)));
+        reuniaoExistente.setTotalAcoes(1);
+
+        when(reuniaoRepository.findById(id))
+                .thenReturn(Optional.of(reuniaoExistente));
+        when(colaboradorRepository.findAllById(any()))
+                .thenReturn(List.of(colaborador));
+        when(acaoRepository.findAllById(any()))
+                .thenReturn(List.of(acao));
+        when(reuniaoRepository.save(any(Reuniao.class)))
+                .thenAnswer(invocacao -> invocacao.getArgument(0));
+
+        var resultado = reuniaoService.atualizarParcial(id, request);
+
+        assertNotNull(resultado);
+        assertThat(resultado.getTitulo()).isEqualTo(request.titulo());
+        assertThat(resultado.getData()).isEqualTo(request.data());
+        assertThat(resultado.getStatusTranscricao()).isEqualTo(request.statusTranscricao());
+        assertThat(resultado.getStatusReuniao()).isEqualTo(request.statusReuniao());
+        assertThat(resultado.getAreas()).isEqualTo(request.areas());
+        assertThat(resultado.getPontosChaves()).isEqualTo(request.pontosChaves());
+        assertThat(resultado.getResumo()).isEqualTo(request.resumo());
+        assertThat(resultado.getParticipantes())
+                .extracting(Colaborador::getId)
+                .containsExactlyElementsOf(request.participantes());
+        assertThat(resultado.getAcoes())
+                .extracting(Acao::getId)
+                .containsExactlyElementsOf(request.acoes());
+        assertThat(resultado.getTotalAcoes()).isEqualTo(1);
+
         verify(reuniaoRepository).save(reuniaoExistente);
     }
 
@@ -147,52 +256,62 @@ class ReuniaoServiceTest {
         var reuniao = new Reuniao();
         reuniao.setId(1L);
 
-        when(reuniaoRepository.findById(1L)).thenReturn(Optional.of(reuniao));
+        when(reuniaoRepository.findById(1L))
+                .thenReturn(Optional.of(reuniao));
 
         assertDoesNotThrow(() -> reuniaoService.deletar(1L));
+
         verify(reuniaoRepository).delete(reuniao);
     }
 
     @Test
-    void deveLancarExceptionCasoColaboradorNaoEncontrado() {
+    void deveLancarExcecaoQuandoColaboradorNaoEncontrado() {
         var request = criarRequestValido();
-        when(colaboradorRepository.findAllById(any())).thenReturn(List.of());
 
-        assertThrows(RecursoNaoEncontradoException.class, () -> reuniaoService.salvar(request));
+        when(colaboradorRepository.findAllById(any()))
+                .thenReturn(List.of());
+
+        assertThrows(
+                RecursoNaoEncontradoException.class,
+                () -> reuniaoService.salvar(request)
+        );
     }
 
     @Test
-    void deveLancarExceptionCasoAcaoNaoEncontrada() {
+    void deveLancarExcecaoQuandoAcaoNaoEncontrada() {
         var request = criarRequestValido();
-        when(colaboradorRepository.findAllById(any())).thenReturn(List.of(new Colaborador()));
-        when(acaoRepository.findAllById(any())).thenReturn(List.of());
 
-        assertThrows(RecursoNaoEncontradoException.class, () -> reuniaoService.salvar(request));
+        when(colaboradorRepository.findAllById(any()))
+                .thenReturn(List.of(new Colaborador()));
+        when(acaoRepository.findAllById(any()))
+                .thenReturn(List.of());
+
+        assertThrows(
+                RecursoNaoEncontradoException.class,
+                () -> reuniaoService.salvar(request)
+        );
     }
 
     @Test
-    void deveRetornarListaVaziaQuandoIdsForemNulosOuVazios() {
+    void deveRetornarListasVaziasQuandoIdsForemNulos() {
         var request = new ReuniaoRequest(
                 "Reunião",
                 "2026-06-01T10:00:00",
                 StatusTranscricao.CONCLUIDA,
                 StatusReuniao.PENDENTE,
-                null,
-                null,
-                null,
-                null,
-                null
+                null, null, null, null, null
         );
-
         var reuniaoSalva = new Reuniao();
         reuniaoSalva.setId(1L);
 
-        when(reuniaoRepository.save(any(Reuniao.class))).thenReturn(reuniaoSalva);
+        // metodo salvar chama os metodos buscarColaboradores e buscarAcoes ao setar os dados
+        when(reuniaoRepository.save(any(Reuniao.class)))
+                .thenReturn(reuniaoSalva);
 
         var resultado = reuniaoService.salvar(request);
 
         assertNotNull(resultado);
-        verify(colaboradorRepository, never()).findAllById(any());
-        verify(acaoRepository, never()).findAllById(any());
+        assertEquals(List.of(), resultado.getParticipantes());
+        assertEquals(List.of(), resultado.getAcoes());
     }
 }

@@ -7,7 +7,7 @@ import br.com.empresa.reunioes.domain.entity.Reuniao;
 import br.com.empresa.reunioes.domain.repository.AcaoRepository;
 import br.com.empresa.reunioes.web.acao.AcaoController;
 import br.com.empresa.reunioes.web.acao.dto.AcaoDTO;
-import br.com.empresa.reunioes.web.acao.dto.AcaoRequest;
+import br.com.empresa.reunioes.web.acao.dto.request.AcaoRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
