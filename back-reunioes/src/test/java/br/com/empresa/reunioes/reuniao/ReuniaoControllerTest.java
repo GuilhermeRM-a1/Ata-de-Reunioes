@@ -9,7 +9,9 @@ import br.com.empresa.reunioes.domain.entity.Reuniao;
 import br.com.empresa.reunioes.domain.enums.StatusReuniao;
 import br.com.empresa.reunioes.domain.enums.StatusTranscricao;
 import br.com.empresa.reunioes.domain.exception.RecursoNaoEncontradoException;
+import br.com.empresa.reunioes.domain.exception.RelatorioIndisponivelException;
 import br.com.empresa.reunioes.web.reuniao.ReuniaoController;
+import br.com.empresa.reunioes.web.reuniao.dto.ReuniaoFeriadoDTO;
 import br.com.empresa.reunioes.web.reuniao.dto.ReuniaoPatchRequest;
 import br.com.empresa.reunioes.web.reuniao.dto.ReuniaoRequest;
 import br.com.empresa.reunioes.web.reuniao.dto.ReuniaoResumoRequest;
@@ -270,11 +272,72 @@ class ReuniaoControllerTest {
             verify(ingestaoService)
                     .receberAnalise(eq(1L), any());
         }
+
+        @Test
+        @DisplayName("Deve rejeitar ingestão sem resumo executivo com 400")
+        void receberAnaliseRetornaBadRequestSemResumo() throws Exception {
+            // Given
+            var request = new ReuniaoResumoRequest("   ", "Transcrição");
+
+            // When / Then
+            mockMvc.perform(patch("/api/reunioes/1/ingestao")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(json(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.title").value("Campos inválidos"))
+                    .andExpect(jsonPath("$.campos[0].campo").value("resumo"));
+
+            verifyNoInteractions(ingestaoService);
+        }
+
+        @Test
+        @DisplayName("Deve retornar 404 quando a reunião da ingestão não existir")
+        void receberAnaliseRetornaNotFoundQuandoReuniaoNaoExiste() throws Exception {
+            // Given
+            when(ingestaoService.receberAnalise(eq(99L), any()))
+                    .thenThrow(new RecursoNaoEncontradoException("Reunião não encontrada."));
+
+            // When / Then
+            mockMvc.perform(patch("/api/reunioes/99/ingestao")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(json(new ReuniaoResumoRequest("Resumo", null))))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.status").value(404));
+        }
     }
 
     @Nested
     @DisplayName("Geração de relatórios")
     class Relatorios {
+
+        @Test
+        @DisplayName("Deve retornar 409 enquanto a reunião não tiver resumo da IA")
+        void gerarRelatorioRetornaConflictSemResumo() throws Exception {
+            // Given
+            when(relatorioService.validarReuniaoParaRelatorio(1L))
+                    .thenThrow(new RelatorioIndisponivelException(
+                            "A reunião 1 ainda não recebeu o resumo da IA."));
+
+            // When / Then
+            mockMvc.perform(get("/api/reunioes/1/relatorio"))
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.status").value(409))
+                    .andExpect(jsonPath("$.title").value("Relatório indisponível"))
+                    .andExpect(jsonPath("$.detail")
+                            .value("A reunião 1 ainda não recebeu o resumo da IA."));
+        }
+
+        @Test
+        @DisplayName("Deve retornar 404 quando a reunião do relatório não existir")
+        void gerarRelatorioRetornaNotFoundQuandoReuniaoNaoExiste() throws Exception {
+            // Given
+            when(relatorioService.validarReuniaoParaRelatorio(99L))
+                    .thenThrow(new RecursoNaoEncontradoException("Reunião não encontrada."));
+
+            // When / Then
+            mockMvc.perform(get("/api/reunioes/99/relatorio"))
+                    .andExpect(status().isNotFound());
+        }
 
         @Test
         @DisplayName("Deve retornar o relatório da reunião")
@@ -310,6 +373,38 @@ class ReuniaoControllerTest {
                     .andExpect(status().isOk());
 
             verify(feriadoService).verificarReuniao(1L);
+        }
+
+        @Test
+        @DisplayName("Deve devolver o feriado encontrado no corpo da resposta")
+        void verificarFeriadoDevolveFeriadoEncontrado() throws Exception {
+            // Given
+            when(feriadoService.verificarReuniao(1L))
+                    .thenReturn(ReuniaoFeriadoDTO.emFeriado(
+                            1L, "Reunião de Alinhamento", "2026-12-25", "Natal", "sexta-feira"));
+
+            // When / Then
+            mockMvc.perform(get("/api/reunioes/1/feriado"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.reuniaoId").value(1))
+                    .andExpect(jsonPath("$.feriado").value(true))
+                    .andExpect(jsonPath("$.nomeFeriado").value("Natal"))
+                    .andExpect(jsonPath("$.diaSemana").value("sexta-feira"));
+        }
+
+        @Test
+        @DisplayName("Deve retornar 404 quando a reunião não tiver data reconhecível")
+        void verificarFeriadoRetornaNotFoundSemDataValida() throws Exception {
+            // Given
+            when(feriadoService.verificarReuniao(1L))
+                    .thenThrow(new RecursoNaoEncontradoException(
+                            "A reunião 1 não tem data em formato reconhecível (aaaa-MM-dd)"));
+
+            // When / Then
+            mockMvc.perform(get("/api/reunioes/1/feriado"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.detail")
+                            .value("A reunião 1 não tem data em formato reconhecível (aaaa-MM-dd)"));
         }
     }
 
