@@ -1,4 +1,4 @@
-package br.com.empresa.reunioes.web.colaborador.dto;
+package br.com.empresa.reunioes.web.colaborador.dto.request;
 
 import br.com.empresa.reunioes.domain.enums.Papel;
 import jakarta.validation.constraints.Email;

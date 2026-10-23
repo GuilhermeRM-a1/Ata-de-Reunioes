@@ -2,7 +2,7 @@ package br.com.empresa.reunioes.application.reuniao;
 
 import br.com.empresa.reunioes.domain.entity.Reuniao;
 import br.com.empresa.reunioes.domain.repository.ReuniaoRepository;
-import br.com.empresa.reunioes.web.reuniao.dto.ReuniaoResumoRequest;
+import br.com.empresa.reunioes.web.reuniao.dto.request.ReuniaoResumoRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

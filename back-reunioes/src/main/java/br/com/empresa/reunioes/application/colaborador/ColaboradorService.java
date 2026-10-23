@@ -2,8 +2,8 @@ package br.com.empresa.reunioes.application.colaborador;
 
 import br.com.empresa.reunioes.domain.entity.Colaborador;
 import br.com.empresa.reunioes.domain.repository.ColaboradorRepository;
-import br.com.empresa.reunioes.web.colaborador.dto.ColaboradorPatchRequest;
-import br.com.empresa.reunioes.web.colaborador.dto.ColaboradorRequest;
+import br.com.empresa.reunioes.web.colaborador.dto.request.ColaboradorPatchRequest;
+import br.com.empresa.reunioes.web.colaborador.dto.request.ColaboradorRequest;
 import br.com.empresa.reunioes.domain.exception.EmailCadastradoExistenteException;
 import br.com.empresa.reunioes.domain.exception.RecursoNaoEncontradoException;
 import lombok.RequiredArgsConstructor;

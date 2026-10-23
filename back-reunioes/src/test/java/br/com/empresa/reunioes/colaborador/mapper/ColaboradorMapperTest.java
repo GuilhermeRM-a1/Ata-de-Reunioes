@@ -3,7 +3,7 @@ package br.com.empresa.reunioes.colaborador.mapper;
 import br.com.empresa.reunioes.application.colaborador.mapper.ColaboradorMapper;
 import br.com.empresa.reunioes.domain.entity.Colaborador;
 import br.com.empresa.reunioes.domain.enums.Papel;
-import br.com.empresa.reunioes.web.colaborador.dto.ColaboradorRequest;
+import br.com.empresa.reunioes.web.colaborador.dto.request.ColaboradorRequest;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
