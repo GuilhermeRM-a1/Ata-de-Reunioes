@@ -1,4 +1,3 @@
-
 package br.com.empresa.reunioes.reuniao;
 
 import br.com.empresa.reunioes.application.reuniao.FeriadoService;
@@ -15,28 +14,48 @@ import br.com.empresa.reunioes.web.reuniao.dto.ReuniaoFeriadoDTO;
 import br.com.empresa.reunioes.web.reuniao.dto.request.ReuniaoPatchRequest;
 import br.com.empresa.reunioes.web.reuniao.dto.request.ReuniaoRequest;
 import br.com.empresa.reunioes.web.reuniao.dto.request.ReuniaoResumoRequest;
-import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.endsWith;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ReuniaoController.class)
 @DisplayName("Controller de reuniões")
 class ReuniaoControllerTest {
+
+    private static final String TITULO = "Reunião de Alinhamento";
+    private static final String MENSAGEM_NAO_ENCONTRADA = "Reunião não encontrada.";
 
     @Autowired
     MockMvc mockMvc;
@@ -59,7 +78,7 @@ class ReuniaoControllerTest {
     private Reuniao criarReuniao() {
         var reuniao = new Reuniao();
         reuniao.setId(1L);
-        reuniao.setTitulo("Reunião de Alinhamento");
+        reuniao.setTitulo(TITULO);
         reuniao.setData("2026-06-01T10:00:00");
         reuniao.setStatusTranscricao(StatusTranscricao.CONCLUIDA);
         reuniao.setStatusReuniao(StatusReuniao.PENDENTE);
@@ -73,7 +92,7 @@ class ReuniaoControllerTest {
 
     private ReuniaoRequest requestValido() {
         return new ReuniaoRequest(
-                "Reunião de Alinhamento",
+                TITULO,
                 "2026-06-01T10:00:00",
                 StatusTranscricao.CONCLUIDA,
                 StatusReuniao.PENDENTE,
@@ -99,8 +118,16 @@ class ReuniaoControllerTest {
         );
     }
 
-    private String json(Object objeto) throws Exception {
+    private String json(Object objeto) {
         return objectMapper.writeValueAsString(objeto);
+    }
+
+    private ResultActions enviarJson(
+            MockHttpServletRequestBuilder metodo,
+            Object corpo) throws Exception {
+        return mockMvc.perform(metodo
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(corpo)));
     }
 
     @Nested
@@ -108,51 +135,60 @@ class ReuniaoControllerTest {
     class Consultas {
 
         @Test
-        @DisplayName("Deve retornar uma página de reuniões")
-        void listarRetornaPaginaDeReunioes() throws Exception {
-            // Given
+        @DisplayName("Dada paginação, quando listar, então retorna 200 com a página e repassa page e size ao service")
+        void paginacao_deveRetornarPaginaDeReunioes() throws Exception {
+
             when(reuniaoService.listar(any()))
                     .thenReturn(new PageImpl<>(List.of(criarReuniao())));
 
-            // When / Then
-            mockMvc.perform(get("/api/reunioes")
-                            .param("page", "0")
-                            .param("size", "10"))
-                    .andExpect(status().isOk())
+
+            ResultActions resposta = mockMvc.perform(get("/api/reunioes")
+                    .param("page", "0")
+                    .param("size", "10"));
+
+
+            resposta.andExpect(status().isOk())
                     .andExpect(jsonPath("$.content").isArray())
+                    .andExpect(jsonPath("$.content[0].titulo").value(TITULO))
                     .andExpect(jsonPath("$.totalElements").value(1));
 
-            verify(reuniaoService).listar(any());
+            ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+            verify(reuniaoService).listar(captor.capture());
+            assertThat(captor.getValue().getPageNumber()).isZero();
+            assertThat(captor.getValue().getPageSize()).isEqualTo(10);
         }
 
         @Test
-        @DisplayName("Deve retornar uma reunião pelo ID")
-        void buscarPorIdRetornaReuniao() throws Exception {
-            // Given
-            when(reuniaoService.buscarPorId(1L))
-                    .thenReturn(criarReuniao());
+        @DisplayName("Dado id existente, quando buscar, então retorna 200 com os dados da reunião")
+        void idExistente_deveRetornarReuniao() throws Exception {
 
-            // When / Then
-            mockMvc.perform(get("/api/reunioes/1"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.titulo")
-                            .value("Reunião de Alinhamento"));
+            when(reuniaoService.buscarPorId(1L)).thenReturn(criarReuniao());
+
+
+            ResultActions resposta = mockMvc.perform(get("/api/reunioes/1"));
+
+
+            resposta.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(1))
+                    .andExpect(jsonPath("$.titulo").value(TITULO));
 
             verify(reuniaoService).buscarPorId(1L);
         }
 
         @Test
-        @DisplayName("Deve retornar 404 quando a reunião não existir")
-        void buscarPorIdRetornaNotFoundQuandoReuniaoNaoExiste()
-                throws Exception {
-            // Given
-            when(reuniaoService.buscarPorId(99L))
-                    .thenThrow(new RecursoNaoEncontradoException(
-                            "Reunião não encontrada"));
+        @DisplayName("Dado id inexistente, quando buscar, então retorna 404")
+        void idInexistente_deveRetornarNotFound() throws Exception {
 
-            // When / Then
-            mockMvc.perform(get("/api/reunioes/99"))
-                    .andExpect(status().isNotFound());
+            when(reuniaoService.buscarPorId(99L))
+                    .thenThrow(new RecursoNaoEncontradoException(MENSAGEM_NAO_ENCONTRADA));
+
+
+            ResultActions resposta = mockMvc.perform(get("/api/reunioes/99"));
+
+
+            resposta.andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.status").value(404))
+                    .andExpect(jsonPath("$.detail").value(MENSAGEM_NAO_ENCONTRADA));
 
             verify(reuniaoService).buscarPorId(99L);
         }
@@ -163,39 +199,37 @@ class ReuniaoControllerTest {
     class Cadastro {
 
         @Test
-        @DisplayName("Deve cadastrar reunião e retornar 201 com Location")
-        void salvarRetornaCreatedComLocation() throws Exception {
-            // Given
-            when(reuniaoService.salvar(any()))
-                    .thenReturn(criarReuniao());
+        @DisplayName("Dada requisição válida, quando cadastrar, então retorna 201 com Location e entrega os dados ao service")
+        void requisicaoValida_deveRetornarCreatedComLocation() throws Exception {
 
-            // When / Then
-            mockMvc.perform(post("/api/reunioes")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(json(requestValido())))
-                    .andExpect(status().isCreated())
-                    .andExpect(header().string(
-                            "Location",
-                            org.hamcrest.Matchers.endsWith(
-                                    "/api/reunioes/1")))
-                    .andExpect(jsonPath("$.titulo")
-                            .value("Reunião de Alinhamento"));
+            when(reuniaoService.salvar(any())).thenReturn(criarReuniao());
 
-            verify(reuniaoService).salvar(any());
+
+            ResultActions resposta = enviarJson(post("/api/reunioes"), requestValido());
+
+
+            resposta.andExpect(status().isCreated())
+                    .andExpect(header().string("Location", endsWith("/api/reunioes/1")))
+                    .andExpect(jsonPath("$.titulo").value(TITULO));
+
+            ArgumentCaptor<ReuniaoRequest> captor = ArgumentCaptor.forClass(ReuniaoRequest.class);
+            verify(reuniaoService).salvar(captor.capture());
+            assertThat(captor.getValue().titulo()).isEqualTo(TITULO);
         }
 
         @Test
-        @DisplayName("Deve rejeitar cadastro com dados inválidos")
-        void salvarRetornaBadRequestQuandoRequestInvalido()
-                throws Exception {
-            // Given
+        @DisplayName("Dada requisição inválida, quando cadastrar, então retorna 400 com os campos inválidos e não chama o service")
+        void requisicaoInvalida_deveRetornarBadRequest() throws Exception {
+
             var request = requestInvalido();
 
-            // When / Then
-            mockMvc.perform(post("/api/reunioes")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(json(request)))
-                    .andExpect(status().isBadRequest());
+
+            ResultActions resposta = enviarJson(post("/api/reunioes"), request);
+
+
+            resposta.andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.title").value("Campos inválidos"))
+                    .andExpect(jsonPath("$.campos").isArray());
 
             verifyNoInteractions(reuniaoService);
         }
@@ -206,44 +240,114 @@ class ReuniaoControllerTest {
     class Atualizacao {
 
         @Test
-        @DisplayName("Deve atualizar uma reunião")
-        void atualizarRetornaReuniaoAtualizada() throws Exception {
-            // Given
-            when(reuniaoService.atualizar(eq(1L), any()))
-                    .thenReturn(criarReuniao());
+        @DisplayName("Dada requisição válida, quando atualizar, então retorna 200 com a reunião atualizada")
+        void requisicaoValida_deveRetornarReuniaoAtualizada() throws Exception {
 
-            // When / Then
-            mockMvc.perform(put("/api/reunioes/1")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(json(requestValido())))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.titulo")
-                            .value("Reunião de Alinhamento"));
+            when(reuniaoService.atualizar(eq(1L), any())).thenReturn(criarReuniao());
 
-            verify(reuniaoService).atualizar(eq(1L), any());
+
+            ResultActions resposta = enviarJson(put("/api/reunioes/1"), requestValido());
+
+
+            resposta.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.titulo").value(TITULO));
+
+            ArgumentCaptor<ReuniaoRequest> captor = ArgumentCaptor.forClass(ReuniaoRequest.class);
+            verify(reuniaoService).atualizar(eq(1L), captor.capture());
+            assertThat(captor.getValue().titulo()).isEqualTo(TITULO);
         }
 
         @Test
-        @DisplayName("Deve atualizar parcialmente uma reunião")
-        void atualizarParcialRetornaReuniaoAtualizada()
-                throws Exception {
-            // Given
+        @DisplayName("Dada requisição inválida, quando atualizar, então retorna 400 e não chama o service")
+        void requisicaoInvalida_deveRetornarBadRequest() throws Exception {
+
+            var request = requestInvalido();
+
+
+            ResultActions resposta = enviarJson(put("/api/reunioes/1"), request);
+
+
+            resposta.andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.title").value("Campos inválidos"));
+
+            verifyNoInteractions(reuniaoService);
+        }
+
+        @Test
+        @DisplayName("Dado id inexistente, quando atualizar, então retorna 404")
+        void idInexistente_deveRetornarNotFound() throws Exception {
+
+            when(reuniaoService.atualizar(eq(99L), any()))
+                    .thenThrow(new RecursoNaoEncontradoException(MENSAGEM_NAO_ENCONTRADA));
+
+
+            ResultActions resposta = enviarJson(put("/api/reunioes/99"), requestValido());
+
+
+            resposta.andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.status").value(404));
+        }
+
+        @Test
+        @DisplayName("Dado apenas o título, quando atualizar parcialmente, então retorna 200 e entrega só o título ao service")
+        void apenasTitulo_deveRetornarReuniaoAtualizada() throws Exception {
+
             var request = new ReuniaoPatchRequest(
                     "Novo título", null, null, null,
                     null, null, null, null, null
             );
+            when(reuniaoService.atualizarParcial(eq(1L), any())).thenReturn(criarReuniao());
 
-            when(reuniaoService.atualizarParcial(eq(1L), any()))
-                    .thenReturn(criarReuniao());
 
-            // When / Then
-            mockMvc.perform(patch("/api/reunioes/1")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(json(request)))
-                    .andExpect(status().isOk());
+            ResultActions resposta = enviarJson(patch("/api/reunioes/1"), request);
 
-            verify(reuniaoService)
-                    .atualizarParcial(eq(1L), any());
+
+            resposta.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(1));
+
+            ArgumentCaptor<ReuniaoRequest> captor = ArgumentCaptor.forClass(ReuniaoRequest.class);
+            verify(reuniaoService).atualizarParcial(eq(1L), captor.capture());
+            assertThat(captor.getValue().titulo()).isEqualTo("Novo título");
+            assertThat(captor.getValue().resumo()).isNull();
+        }
+
+        @Test
+        @DisplayName("Dado título com menos de 5 caracteres, quando atualizar parcialmente, então retorna 400 e não chama o service")
+        void tituloCurto_aoAtualizarParcialmente_deveRetornarBadRequest() throws Exception {
+
+            var request = new ReuniaoPatchRequest(
+                    "abc", null, null, null,
+                    null, null, null, null, null
+            );
+
+
+            ResultActions resposta = enviarJson(patch("/api/reunioes/1"), request);
+
+
+            resposta.andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.title").value("Campos inválidos"))
+                    .andExpect(jsonPath("$.campos[0].campo").value("titulo"));
+
+            verifyNoInteractions(reuniaoService);
+        }
+
+        @Test
+        @DisplayName("Dado id inexistente, quando atualizar parcialmente, então retorna 404")
+        void idInexistente_aoAtualizarParcialmente_deveRetornarNotFound() throws Exception {
+
+            var request = new ReuniaoPatchRequest(
+                    "Novo título", null, null, null,
+                    null, null, null, null, null
+            );
+            when(reuniaoService.atualizarParcial(eq(99L), any()))
+                    .thenThrow(new RecursoNaoEncontradoException(MENSAGEM_NAO_ENCONTRADA));
+
+
+            ResultActions resposta = enviarJson(patch("/api/reunioes/99"), request);
+
+
+            resposta.andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.status").value(404));
         }
     }
 
@@ -252,38 +356,37 @@ class ReuniaoControllerTest {
     class Ingestao {
 
         @Test
-        @DisplayName("Deve aceitar os dados recebidos para análise")
-        void receberAnaliseRetornaAccepted() throws Exception {
-            // Given
+        @DisplayName("Dados resumo e transcrição, quando ingerir, então retorna 202 e entrega os dados ao service")
+        void dadosValidos_deveRetornarAccepted() throws Exception {
+
             var request = new ReuniaoResumoRequest(
                     "Resumo executivo da reunião",
                     "Transcrição completa da reunião"
             );
+            when(ingestaoService.receberAnalise(eq(1L), any())).thenReturn(criarReuniao());
 
-            when(ingestaoService.receberAnalise(eq(1L), any()))
-                    .thenReturn(criarReuniao());
 
-            // When / Then
-            mockMvc.perform(patch("/api/reunioes/1/ingestao")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(json(request)))
-                    .andExpect(status().isAccepted());
+            ResultActions resposta = enviarJson(patch("/api/reunioes/1/ingestao"), request);
 
-            verify(ingestaoService)
-                    .receberAnalise(eq(1L), any());
+
+            resposta.andExpect(status().isAccepted());
+
+            ArgumentCaptor<ReuniaoResumoRequest> captor = ArgumentCaptor.forClass(ReuniaoResumoRequest.class);
+            verify(ingestaoService).receberAnalise(eq(1L), captor.capture());
+            assertThat(captor.getValue().resumo()).isEqualTo("Resumo executivo da reunião");
         }
 
         @Test
-        @DisplayName("Deve rejeitar ingestão sem resumo executivo com 400")
-        void receberAnaliseRetornaBadRequestSemResumo() throws Exception {
-            // Given
+        @DisplayName("Dado resumo em branco, quando ingerir, então retorna 400 indicando o campo e não chama o service")
+        void resumoEmBranco_deveRetornarBadRequest() throws Exception {
+
             var request = new ReuniaoResumoRequest("   ", "Transcrição");
 
-            // When / Then
-            mockMvc.perform(patch("/api/reunioes/1/ingestao")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(json(request)))
-                    .andExpect(status().isBadRequest())
+
+            ResultActions resposta = enviarJson(patch("/api/reunioes/1/ingestao"), request);
+
+
+            resposta.andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.title").value("Campos inválidos"))
                     .andExpect(jsonPath("$.campos[0].campo").value("resumo"));
 
@@ -291,17 +394,19 @@ class ReuniaoControllerTest {
         }
 
         @Test
-        @DisplayName("Deve retornar 404 quando a reunião da ingestão não existir")
-        void receberAnaliseRetornaNotFoundQuandoReuniaoNaoExiste() throws Exception {
-            // Given
-            when(ingestaoService.receberAnalise(eq(99L), any()))
-                    .thenThrow(new RecursoNaoEncontradoException("Reunião não encontrada."));
+        @DisplayName("Dada reunião inexistente, quando ingerir, então retorna 404")
+        void reuniaoInexistente_deveRetornarNotFound() throws Exception {
 
-            // When / Then
-            mockMvc.perform(patch("/api/reunioes/99/ingestao")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(json(new ReuniaoResumoRequest("Resumo", null))))
-                    .andExpect(status().isNotFound())
+            when(ingestaoService.receberAnalise(eq(99L), any()))
+                    .thenThrow(new RecursoNaoEncontradoException(MENSAGEM_NAO_ENCONTRADA));
+
+
+            ResultActions resposta = enviarJson(
+                    patch("/api/reunioes/99/ingestao"),
+                    new ReuniaoResumoRequest("Resumo", null));
+
+
+            resposta.andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.status").value(404));
         }
     }
@@ -311,16 +416,34 @@ class ReuniaoControllerTest {
     class Relatorios {
 
         @Test
-        @DisplayName("Deve retornar 409 enquanto a reunião não tiver resumo da IA")
-        void gerarRelatorioRetornaConflictSemResumo() throws Exception {
-            // Given
+        @DisplayName("Dada reunião com resumo da IA, quando gerar relatório, então retorna 200 com os dados da reunião")
+        void reuniaoComResumo_deveRetornarRelatorio() throws Exception {
+
+            when(relatorioService.validarReuniaoParaRelatorio(1L)).thenReturn(criarReuniao());
+
+
+            ResultActions resposta = mockMvc.perform(get("/api/reunioes/1/relatorio"));
+
+
+            resposta.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.titulo").value(TITULO));
+
+            verify(relatorioService).validarReuniaoParaRelatorio(1L);
+        }
+
+        @Test
+        @DisplayName("Dada reunião sem resumo da IA, quando gerar relatório, então retorna 409")
+        void reuniaoSemResumo_deveRetornarConflict() throws Exception {
+
             when(relatorioService.validarReuniaoParaRelatorio(1L))
                     .thenThrow(new RelatorioIndisponivelException(
                             "A reunião 1 ainda não recebeu o resumo da IA."));
 
-            // When / Then
-            mockMvc.perform(get("/api/reunioes/1/relatorio"))
-                    .andExpect(status().isConflict())
+
+            ResultActions resposta = mockMvc.perform(get("/api/reunioes/1/relatorio"));
+
+
+            resposta.andExpect(status().isConflict())
                     .andExpect(jsonPath("$.status").value(409))
                     .andExpect(jsonPath("$.title").value("Relatório indisponível"))
                     .andExpect(jsonPath("$.detail")
@@ -328,32 +451,18 @@ class ReuniaoControllerTest {
         }
 
         @Test
-        @DisplayName("Deve retornar 404 quando a reunião do relatório não existir")
-        void gerarRelatorioRetornaNotFoundQuandoReuniaoNaoExiste() throws Exception {
-            // Given
+        @DisplayName("Dada reunião inexistente, quando gerar relatório, então retorna 404")
+        void reuniaoInexistente_deveRetornarNotFound() throws Exception {
+
             when(relatorioService.validarReuniaoParaRelatorio(99L))
-                    .thenThrow(new RecursoNaoEncontradoException("Reunião não encontrada."));
+                    .thenThrow(new RecursoNaoEncontradoException(MENSAGEM_NAO_ENCONTRADA));
 
-            // When / Then
-            mockMvc.perform(get("/api/reunioes/99/relatorio"))
-                    .andExpect(status().isNotFound());
-        }
 
-        @Test
-        @DisplayName("Deve retornar o relatório da reunião")
-        void gerarRelatorioRetornaRelatorio() throws Exception {
-            // Given
-            when(relatorioService.validarReuniaoParaRelatorio(1L))
-                    .thenReturn(criarReuniao());
+            ResultActions resposta = mockMvc.perform(get("/api/reunioes/99/relatorio"));
 
-            // When / Then
-            mockMvc.perform(get("/api/reunioes/1/relatorio"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.titulo")
-                            .value("Reunião de Alinhamento"));
 
-            verify(relatorioService)
-                    .validarReuniaoParaRelatorio(1L);
+            resposta.andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.status").value(404));
         }
     }
 
@@ -362,49 +471,56 @@ class ReuniaoControllerTest {
     class Feriados {
 
         @Test
-        @DisplayName("Deve retornar sucesso ao verificar feriado")
-        void verificarFeriadoRetornaResultado() throws Exception {
-            // Given
-            when(feriadoService.verificarReuniao(1L))
-                    .thenReturn(null);
+        @DisplayName("Dada reunião em feriado, quando verificar, então retorna 200 com os dados do feriado")
+        void reuniaoEmFeriado_deveDevolverFeriadoEncontrado() throws Exception {
 
-            // When / Then
-            mockMvc.perform(get("/api/reunioes/1/feriado"))
-                    .andExpect(status().isOk());
+            when(feriadoService.verificarReuniao(1L))
+                    .thenReturn(ReuniaoFeriadoDTO.emFeriado(
+                            1L, TITULO, "2026-12-25", "Natal", "sexta-feira"));
+
+
+            ResultActions resposta = mockMvc.perform(get("/api/reunioes/1/feriado"));
+
+
+            resposta.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.reuniaoId").value(1))
+                    .andExpect(jsonPath("$.feriado").value(true))
+                    .andExpect(jsonPath("$.nomeFeriado").value("Natal"))
+                    .andExpect(jsonPath("$.diaSemana").value("sexta-feira"));
 
             verify(feriadoService).verificarReuniao(1L);
         }
 
         @Test
-        @DisplayName("Deve devolver o feriado encontrado no corpo da resposta")
-        void verificarFeriadoDevolveFeriadoEncontrado() throws Exception {
-            // Given
-            when(feriadoService.verificarReuniao(1L))
-                    .thenReturn(ReuniaoFeriadoDTO.emFeriado(
-                            1L, "Reunião de Alinhamento", "2026-12-25", "Natal", "sexta-feira"));
+        @DisplayName("Dado que o service não encontra feriado, quando verificar, então retorna 200 sem corpo")
+        void semFeriado_deveRetornarOkSemCorpo() throws Exception {
 
-            // When / Then
-            mockMvc.perform(get("/api/reunioes/1/feriado"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.reuniaoId").value(1))
-                    .andExpect(jsonPath("$.feriado").value(true))
-                    .andExpect(jsonPath("$.nomeFeriado").value("Natal"))
-                    .andExpect(jsonPath("$.diaSemana").value("sexta-feira"));
+            when(feriadoService.verificarReuniao(1L)).thenReturn(null);
+
+
+            ResultActions resposta = mockMvc.perform(get("/api/reunioes/1/feriado"));
+
+
+            resposta.andExpect(status().isOk())
+                    .andExpect(content().string(""));
+
+            verify(feriadoService).verificarReuniao(1L);
         }
 
         @Test
-        @DisplayName("Deve retornar 404 quando a reunião não tiver data reconhecível")
-        void verificarFeriadoRetornaNotFoundSemDataValida() throws Exception {
-            // Given
-            when(feriadoService.verificarReuniao(1L))
-                    .thenThrow(new RecursoNaoEncontradoException(
-                            "A reunião 1 não tem data em formato reconhecível (aaaa-MM-dd)"));
+        @DisplayName("Dada reunião sem data reconhecível, quando verificar, então retorna 404 com o motivo")
+        void reuniaoSemDataValida_deveRetornarNotFound() throws Exception {
 
-            // When / Then
-            mockMvc.perform(get("/api/reunioes/1/feriado"))
-                    .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.detail")
-                            .value("A reunião 1 não tem data em formato reconhecível (aaaa-MM-dd)"));
+            String detalhe = "A reunião 1 não tem data em formato reconhecível (aaaa-MM-dd)";
+            when(feriadoService.verificarReuniao(1L))
+                    .thenThrow(new RecursoNaoEncontradoException(detalhe));
+
+
+            ResultActions resposta = mockMvc.perform(get("/api/reunioes/1/feriado"));
+
+
+            resposta.andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.detail").value(detalhe));
         }
     }
 
@@ -413,17 +529,36 @@ class ReuniaoControllerTest {
     class Exclusao {
 
         @Test
-        @DisplayName("Deve excluir uma reunião e retornar 204")
-        void deletarRetornaNoContent() throws Exception {
-            // Given
+        @DisplayName("Dado id existente, quando excluir, então retorna 204 sem corpo")
+        void idExistente_deveRetornarNoContent() throws Exception {
+
             doNothing().when(reuniaoService).deletar(1L);
 
-            // When / Then
-            mockMvc.perform(delete("/api/reunioes/1"))
-                    .andExpect(status().isNoContent())
+
+            ResultActions resposta = mockMvc.perform(delete("/api/reunioes/1"));
+
+
+            resposta.andExpect(status().isNoContent())
                     .andExpect(content().string(""));
 
             verify(reuniaoService).deletar(1L);
+        }
+
+        @Test
+        @DisplayName("Dado id inexistente, quando excluir, então retorna 404")
+        void idInexistente_deveRetornarNotFound() throws Exception {
+
+            doThrow(new RecursoNaoEncontradoException(MENSAGEM_NAO_ENCONTRADA))
+                    .when(reuniaoService).deletar(99L);
+
+
+            ResultActions resposta = mockMvc.perform(delete("/api/reunioes/99"));
+
+
+            resposta.andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.status").value(404));
+
+            verify(reuniaoService).deletar(99L);
         }
     }
 }
