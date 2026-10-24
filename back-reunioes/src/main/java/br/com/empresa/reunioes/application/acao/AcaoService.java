@@ -21,7 +21,7 @@ import java.util.List;
 import static br.com.empresa.reunioes.application.acao.mapper.AcaoMapper.*;
 
 /**
- * Todo método público devolve Entidade.
+ * Cada método público devolve Entidade.
  */
 @Slf4j
 @Service
@@ -110,7 +110,7 @@ public class AcaoService {
         acao.setDescricao(request.descricao());
         acao.setTipo(request.tipo());
         acao.setPrazo(request.prazo());
-        acao.setConcluida(request.concluida() != null ? request.concluida() : false);
+        acao.setConcluida(Boolean.TRUE.equals(request.concluida()));
         acao.setResponsavel(buscarResponsaveis(request.responsavel()));
 
         // Atualizando ação.

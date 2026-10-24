@@ -5,9 +5,9 @@ import br.com.empresa.reunioes.domain.entity.Colaborador;
 import br.com.empresa.reunioes.web.colaborador.dto.ColaboradorDTO;
 import br.com.empresa.reunioes.web.colaborador.dto.request.ColaboradorPatchRequest;
 import br.com.empresa.reunioes.web.colaborador.dto.request.ColaboradorRequest;
+import br.com.empresa.reunioes.web.colaborador.mapper.ColaboradorWebMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,10 +30,8 @@ public class ColaboradorController {
 
     @Operation(summary = "Cria um colaborador",
             description = "A senha é gravada na entidade, mas nunca volta na resposta.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Colaborador criado"),
-            @ApiResponse(responseCode = "400", description = "Campos obrigatórios ausentes ou inválidos")
-    })
+    @ApiResponse(responseCode = "201", description = "Colaborador criado")
+    @ApiResponse(responseCode = "400", description = "Campos obrigatórios ausentes ou inválidos")
     @PostMapping()
     public ResponseEntity<ColaboradorDTO> salvar(@Valid @RequestBody ColaboradorRequest request) {
 
@@ -50,16 +48,14 @@ public class ColaboradorController {
     public ResponseEntity<Page<ColaboradorDTO>> listar(Pageable paginacao) {
 
         Page<ColaboradorDTO> listagemDTO = service.listar(paginacao)
-                .map(colaborador -> colaboradorToDTO(colaborador));
+                .map(ColaboradorWebMapper::colaboradorToDTO);
 
         return ResponseEntity.ok(listagemDTO);
     }
 
     @Operation(summary = "Busca um colaborador pelo id")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Colaborador encontrado"),
-            @ApiResponse(responseCode = "404", description = "Nenhum colaborador com esse id")
-    })
+    @ApiResponse(responseCode = "200", description = "Colaborador encontrado")
+    @ApiResponse(responseCode = "404", description = "Nenhum colaborador com esse id")
     @GetMapping("/{id}")
     public ResponseEntity<ColaboradorDTO> buscarPorId(@PathVariable Long id) {
         Colaborador colaborador = service.buscarPorId(id);
@@ -69,10 +65,8 @@ public class ColaboradorController {
     }
 
     @Operation(summary = "Busca um colaborador pelo email")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Colaborador encontrado"),
-            @ApiResponse(responseCode = "404", description = "Nenhum colaborador com esse email")
-    })
+    @ApiResponse(responseCode = "200", description = "Colaborador encontrado")
+    @ApiResponse(responseCode = "404", description = "Nenhum colaborador com esse email")
     @GetMapping("/email/{email}")
     public ResponseEntity<ColaboradorDTO> buscarPorEmail(@PathVariable String email) {
         Colaborador colaborador = service.buscarPorEmail(email);
@@ -82,11 +76,9 @@ public class ColaboradorController {
     }
 
     @Operation(summary = "Substitui um colaborador por completo")
-    @ApiResponses({
-            @ApiResponse(responseCode = "202", description = "Colaborador atualizado"),
-            @ApiResponse(responseCode = "400", description = "Campos obrigatórios ausentes ou inválidos"),
-            @ApiResponse(responseCode = "404", description = "Nenhum colaborador com esse id")
-    })
+    @ApiResponse(responseCode = "202", description = "Colaborador atualizado")
+    @ApiResponse(responseCode = "400", description = "Campos obrigatórios ausentes ou inválidos")
+    @ApiResponse(responseCode = "404", description = "Nenhum colaborador com esse id")
     @PutMapping("/{id}")
     public ResponseEntity<ColaboradorDTO> atualizar(@PathVariable Long id, @Valid @RequestBody ColaboradorRequest request) {
         Colaborador colaborador = service.atualizar(id, request);
@@ -98,11 +90,9 @@ public class ColaboradorController {
     @Operation(summary = "Atualiza parcialmente um colaborador",
             description = "Campo ausente ou nulo é ignorado — só o que vier no corpo é alterado. "
                     + "O campo que vier preenchido não pode ser vazio.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "202", description = "Colaborador atualizado"),
-            @ApiResponse(responseCode = "400", description = "Campo enviado veio vazio"),
-            @ApiResponse(responseCode = "404", description = "Nenhum colaborador com esse id")
-    })
+    @ApiResponse(responseCode = "202", description = "Colaborador atualizado")
+    @ApiResponse(responseCode = "400", description = "Campo enviado veio vazio")
+    @ApiResponse(responseCode = "404", description = "Nenhum colaborador com esse id")
     @PatchMapping("/{id}")
     public ResponseEntity<ColaboradorDTO> atualizarParcial(@PathVariable Long id,
                                                            @Valid @RequestBody ColaboradorPatchRequest request) {
@@ -114,10 +104,8 @@ public class ColaboradorController {
     }
 
     @Operation(summary = "Exclui um colaborador")
-    @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Colaborador excluído"),
-            @ApiResponse(responseCode = "404", description = "Nenhum colaborador com esse id")
-    })
+    @ApiResponse(responseCode = "204", description = "Colaborador excluído")
+    @ApiResponse(responseCode = "404", description = "Nenhum colaborador com esse id")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
 

@@ -22,7 +22,7 @@ public final class AcaoMapper {
         acao.setDescricao(request.descricao());
         acao.setTipo(request.tipo());
         acao.setPrazo(request.prazo());
-        acao.setConcluida(request.concluida() != null ? request.concluida() : false);
+        acao.setConcluida(Boolean.TRUE.equals(request.concluida()));
 
         log.debug("Requisição convertida para Entidade com sucesso");
 
