@@ -26,7 +26,7 @@ public class ColaboradorService {
     private static final String EMAIL_EXISTENTE = "Este e-mail já existe, cadastre outro.";
 
     /**
-     * Todo método público devolve ENTIDADE.
+     * Cada método público devolve ENTIDADE.
      */
 
     @Transactional

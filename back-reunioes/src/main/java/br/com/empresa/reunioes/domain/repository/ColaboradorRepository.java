@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ColaboradorRepository extends JpaRepository<Colaborador, Long> {
 
     Colaborador findByEmail(String email);
-    Boolean existsByEmail(String email);
+    boolean existsByEmail(String email);
 }

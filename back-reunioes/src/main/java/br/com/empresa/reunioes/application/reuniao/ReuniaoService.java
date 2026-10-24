@@ -21,7 +21,7 @@ import java.util.List;
 import static br.com.empresa.reunioes.application.reuniao.mapper.ReuniaoMapper.*;
 
 /**
- * Todo metodo com retorn sempre retornará uma entidade
+ * Cada metodo com retorno sempre retornará uma entidade
  * O mapper faz o trabalho de converter a request para entidade pronta para uso ao criar uma reuniao
  * Em alguns casos, metodos internos já fazem isso só pelo id por retornar um item existentes no banco
  */

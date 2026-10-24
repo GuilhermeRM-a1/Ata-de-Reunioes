@@ -127,7 +127,7 @@ public class RestExceptionHandler {
     /**
      * A API externa de feriados falhou ou demorou demais. Isso e problema de
      * terceiro, nao do cliente: devolve 503, nao 500, e o servico segue de pe
-     * para todo o resto.
+     * para o restante.
      */
     @ExceptionHandler(FeignException.class)
     public ProblemDetail tratarApiExterna(FeignException e) {

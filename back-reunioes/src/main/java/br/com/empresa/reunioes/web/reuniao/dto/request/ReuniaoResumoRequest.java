@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 /**
  * Entrada da ingestao: o que a IA devolve depois de processar o audio.
  * <p>
- * Sao os unicos dois textos que chegam de fora. Todo o resto do relatorio a
+ * Sao os unicos dois textos que chegam de fora. O restante do relatorio a
  * propria API monta com o que o administrador registrou na reuniao.
  */
 public record ReuniaoResumoRequest(
