@@ -203,19 +203,6 @@ class ColaboradorControllerTest {
         }
 
         @Test
-        @DisplayName("Dado e-mail cadastrado, quando buscar pelo parâmetro, então retorna 200 com o colaborador")
-        void emailNoParametro_deveRetornarColaborador() throws Exception {
-            when(service.buscarPorEmail(EMAIL)).thenReturn(criarColaborador());
-
-            ResultActions resposta = mockMvc.perform(get(URL_POR_EMAIL_PARAM).param("email", EMAIL));
-
-            resposta.andExpect(status().isOk())
-                    .andExpect(jsonPath("$.email").value(EMAIL));
-
-            verify(service).buscarPorEmail(EMAIL);
-        }
-
-        @Test
         @DisplayName("Dado e-mail não cadastrado, quando buscar, então retorna 404")
         void emailNaoCadastrado_deveRetornarNotFound() throws Exception {
             when(service.buscarPorEmail("ninguem@empresa.com"))

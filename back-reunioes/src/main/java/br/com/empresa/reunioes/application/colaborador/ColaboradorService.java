@@ -23,6 +23,7 @@ public class ColaboradorService {
 
     private final ColaboradorRepository colaboradorRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private static final String EMAIL_EXISTENTE = "Este e-mail já existe, cadastre outro.";
 
     /**
      * Todo método público devolve ENTIDADE.
@@ -40,9 +41,7 @@ public class ColaboradorService {
 
         if (existe) {
             log.warn("Tentativa de cadastro com e-mail já existente.");
-            throw new EmailCadastradoExistenteException(
-                    "Este e-mail já existe, cadastre outro."
-            );
+            throw new EmailCadastradoExistenteException(EMAIL_EXISTENTE);
         }
 
         colaborador.setSenha(passwordEncoder.encode(colaborador.getSenha()));
@@ -112,9 +111,7 @@ public class ColaboradorService {
         if (emailAlterado
                 && colaboradorRepository.existsByEmail(request.email())) {
             log.warn("Tentativa de alteração para e-mail já existente: id={}", id);
-            throw new EmailCadastradoExistenteException(
-                    "Este e-mail já existe, cadastre outro."
-            );
+            throw new EmailCadastradoExistenteException(EMAIL_EXISTENTE);
         }
 
         log.debug("Atualizando colaborador: id={}", id);
@@ -150,9 +147,7 @@ public class ColaboradorService {
                         "Tentativa de alteração para e-mail já existente: id={}",
                         id
                 );
-                throw new EmailCadastradoExistenteException(
-                        "Este e-mail já existe, cadastre outro."
-                );
+                throw new EmailCadastradoExistenteException(EMAIL_EXISTENTE);
             }
         }
 
