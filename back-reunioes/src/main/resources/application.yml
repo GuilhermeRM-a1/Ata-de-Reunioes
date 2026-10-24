@@ -8,6 +8,8 @@ spring:
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
 
+
+
   jpa:
     # validate: o Hibernate so confere se as entidades batem com o banco.
     # Quem cria tabela e o Flyway, nunca o Hibernate.
@@ -50,3 +52,7 @@ api:
 spring.cloud.openfeign.client.config.default:
   connectTimeout: 3000
   readTimeout: 5000
+
+app:
+  cors:
+    allowed-origins: http://localhost:4200

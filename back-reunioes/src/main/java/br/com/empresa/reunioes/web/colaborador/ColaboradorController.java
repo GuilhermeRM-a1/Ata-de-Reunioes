@@ -1,0 +1,117 @@
+package br.com.empresa.reunioes.web.colaborador;
+
+import br.com.empresa.reunioes.application.colaborador.ColaboradorService;
+import br.com.empresa.reunioes.domain.entity.Colaborador;
+import br.com.empresa.reunioes.web.colaborador.dto.ColaboradorDTO;
+import br.com.empresa.reunioes.web.colaborador.dto.request.ColaboradorPatchRequest;
+import br.com.empresa.reunioes.web.colaborador.dto.request.ColaboradorRequest;
+import br.com.empresa.reunioes.web.colaborador.mapper.ColaboradorWebMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import static br.com.empresa.reunioes.web.colaborador.mapper.ColaboradorWebMapper.colaboradorToDTO;
+
+@RestController
+@RequestMapping("/api/reunioes/colaboradores")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "${app.cors.allowed-origins}")
+@Tag(name = "Colaboradores", description = "CRUD de colaboradores")
+public class ColaboradorController {
+
+    private final ColaboradorService service;
+
+    @Operation(summary = "Cria um colaborador",
+            description = "A senha é gravada na entidade, mas nunca volta na resposta.")
+    @ApiResponse(responseCode = "201", description = "Colaborador criado")
+    @ApiResponse(responseCode = "400", description = "Campos obrigatórios ausentes ou inválidos")
+    @PostMapping()
+    public ResponseEntity<ColaboradorDTO> salvar(@Valid @RequestBody ColaboradorRequest request) {
+
+        Colaborador colaborador = this.service.salvar(request);
+        ColaboradorDTO dto = colaboradorToDTO(colaborador);
+
+        return new ResponseEntity<>(dto, HttpStatus.CREATED);
+    }
+
+    @Operation(summary = "Lista colaboradores paginados",
+            description = "Devolve o envelope padrão com content, page, size, totalElements e totalPages.")
+    @ApiResponse(responseCode = "200", description = "Página de colaboradores devolvida")
+    @GetMapping()
+    public ResponseEntity<Page<ColaboradorDTO>> listar(Pageable paginacao) {
+
+        Page<ColaboradorDTO> listagemDTO = service.listar(paginacao)
+                .map(ColaboradorWebMapper::colaboradorToDTO);
+
+        return ResponseEntity.ok(listagemDTO);
+    }
+
+    @Operation(summary = "Busca um colaborador pelo id")
+    @ApiResponse(responseCode = "200", description = "Colaborador encontrado")
+    @ApiResponse(responseCode = "404", description = "Nenhum colaborador com esse id")
+    @GetMapping("/{id}")
+    public ResponseEntity<ColaboradorDTO> buscarPorId(@PathVariable Long id) {
+        Colaborador colaborador = service.buscarPorId(id);
+        ColaboradorDTO dto = colaboradorToDTO(colaborador);
+
+        return ResponseEntity.ok(dto);
+    }
+
+    @Operation(summary = "Busca um colaborador pelo email")
+    @ApiResponse(responseCode = "200", description = "Colaborador encontrado")
+    @ApiResponse(responseCode = "404", description = "Nenhum colaborador com esse email")
+    @GetMapping("/email/{email}")
+    public ResponseEntity<ColaboradorDTO> buscarPorEmail(@PathVariable String email) {
+        Colaborador colaborador = service.buscarPorEmail(email);
+        ColaboradorDTO dto = colaboradorToDTO(colaborador);
+
+        return ResponseEntity.ok(dto);
+    }
+
+    @Operation(summary = "Substitui um colaborador por completo")
+    @ApiResponse(responseCode = "202", description = "Colaborador atualizado")
+    @ApiResponse(responseCode = "400", description = "Campos obrigatórios ausentes ou inválidos")
+    @ApiResponse(responseCode = "404", description = "Nenhum colaborador com esse id")
+    @PutMapping("/{id}")
+    public ResponseEntity<ColaboradorDTO> atualizar(@PathVariable Long id, @Valid @RequestBody ColaboradorRequest request) {
+        Colaborador colaborador = service.atualizar(id, request);
+        ColaboradorDTO dto = colaboradorToDTO(colaborador);
+
+        return new ResponseEntity<>(dto, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Atualiza parcialmente um colaborador",
+            description = "Campo ausente ou nulo é ignorado — só o que vier no corpo é alterado. "
+                    + "O campo que vier preenchido não pode ser vazio.")
+    @ApiResponse(responseCode = "202", description = "Colaborador atualizado")
+    @ApiResponse(responseCode = "400", description = "Campo enviado veio vazio")
+    @ApiResponse(responseCode = "404", description = "Nenhum colaborador com esse id")
+    @PatchMapping("/{id}")
+    public ResponseEntity<ColaboradorDTO> atualizarParcial(@PathVariable Long id,
+                                                           @Valid @RequestBody ColaboradorPatchRequest request) {
+
+        Colaborador colaborador = service.atualizarParcial(id, request);
+        ColaboradorDTO dto = colaboradorToDTO(colaborador);
+
+        return new ResponseEntity<>(dto, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Exclui um colaborador")
+    @ApiResponse(responseCode = "204", description = "Colaborador excluído")
+    @ApiResponse(responseCode = "404", description = "Nenhum colaborador com esse id")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+
+        this.service.deletar(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
+}

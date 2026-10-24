@@ -1,5 +1,8 @@
 package br.com.empresa.reunioes.web.exception;
 
+import br.com.empresa.reunioes.domain.exception.EmailCadastradoExistenteException;
+import br.com.empresa.reunioes.domain.exception.RecursoNaoEncontradoException;
+import br.com.empresa.reunioes.domain.exception.RelatorioIndisponivelException;
 import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -124,7 +127,7 @@ public class RestExceptionHandler {
     /**
      * A API externa de feriados falhou ou demorou demais. Isso e problema de
      * terceiro, nao do cliente: devolve 503, nao 500, e o servico segue de pe
-     * para todo o resto.
+     * para o restante.
      */
     @ExceptionHandler(FeignException.class)
     public ProblemDetail tratarApiExterna(FeignException e) {

@@ -1,0 +1,187 @@
+package br.com.empresa.reunioes.application.colaborador;
+
+import br.com.empresa.reunioes.domain.entity.Colaborador;
+import br.com.empresa.reunioes.domain.repository.ColaboradorRepository;
+import br.com.empresa.reunioes.web.colaborador.dto.request.ColaboradorPatchRequest;
+import br.com.empresa.reunioes.web.colaborador.dto.request.ColaboradorRequest;
+import br.com.empresa.reunioes.domain.exception.EmailCadastradoExistenteException;
+import br.com.empresa.reunioes.domain.exception.RecursoNaoEncontradoException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import static br.com.empresa.reunioes.application.colaborador.mapper.ColaboradorMapper.*;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class ColaboradorService {
+
+    private final ColaboradorRepository colaboradorRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
+    private static final String EMAIL_EXISTENTE = "Este e-mail já existe, cadastre outro.";
+
+    /**
+     * Cada método público devolve ENTIDADE.
+     */
+
+    @Transactional
+    public Colaborador salvar(ColaboradorRequest request) {
+        log.info("Iniciando processo de salvar colaborador.");
+
+        Colaborador colaborador = colaboradorToEntity(request);
+        log.debug("Requisição convertida para entidade.");
+
+        log.debug("Verificando se o e-mail já está cadastrado.");
+        boolean existe = colaboradorRepository.existsByEmail(colaborador.getEmail());
+
+        if (existe) {
+            log.warn("Tentativa de cadastro com e-mail já existente.");
+            throw new EmailCadastradoExistenteException(EMAIL_EXISTENTE);
+        }
+
+        colaborador.setSenha(passwordEncoder.encode(colaborador.getSenha()));
+        log.debug("Senha do colaborador criptografada.");
+
+        Colaborador colaboradorSalvo = colaboradorRepository.save(colaborador);
+
+        log.info("Colaborador salvo com sucesso: id={}", colaboradorSalvo.getId());
+
+        return colaboradorSalvo;
+    }
+
+    public Colaborador buscarPorId(Long id) {
+        log.debug("Buscando colaborador por id={}", id);
+
+        Colaborador colaboradorEncontrado = colaboradorRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException(
+                        "Colaborador não encontrado com ID: " + id
+                ));
+
+        log.debug("Colaborador encontrado: id={}", id);
+
+        return colaboradorEncontrado;
+    }
+
+    public Colaborador buscarPorEmail(String email) {
+        log.info("Iniciando busca do colaborador pelo e-mail.");
+
+        log.debug("Verificando se existe colaborador com o e-mail informado.");
+        Colaborador colaboradorEncontrado = colaboradorRepository.findByEmail(email);
+
+        if (colaboradorEncontrado == null) {
+            throw new RecursoNaoEncontradoException(
+                    "Colaborador com e-mail " + email + " não encontrado"
+            );
+        }
+
+        log.debug("Colaborador encontrado pelo e-mail.");
+
+        return colaboradorEncontrado;
+    }
+
+    public Page<Colaborador> listar(Pageable paginacao) {
+        log.info("Iniciando listagem paginada de colaboradores.");
+
+        Page<Colaborador> listaPaginada =
+                colaboradorRepository.findAll(paginacao);
+
+        log.debug(
+                "Listagem de colaboradores concluída. Total encontrado: {}",
+                listaPaginada.getTotalElements()
+        );
+
+        return listaPaginada;
+    }
+
+    @Transactional
+    public Colaborador atualizar(Long id, ColaboradorRequest request) {
+        log.info("Iniciando atualização do colaborador: id={}", id);
+
+        Colaborador colaborador = buscarPorId(id);
+
+        log.debug("Verificando se o novo e-mail já está cadastrado.");
+
+        boolean emailAlterado = !request.email().equals(colaborador.getEmail());
+
+        if (emailAlterado
+                && colaboradorRepository.existsByEmail(request.email())) {
+            log.warn("Tentativa de alteração para e-mail já existente: id={}", id);
+            throw new EmailCadastradoExistenteException(EMAIL_EXISTENTE);
+        }
+
+        log.debug("Atualizando colaborador: id={}", id);
+        colaborador.setNome(request.nome());
+        colaborador.setEmail(request.email());
+        colaborador.setSenha(passwordEncoder.encode(request.senha()));
+        colaborador.setPapel(request.papel());
+        colaborador.setMonitorarReunioes(request.monitorarReunioes());
+        colaborador.setDataCadastro(request.dataCadastro());
+
+        Colaborador colaboradorAtualizado =
+                colaboradorRepository.save(colaborador);
+
+        log.info("Colaborador atualizado com sucesso: id={}", id);
+
+        return colaboradorAtualizado;
+    }
+
+    @Transactional
+    public Colaborador atualizarParcial(Long id, ColaboradorPatchRequest request) {
+        log.info("Iniciando atualização parcial do colaborador: id={}", id);
+
+        Colaborador colaborador = buscarPorId(id);
+
+        if (request.email() != null) {
+            log.debug("Verificando se o novo e-mail já está cadastrado.");
+
+            boolean emailAlterado = !request.email().equals(colaborador.getEmail());
+
+            if (emailAlterado
+                    && colaboradorRepository.existsByEmail(request.email())) {
+                log.warn(
+                        "Tentativa de alteração para e-mail já existente: id={}",
+                        id
+                );
+                throw new EmailCadastradoExistenteException(EMAIL_EXISTENTE);
+            }
+        }
+
+        log.debug("Atualizando parcialmente o colaborador: id={}", id);
+
+        if (request.nome() != null)
+            colaborador.setNome(request.nome());
+        if (request.email() != null)
+            colaborador.setEmail(request.email());
+        if (request.senha() != null)
+            colaborador.setSenha(passwordEncoder.encode(request.senha()));
+        if (request.papel() != null)
+            colaborador.setPapel(request.papel());
+        if (request.monitorarReunioes() != null)
+            colaborador.setMonitorarReunioes(request.monitorarReunioes());
+        if (request.dataCadastro() != null)
+            colaborador.setDataCadastro(request.dataCadastro());
+
+        Colaborador colaboradorAtualizado =
+                colaboradorRepository.save(colaborador);
+
+        log.info("Colaborador atualizado parcialmente com sucesso: id={}", id);
+
+        return colaboradorAtualizado;
+    }
+
+    @Transactional
+    public void deletar(Long id) {
+        log.info("Iniciando processo de remoção do colaborador: id={}", id);
+
+        Colaborador colaborador = buscarPorId(id);
+
+        colaboradorRepository.delete(colaborador);
+
+        log.info("Colaborador removido com sucesso: id={}", id);
+    }
+}

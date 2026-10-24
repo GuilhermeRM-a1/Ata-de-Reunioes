@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -49,7 +50,7 @@ public class Reuniao {
     @JoinTable(name = "reuniao_participantes",
             joinColumns = @JoinColumn(name = "reuniao_id"),
             inverseJoinColumns = @JoinColumn(name = "participantes_id"))
-    private List<Colaborador> participantes;
+    private List<Colaborador> participantes = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(name = "reuniao_areas", joinColumns = @JoinColumn(name = "reuniao_id"))
@@ -63,7 +64,7 @@ public class Reuniao {
 
     /** Lado inverso: a coluna reuniao_id mora na tabela acao. */
     @OneToMany(mappedBy = "reuniao", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Acao> acoes;
+    private List<Acao> acoes = new ArrayList<>();
 
     @Column(name = "total_acoes")
     private Integer totalAcoes;
