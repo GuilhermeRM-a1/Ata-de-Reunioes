@@ -114,7 +114,9 @@ class IngestaoServiceTest {
         when(reuniaoService.buscarPorId(99L))
                 .thenThrow(new RecursoNaoEncontradoException("Reunião não encontrada."));
 
-        assertThatThrownBy(() -> ingestaoService.receberAnalise(99L, new ReuniaoResumoRequest("Resumo", null)))
+        var request = new ReuniaoResumoRequest("Resumo", null);
+
+        assertThatThrownBy(() -> ingestaoService.receberAnalise(99L, request))
                 .isInstanceOf(RecursoNaoEncontradoException.class);
 
         verify(reuniaoRepository, never()).save(any());
