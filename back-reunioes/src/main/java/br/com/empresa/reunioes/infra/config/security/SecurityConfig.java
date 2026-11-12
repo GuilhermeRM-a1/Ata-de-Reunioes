@@ -1,4 +1,4 @@
-package br.com.empresa.reunioes.infra.config;
+package br.com.empresa.reunioes.infra.config.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -6,6 +6,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Configuration
 public class SecurityConfig {
+
+    // configurar
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {

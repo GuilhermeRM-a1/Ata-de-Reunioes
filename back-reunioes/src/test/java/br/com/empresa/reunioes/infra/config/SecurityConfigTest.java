@@ -1,5 +1,6 @@
 package br.com.empresa.reunioes.infra.config;
 
+import br.com.empresa.reunioes.infra.config.security.SecurityConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
