@@ -14,8 +14,6 @@ import java.time.temporal.ChronoUnit;
 @Service
 public class JwtService {
 
-    private static final long EXPIRACAO_HORAS = 8;
-
     private final Algorithm algorithm;
     private final String issuer;
 
@@ -36,7 +34,7 @@ public class JwtService {
                 .withSubject(String.valueOf(colaborador.getId()))
                 .withClaim("id", colaborador.getId())
                 .withClaim("papel", colaborador.getPapel().name())
-                .withExpiresAt(Instant.now().plus(EXPIRACAO_HORAS, ChronoUnit.HOURS))
+                .withExpiresAt(Instant.now().plus(8, ChronoUnit.HOURS))
                 .sign(algorithm);
     }
 

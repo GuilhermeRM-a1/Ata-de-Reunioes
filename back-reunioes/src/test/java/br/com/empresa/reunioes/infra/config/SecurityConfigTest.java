@@ -1,5 +1,6 @@
 package br.com.empresa.reunioes.infra.config;
 
+import br.com.empresa.reunioes.infra.config.security.CryptPassConfig;
 import br.com.empresa.reunioes.infra.config.security.SecurityConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -15,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Executa o metodo mapeado com Bean
  * Autowired indica aonde injetar o resultado da execução
  */
-@SpringJUnitConfig(SecurityConfig.class)
+@SpringJUnitConfig(CryptPassConfig.class)
 @DisplayName("Configuração de segurança")
 class SecurityConfigTest {
 
