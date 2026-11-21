@@ -33,7 +33,6 @@ import static br.com.empresa.reunioes.web.reuniao.mapper.ReuniaoWebMapper.reunia
 
 @RestController
 @RequiredArgsConstructor
-@CrossOrigin(origins = "${app.cors.allowed-origins}")
 @RequestMapping("/api/reunioes")
 @Tag(name = "Reuniões", description = "CRUD de reuniões e suas ações")
 public class ReuniaoController {
