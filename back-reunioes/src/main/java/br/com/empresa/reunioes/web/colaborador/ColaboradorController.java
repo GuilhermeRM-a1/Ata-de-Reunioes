@@ -22,7 +22,6 @@ import static br.com.empresa.reunioes.web.colaborador.mapper.ColaboradorWebMappe
 @RestController
 @RequestMapping("/api/reunioes/colaboradores")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "${app.cors.allowed-origins}")
 @Tag(name = "Colaboradores", description = "CRUD de colaboradores")
 public class ColaboradorController {
 

@@ -24,7 +24,6 @@ import static br.com.empresa.reunioes.web.acao.mapper.AcaoWebMapper.acaoToDTO;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/reunioes/acoes")
-@CrossOrigin(origins = "${app.cors.allowed-origins}")
 @Tag(name = "Ações", description = "CRUD de ações")
 public class AcaoController {
 
