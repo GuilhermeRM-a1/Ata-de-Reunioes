@@ -1,9 +1,8 @@
 import { Routes } from '@angular/router';
+import { adminGuard } from './core/guards/admin.guard';
+import { authGuard } from './core/guards/auth.guard';
+import { loginGuard } from './core/guards/login.guard';
 
-/**
- * Rotas unificadas. Nao existe mais prefixo /admin nem /usuario:
- * a mesma tela atende os dois perfis e o AuthService decide o que aparece.
- */
 export const routes: Routes = [
   {
     path: '',
@@ -12,11 +11,13 @@ export const routes: Routes = [
   },
   {
     path: 'login',
+    canActivate: [loginGuard],
     loadComponent: () =>
       import('./features/login/pages/login/login.component').then(m => m.LoginComponent)
   },
   {
     path: '',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./layout/shell/shell.component').then(m => m.ShellComponent),
     children: [
@@ -27,6 +28,7 @@ export const routes: Routes = [
       },
       {
         path: 'reunioes/novo',
+        canActivate: [adminGuard],
         loadComponent: () =>
           import('./features/reunioes/pages/reuniao-form/reuniao-form.component').then(m => m.ReuniaoFormComponent)
       },
@@ -37,6 +39,7 @@ export const routes: Routes = [
       },
       {
         path: 'reunioes/:id/editar',
+        canActivate: [adminGuard],
         loadComponent: () =>
           import('./features/reunioes/pages/reuniao-form/reuniao-form.component').then(m => m.ReuniaoFormComponent)
       },
@@ -47,11 +50,10 @@ export const routes: Routes = [
       },
       {
         path: 'colaboradores',
+        canActivate: [adminGuard],
         loadComponent: () =>
           import('./features/colaboradores/pages/colaboradores/colaboradores.component').then(m => m.ColaboradoresComponent)
       },
-
-      // Caminhos antigos: mantidos como redirect para nao quebrar link salvo.
       { path: 'admin/reunioes', redirectTo: 'reunioes', pathMatch: 'full' },
       { path: 'admin/reunioes/novo', redirectTo: 'reunioes/novo', pathMatch: 'full' },
       { path: 'admin/reunioes/:id', redirectTo: 'reunioes/:id', pathMatch: 'full' },
