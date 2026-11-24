@@ -1,7 +1,5 @@
-package br.com.empresa.reunioes.infra.config;
+package br.com.empresa.reunioes.infra.config.security;
 
-import br.com.empresa.reunioes.infra.config.security.CryptPassConfig;
-import br.com.empresa.reunioes.infra.config.security.SecurityConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

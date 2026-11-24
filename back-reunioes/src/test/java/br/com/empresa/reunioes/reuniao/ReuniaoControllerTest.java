@@ -9,8 +9,9 @@ import br.com.empresa.reunioes.domain.enums.StatusReuniao;
 import br.com.empresa.reunioes.domain.enums.StatusTranscricao;
 import br.com.empresa.reunioes.domain.exception.RecursoNaoEncontradoException;
 import br.com.empresa.reunioes.domain.exception.RelatorioIndisponivelException;
+import br.com.empresa.reunioes.infra.client.dto.FeriadoClientResponse;
+import br.com.empresa.reunioes.infra.config.security.SecurityFilter;
 import br.com.empresa.reunioes.web.reuniao.ReuniaoController;
-import br.com.empresa.reunioes.web.reuniao.dto.ReuniaoFeriadoDTO;
 import br.com.empresa.reunioes.web.reuniao.dto.request.ReuniaoPatchRequest;
 import br.com.empresa.reunioes.web.reuniao.dto.request.ReuniaoRequest;
 import br.com.empresa.reunioes.web.reuniao.dto.request.ReuniaoResumoRequest;
@@ -19,7 +20,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -30,6 +34,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.endsWith;
@@ -50,7 +55,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(ReuniaoController.class)
+@WebMvcTest(controllers = ReuniaoController.class,
+        excludeFilters = @ComponentScan.Filter(
+                type = FilterType.ASSIGNABLE_TYPE, classes = SecurityFilter.class))
+@AutoConfigureMockMvc(addFilters = false)
 @DisplayName("Controller de reuniões")
 class ReuniaoControllerTest {
 
@@ -480,9 +488,11 @@ class ReuniaoControllerTest {
         @DisplayName("Dada reunião em feriado, quando verificar, então retorna 200 com os dados do feriado")
         void reuniaoEmFeriado_deveDevolverFeriadoEncontrado() throws Exception {
 
-            when(feriadoService.verificarReuniao(1L))
-                    .thenReturn(ReuniaoFeriadoDTO.emFeriado(
-                            1L, TITULO, "2026-12-25", "Natal", "sexta-feira"));
+            var reuniao = criarReuniao();
+            reuniao.setData("2026-12-25");
+            when(reuniaoService.buscarPorId(1L)).thenReturn(reuniao);
+            when(feriadoService.buscarPorData("2026-12-25")).thenReturn(Optional.of(
+                    new FeriadoClientResponse("2026-12-25", "Natal", "national", "sexta-feira")));
 
 
             ResultActions resposta = mockMvc.perform(get(URL_FERIADO, 1L));
@@ -490,35 +500,36 @@ class ReuniaoControllerTest {
 
             resposta.andExpect(status().isOk())
                     .andExpect(jsonPath("$.reuniaoId").value(1))
+                    .andExpect(jsonPath("$.titulo").value(TITULO))
                     .andExpect(jsonPath("$.feriado").value(true))
                     .andExpect(jsonPath("$.nomeFeriado").value("Natal"))
                     .andExpect(jsonPath("$.diaSemana").value("sexta-feira"));
-
-            verify(feriadoService).verificarReuniao(1L);
         }
 
         @Test
-        @DisplayName("Dado que o service não encontra feriado, quando verificar, então retorna 200 sem corpo")
-        void semFeriado_deveRetornarOkSemCorpo() throws Exception {
+        @DisplayName("Dada reunião em dia comum, quando verificar, então retorna 200 com feriado falso")
+        void reuniaoEmDiaComum_deveDevolverFeriadoFalso() throws Exception {
 
-            when(feriadoService.verificarReuniao(1L)).thenReturn(null);
+            when(reuniaoService.buscarPorId(1L)).thenReturn(criarReuniao());
+            when(feriadoService.buscarPorData(any())).thenReturn(Optional.empty());
 
 
             ResultActions resposta = mockMvc.perform(get(URL_FERIADO, 1L));
 
 
             resposta.andExpect(status().isOk())
-                    .andExpect(content().string(""));
-
-            verify(feriadoService).verificarReuniao(1L);
+                    .andExpect(jsonPath("$.reuniaoId").value(1))
+                    .andExpect(jsonPath("$.feriado").value(false))
+                    .andExpect(jsonPath("$.nomeFeriado").doesNotExist());
         }
 
         @Test
         @DisplayName("Dada reunião sem data reconhecível, quando verificar, então retorna 404 com o motivo")
         void reuniaoSemDataValida_deveRetornarNotFound() throws Exception {
 
-            String detalhe = "A reunião 1 não tem data em formato reconhecível (aaaa-MM-dd)";
-            when(feriadoService.verificarReuniao(1L))
+            String detalhe = "A data não está em formato reconhecível (aaaa-MM-dd): xx";
+            when(reuniaoService.buscarPorId(1L)).thenReturn(criarReuniao());
+            when(feriadoService.buscarPorData(any()))
                     .thenThrow(new RecursoNaoEncontradoException(detalhe));
 
 
@@ -527,6 +538,23 @@ class ReuniaoControllerTest {
 
             resposta.andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.detail").value(detalhe));
+        }
+
+        @Test
+        @DisplayName("Dada data avulsa em feriado, quando verificar, então retorna 200 sem id de reunião")
+        void dataAvulsaEmFeriado_deveDevolverFeriado() throws Exception {
+
+            when(feriadoService.buscarPorData("2026-12-25")).thenReturn(Optional.of(
+                    new FeriadoClientResponse("2026-12-25", "Natal", "national", "sexta-feira")));
+
+
+            ResultActions resposta = mockMvc.perform(get(URL_BASE + "/feriados").param("data", "2026-12-25"));
+
+
+            resposta.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.feriado").value(true))
+                    .andExpect(jsonPath("$.nomeFeriado").value("Natal"))
+                    .andExpect(jsonPath("$.reuniaoId").doesNotExist());
         }
     }
 
