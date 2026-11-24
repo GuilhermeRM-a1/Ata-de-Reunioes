@@ -1,22 +1,21 @@
 package br.com.empresa.reunioes.application.reuniao;
 
-import br.com.empresa.reunioes.domain.entity.Reuniao;
+import br.com.empresa.reunioes.domain.exception.RecursoNaoEncontradoException;
 import br.com.empresa.reunioes.infra.client.FeriadoClient;
 import br.com.empresa.reunioes.infra.client.dto.FeriadoClientResponse;
-import br.com.empresa.reunioes.web.reuniao.dto.ReuniaoFeriadoDTO;
-import br.com.empresa.reunioes.domain.exception.RecursoNaoEncontradoException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
- * Cruza a data da reuniao com o calendario nacional de feriados, que vem de
- * uma API externa consumida por Feign.
+ * Cruza uma data com o calendario nacional de feriados, que vem de uma API
+ * externa consumida por Feign.
  *
- * Serve para o operador perceber que marcou reuniao em feriado — que e uma das
- * inconsistencias que a proposta do projeto pede para o sistema apontar.
+ * Devolve so o feriado encontrado (ou vazio, se for dia comum). Montar a
+ * resposta da API e trabalho do controller.
  */
 @Slf4j
 @Service
@@ -24,21 +23,21 @@ import java.util.List;
 public class FeriadoService {
 
     private final FeriadoClient feriadoClient;
-    private final ReuniaoService reuniaoService;
 
-    public ReuniaoFeriadoDTO verificarReuniao(Long reuniaoId) {
-        log.info("Verificando se a reunião {} caiu em feriado.", reuniaoId);
+    /**
+     * Aceita "2026-06-02" ou "2026-06-02T09:00:00". Lanca
+     * RecursoNaoEncontradoException se a data nao tiver formato reconhecivel.
+     */
+    public Optional<FeriadoClientResponse> buscarPorData(String data) {
+        log.info("Verificando se a data {} cai em feriado.", data);
 
-        Reuniao reuniao = reuniaoService.buscarPorId(reuniaoId);
-
-        String dia = extrairDia(reuniao.getData());
+        String dia = extrairDia(data);
 
         if (dia == null) {
-            log.warn("Reunião {} está sem data ou com data em formato inesperado: {}",
-                    reuniaoId, reuniao.getData());
+            log.warn("Data em formato inesperado: {}", data);
 
             throw new RecursoNaoEncontradoException(
-                    "A reunião " + reuniaoId + " não tem data em formato reconhecível (aaaa-MM-dd)");
+                    "A data não está em formato reconhecível (aaaa-MM-dd): " + data);
         }
 
         int ano = Integer.parseInt(dia.substring(0, 4));
@@ -49,22 +48,12 @@ public class FeriadoService {
 
         return feriados.stream()
                 .filter(f -> dia.equals(f.date()))
-                .findFirst()
-                .map(f -> {
-                    log.info("Reunião {} caiu no feriado de {}.", reuniaoId, f.name());
-                    return ReuniaoFeriadoDTO.emFeriado(
-                            reuniao.getId(), reuniao.getTitulo(), dia, f.name(), f.weekday());
-                })
-                .orElseGet(() -> {
-                    log.info("Reunião {} não caiu em feriado.", reuniaoId);
-                    return ReuniaoFeriadoDTO.diaComum(reuniao.getId(), reuniao.getTitulo(), dia);
-                });
+                .findFirst();
     }
 
     /**
-     * A data da reuniao e String livre. Aceita tanto "2026-06-02" quanto
-     * "2026-06-02T09:00:00", e devolve null no que nao reconhecer — nunca
-     * estoura, porque o campo nao tem validacao de formato no banco.
+     * A data da reuniao e String livre, sem validacao de formato no banco.
+     * Devolve null no que nao reconhecer, nunca estoura.
      */
     private String extrairDia(String data) {
 

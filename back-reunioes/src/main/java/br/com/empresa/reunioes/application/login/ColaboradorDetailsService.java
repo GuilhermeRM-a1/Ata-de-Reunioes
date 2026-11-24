@@ -8,6 +8,13 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+/**
+ * Ensina o Spring Security a achar um usuario pelo email.
+ *
+ * O Colaborador ja implementa UserDetails, entao nao ha conversao: o proprio
+ * registro do banco e devolvido. O AuthenticationManager usa este service,
+ * junto com o BCryptPasswordEncoder, para conferir email e senha no login.
+ */
 @Service
 @RequiredArgsConstructor
 public class ColaboradorDetailsService implements UserDetailsService {

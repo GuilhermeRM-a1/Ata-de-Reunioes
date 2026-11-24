@@ -10,8 +10,6 @@ spring:
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
 
-
-
   jpa:
     # validate: o Hibernate so confere se as entidades batem com o banco.
     # Quem cria tabela e o Flyway, nunca o Hibernate.
@@ -28,11 +26,15 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
-    api:
-      security:
-        token:
-          secret: ${JWT_SECRET}
-          issuer: reunioes-api
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            # Timeout curto: a consulta de feriado nao pode segurar a requisicao do usuario
+            # se a API de terceiro estiver lenta.
+            connectTimeout: 3000
+            readTimeout: 5000
 
 server:
   port: 8080
@@ -50,20 +52,15 @@ logging:
   level:
     br.com.empresa.reunioes: DEBUG
 
-# API externa de feriados nacionais, consumida por Feign.
 api:
+  security:
+    token:
+      secret: ${JWT_SECRET}
+      issuer: reunioes-api
+  # API externa de feriados nacionais, consumida por Feign.
   feriados:
     url: https://brasilapi.com.br/api/feriados/v1
-
-# Timeout curto: a consulta de feriado nao pode segurar a requisicao do usuario
-# se a API de terceiro estiver lenta.
-spring.cloud.openfeign.client.config.default:
-  connectTimeout: 3000
-  readTimeout: 5000
 
 app:
   cors:
     allowed-origins: http://localhost:4200
-
-
-

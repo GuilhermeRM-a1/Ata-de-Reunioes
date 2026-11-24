@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.net.URI;
 
@@ -45,6 +46,7 @@ public class ReuniaoController {
     @Operation(summary = "Lista reuniões ",
             description = "Devolve o envelope padrão com content, page, size, totalElements e totalPages.")
     @ApiResponse(responseCode = "200", description = "Página de reuniões devolvida")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USUARIO')")
     @GetMapping()
     public ResponseEntity<Page<ReuniaoDTO>> listar(Pageable paginacao) {
         Page<ReuniaoDTO> listagemDTO = reuniaoService.listar(paginacao)
@@ -58,6 +60,7 @@ public class ReuniaoController {
     @ApiResponse(responseCode = "200", description = "Reunião encontrada")
     @ApiResponse(responseCode = "404", description = "Nenhuma reunião com esse id")
     @ApiResponse(responseCode = "400", description = "Id em formato inválido")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USUARIO')")
     @GetMapping("/{id}")
     public ResponseEntity<ReuniaoDTO> buscarPorId(@PathVariable Long id) {
         Reuniao reuniao = reuniaoService.buscarPorId(id);
@@ -71,6 +74,7 @@ public class ReuniaoController {
     @ApiResponse(responseCode = "201", description = "Reunião criada")
     @ApiResponse(responseCode = "400", description = "Campos obrigatórios ausentes ou inválidos")
     @ApiResponse(responseCode = "404", description = "Participante ou ação informada não existe")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping()
     public ResponseEntity<ReuniaoDTO> salvar(@Valid @RequestBody ReuniaoRequest request) {
         Reuniao reuniao = reuniaoService.salvar(request);
@@ -89,6 +93,7 @@ public class ReuniaoController {
     @ApiResponse(responseCode = "202", description = "Reunião atualizada")
     @ApiResponse(responseCode = "400", description = "Campos obrigatórios ausentes ou inválidos")
     @ApiResponse(responseCode = "404", description = "Nenhuma reunião com esse id")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<ReuniaoDTO> atualizar(@PathVariable Long id,
                                                 @Valid @RequestBody ReuniaoRequest request) {
@@ -105,6 +110,7 @@ public class ReuniaoController {
             description = "Campo ausente ou nulo é ignorado — só o que vier no corpo é alterado.")
     @ApiResponse(responseCode = "202", description = "Reunião atualizada")
     @ApiResponse(responseCode = "404", description = "Nenhuma reunião com esse id")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PatchMapping("/{id}")
     public ResponseEntity<ReuniaoDTO> atualizarParcial(@PathVariable Long id,
                                                        @Valid @RequestBody ReuniaoPatchRequest request) {
@@ -121,6 +127,7 @@ public class ReuniaoController {
     @ApiResponse(responseCode = "202", description = "Análise recebida e gravada")
     @ApiResponse(responseCode = "400", description = "Resumo executivo ausente ou vazio")
     @ApiResponse(responseCode = "404", description = "Nenhuma reunião com esse id")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PatchMapping("/{id}/ingestao")
     public ResponseEntity<ReuniaoDTO> receberAnalise(@PathVariable Long id,
                                                      @Valid @RequestBody ReuniaoResumoRequest request) {
@@ -137,11 +144,29 @@ public class ReuniaoController {
     @ApiResponse(responseCode = "200", description = "Relatório gerado")
     @ApiResponse(responseCode = "404", description = "Nenhuma reunião com esse id")
     @ApiResponse(responseCode = "409", description = "A reunião ainda não recebeu o resumo da IA")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USUARIO')")
     @GetMapping("/{id}/relatorio")
     public ResponseEntity<RelatorioReuniaoResponse> gerarRelatorio(@PathVariable Long id) {
         Reuniao reuniaoValidada = relatorioService.validarReuniaoParaRelatorio(id);
 
         return ResponseEntity.ok(montarRelatorio(reuniaoValidada));
+    }
+
+    @Operation(summary = "Verifica se uma data cai em feriado nacional",
+            description = "Usado pelo formulário de cadastro, antes de a reunião existir. "
+                    + "Recebe a data no formato aaaa-MM-dd e consulta a BrasilAPI.")
+    @ApiResponse(responseCode = "200", description = "Verificação concluída")
+    @ApiResponse(responseCode = "404", description = "Data em formato não reconhecido")
+    @ApiResponse(responseCode = "503", description = "A API externa de feriados está indisponível")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USUARIO')")
+    @GetMapping("/feriados")
+    public ResponseEntity<ReuniaoFeriadoDTO> verificarFeriadoPorData(@RequestParam String data) {
+
+        ReuniaoFeriadoDTO dto = feriadoService.buscarPorData(data)
+                .map(f -> ReuniaoFeriadoDTO.emFeriado(null, null, f.date(), f.name(), f.weekday()))
+                .orElseGet(() -> ReuniaoFeriadoDTO.diaComum(null, null, data));
+
+        return ResponseEntity.ok(dto);
     }
 
     @Operation(summary = "Verifica se a reunião caiu em feriado nacional",
@@ -150,15 +175,25 @@ public class ReuniaoController {
     @ApiResponse(responseCode = "200", description = "Verificação concluída")
     @ApiResponse(responseCode = "404", description = "Nenhuma reunião com esse id, ou reunião sem data válida")
     @ApiResponse(responseCode = "503", description = "A API externa de feriados está indisponível")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USUARIO')")
     @GetMapping("/{id}/feriado")
     public ResponseEntity<ReuniaoFeriadoDTO> verificarFeriado(@PathVariable Long id) {
 
-        return ResponseEntity.ok(feriadoService.verificarReuniao(id));
+        Reuniao reuniao = reuniaoService.buscarPorId(id);
+
+        ReuniaoFeriadoDTO dto = feriadoService.buscarPorData(reuniao.getData())
+                .map(f -> ReuniaoFeriadoDTO.emFeriado(
+                        reuniao.getId(), reuniao.getTitulo(), f.date(), f.name(), f.weekday()))
+                .orElseGet(() -> ReuniaoFeriadoDTO.diaComum(
+                        reuniao.getId(), reuniao.getTitulo(), reuniao.getData()));
+
+        return ResponseEntity.ok(dto);
     }
 
     @Operation(summary = "Exclui uma reunião")
     @ApiResponse(responseCode = "204", description = "Reunião excluída")
     @ApiResponse(responseCode = "404", description = "Nenhuma reunião com esse id")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
 
