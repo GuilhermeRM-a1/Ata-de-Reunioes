@@ -21,7 +21,6 @@ import { AcaoRequestPayload, Colaborador, ReuniaoApiDTO, ReuniaoApiRequest } fro
   styleUrl: './reuniao-form.component.scss'
 })
 export class ReuniaoFormComponent implements OnInit {
-  // publico de proposito: o template le auth.isAdmin
   readonly auth = inject(AuthService);
 
   private readonly fb = inject(FormBuilder);
@@ -36,8 +35,9 @@ export class ReuniaoFormComponent implements OnInit {
   readonly idNaoEncontrado = signal(false);
   readonly salvando = signal(false);
 
-  /** Alimenta o select de responsavel de cada acao. */
   readonly colaboradores = signal<Colaborador[]>([]);
+
+  private readonly acoesOriginais = new Map<number, Omit<AcaoRequestPayload, 'responsavel'>>();
 
   readonly form: FormGroup = this.fb.group({
     tituloReuniao: ['', [Validators.required, Validators.minLength(5)]],
@@ -53,14 +53,11 @@ export class ReuniaoFormComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    // a tela de cadastro e de edicao e so do admin; usuario comum volta para a listagem
     if (!this.auth.isAdmin) {
       this.router.navigate(['/reunioes']);
       return;
     }
 
-    // os colaboradores vem antes da reuniao porque o responsavel de uma acao
-    // ja salva volta da API como nome e precisa ser reconvertido em id
     this.colaboradorService.listar().subscribe({
       next: lista => {
         this.colaboradores.set(lista ?? []);
@@ -108,7 +105,18 @@ export class ReuniaoFormComponent implements OnInit {
         });
 
         for (const acao of reuniao.acoes ?? []) {
-          // o id marca a acao que ja existe no banco: ela nao pode ser recriada
+          const concluida = !!acao.concluida;
+
+          if (acao.id !== null && acao.id !== undefined) {
+            this.acoesOriginais.set(Number(acao.id), {
+              titulo: acao.titulo ?? '',
+              descricao: acao.descricao ?? '',
+              tipo: acao.tipo,
+              prazo: acao.prazo ?? null,
+              concluida
+            });
+          }
+
           this.acoes.push(
             this.fb.group({
               id: [acao.id ?? null],
@@ -116,6 +124,7 @@ export class ReuniaoFormComponent implements OnInit {
               descricao: [acao.descricao, Validators.required],
               tipo: [acao.tipo, Validators.required],
               prazo: [acao.prazo],
+              concluida: [concluida],
               responsavel: [this.idDoPrimeiroResponsavel(acao.responsavel)]
             })
           );
@@ -137,6 +146,7 @@ export class ReuniaoFormComponent implements OnInit {
         descricao: ['', Validators.required],
         tipo: ['ACAO', Validators.required],
         prazo: [null],
+        concluida: [false],
         responsavel: [null]
       })
     );
@@ -157,14 +167,23 @@ export class ReuniaoFormComponent implements OnInit {
     const bruto = this.form.value;
     const grupos: any[] = bruto.acoes ?? [];
 
-    // a acao so pode ser criada debaixo de uma reuniao que ja existe, entao o
-    // corpo da reuniao leva apenas os ids das acoes que ja estao no banco
     const acoesExistentes = grupos
       .filter(a => a.id !== null && a.id !== undefined && a.id !== '')
       .map(a => Number(a.id))
       .filter(id => !isNaN(id));
 
     const acoesNovas = grupos.filter(a => a.id === null || a.id === undefined || a.id === '');
+
+    const acoesComStatusAlterado = grupos.flatMap(grupo => {
+      if (grupo.id === null || grupo.id === undefined || grupo.id === '') return [];
+
+      const original = this.acoesOriginais.get(Number(grupo.id));
+      const concluida = !!grupo.concluida;
+
+      if (!original || original.concluida === concluida) return [];
+
+      return [{ id: String(grupo.id), titulo: original.titulo, payload: { ...original, concluida } }];
+    });
 
     const dados: ReuniaoApiRequest = {
       titulo: bruto.tituloReuniao,
@@ -189,18 +208,29 @@ export class ReuniaoFormComponent implements OnInit {
         switchMap(reuniao => {
           const reuniaoId = reuniao?.id ?? id;
 
-          // forkJoin([]) completa sem emitir: sem acao nova, nem entra no passo 2
-          if (!reuniaoId || acoesNovas.length === 0) return of<string[]>([]);
-
-          return forkJoin(
-            acoesNovas.map(acao =>
-              this.acaoService.criar(reuniaoId, this.paraPayloadDeAcao(acao)).pipe(
-                map(() => null),
-                // uma acao que falha nao derruba as outras nem apaga a reuniao ja salva
-                catchError(() => of(acao.titulo || acao.descricao || 'sem título'))
+          const criacoes: Observable<string | null>[] = reuniaoId
+            ? acoesNovas.map(acao =>
+                this.acaoService.criar(reuniaoId, this.paraPayloadDeAcao(acao)).pipe(
+                  map(() => null),
+                  catchError(() => of(acao.titulo || acao.descricao || 'sem título'))
+                )
               )
+            : [];
+
+          const atualizacoes: Observable<string | null>[] = acoesComStatusAlterado.map(item =>
+            this.acaoService.atualizarParcial(item.id, item.payload).pipe(
+              map(() => null),
+              catchError(() => of(item.titulo || 'sem título'))
             )
-          ).pipe(map(resultados => resultados.filter((t): t is string => !!t)));
+          );
+
+          const chamadas = [...criacoes, ...atualizacoes];
+
+          if (chamadas.length === 0) return of<string[]>([]);
+
+          return forkJoin(chamadas).pipe(
+            map(resultados => resultados.filter((t): t is string => !!t))
+          );
         })
       )
       .subscribe({
@@ -210,7 +240,7 @@ export class ReuniaoFormComponent implements OnInit {
           if (falhas.length > 0) {
             this.alerta.erro(
               id !== null ? 'Reunião atualizada com pendências' : 'Reunião criada com pendências',
-              `A reunião foi salva, mas não foi possível criar ${falhas.length === 1 ? 'a ação' : 'as ações'}: ${falhas.join(', ')}.`
+              `A reunião foi salva, mas não foi possível salvar ${falhas.length === 1 ? 'a ação' : 'as ações'}: ${falhas.join(', ')}.`
             );
           } else {
             this.alerta.sucesso(id !== null ? 'Reunião atualizada' : 'Reunião criada');
@@ -237,12 +267,11 @@ export class ReuniaoFormComponent implements OnInit {
       descricao: acao.descricao,
       tipo: acao.tipo,
       prazo: acao.prazo || null,
-      concluida: false,
+      concluida: !!acao.concluida,
       responsavel: acao.responsavel && !isNaN(responsavel) ? [responsavel] : []
     };
   }
 
-  /** O back devolve o responsavel como nome; o select trabalha com id. */
   private idDoPrimeiroResponsavel(responsavel: unknown): number | null {
     if (!Array.isArray(responsavel) || responsavel.length === 0) return null;
 
@@ -252,7 +281,6 @@ export class ReuniaoFormComponent implements OnInit {
     return encontrado?.id ?? null;
   }
 
-  /** O campo e texto livre, mas o back espera ids — nome desconhecido e descartado. */
   private idsDosParticipantes(texto: string): number[] {
     return this.textoParaLista(texto)
       .map(nome => {

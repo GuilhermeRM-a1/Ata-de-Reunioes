@@ -1,22 +1,17 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { MdbRippleModule } from 'mdb-angular-ui-kit/ripple';
-import { Router } from '@angular/router';
 import { Acao } from '../../../../core/models';
 import { AcaoService } from '../../../../core/services/acao.service';
 import { AlertaService } from '../../../../core/services/alerta.service';
 import { AuthService } from '../../../../core/services/auth.service';
 
-/**
- * Tela unica de acoes. Os controles de edicao e exclusao so aparecem
- * para ADMIN — e os metodos tambem barram quem nao e admin, porque
- * esconder o botao no template nao impede ninguem de chamar o metodo.
- */
 @Component({
   selector: 'app-acoes',
   standalone: true,
-  imports: [CommonModule, FormsModule, MdbRippleModule],
+  imports: [CommonModule, FormsModule, MdbRippleModule, RouterLink, RouterLinkActive],
   templateUrl: './acoes.component.html',
   styleUrls: ['./acoes.component.scss']
 })
@@ -25,32 +20,29 @@ export class AcoesComponent implements OnInit {
   private readonly acaoService = inject(AcaoService);
   private readonly alertaService = inject(AlertaService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
-  /** Publico de proposito: o template le `auth.isAdmin`. */
   readonly auth = inject(AuthService);
 
+  readonly exibeConcluidas = this.route.snapshot.data['status'] === 'concluidas';
+
   readonly carregando = signal(true);
-  readonly paginaAtual = signal(1);
-  readonly limite = signal(10);
 
   private readonly todasAcoes = signal<Acao[]>([]);
 
-  private readonly pendentes = computed(() =>
-    this.ordenarPorPrazo(this.todasAcoes().filter(a => !a.concluida))
+  readonly totalPendentes = computed(() =>
+    this.todasAcoes().filter(a => !a.concluida).length
   );
 
-  private readonly concluidas = computed(() =>
-    this.ordenarPorPrazo(this.todasAcoes().filter(a => a.concluida))
+  readonly totalConcluidas = computed(() =>
+    this.todasAcoes().filter(a => a.concluida).length
   );
 
-  readonly acoesPendentes = computed(() => this.fatiarPagina(this.pendentes()));
-  readonly acoesConcluidas = computed(() => this.fatiarPagina(this.concluidas()));
-
-  readonly totalPaginas = computed(() => Math.max(
-    Math.ceil(this.pendentes().length / this.limite()),
-    Math.ceil(this.concluidas().length / this.limite()),
-    1
-  ));
+  readonly acoes = computed(() =>
+    this.ordenarPorPrazo(
+      this.todasAcoes().filter(a => !!a.concluida === this.exibeConcluidas)
+    )
+  );
 
   ngOnInit(): void {
     this.carregarAcoes();
@@ -119,28 +111,11 @@ export class AcoesComponent implements OnInit {
     }
   }
 
-  proximaPagina(): void {
-    if (this.paginaAtual() < this.totalPaginas()) {
-      this.paginaAtual.update(p => p + 1);
-    }
-  }
-
-  paginaAnterior(): void {
-    if (this.paginaAtual() > 1) {
-      this.paginaAtual.update(p => p - 1);
-    }
-  }
-
   private ordenarPorPrazo(lista: Acao[]): Acao[] {
     return [...lista].sort((a, b) => {
       if (a.prazo === null) return 1;
       if (b.prazo === null) return -1;
       return a.prazo.localeCompare(b.prazo);
     });
-  }
-
-  private fatiarPagina(lista: Acao[]): Acao[] {
-    const inicio = (this.paginaAtual() - 1) * this.limite();
-    return lista.slice(inicio, inicio + this.limite());
   }
 }

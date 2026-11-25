@@ -45,6 +45,18 @@ export const routes: Routes = [
       },
       {
         path: 'acoes',
+        redirectTo: 'acoes/pendentes',
+        pathMatch: 'full'
+      },
+      {
+        path: 'acoes/pendentes',
+        data: { status: 'pendentes' },
+        loadComponent: () =>
+          import('./features/acoes/pages/acoes/acoes.component').then(m => m.AcoesComponent)
+      },
+      {
+        path: 'acoes/concluidas',
+        data: { status: 'concluidas' },
         loadComponent: () =>
           import('./features/acoes/pages/acoes/acoes.component').then(m => m.AcoesComponent)
       },
@@ -58,10 +70,10 @@ export const routes: Routes = [
       { path: 'admin/reunioes/novo', redirectTo: 'reunioes/novo', pathMatch: 'full' },
       { path: 'admin/reunioes/:id', redirectTo: 'reunioes/:id', pathMatch: 'full' },
       { path: 'admin/reunioes/:id/editar', redirectTo: 'reunioes/:id/editar', pathMatch: 'full' },
-      { path: 'admin/acoes', redirectTo: 'acoes', pathMatch: 'full' },
+      { path: 'admin/acoes', redirectTo: 'acoes/pendentes', pathMatch: 'full' },
       { path: 'usuario/reunioes', redirectTo: 'reunioes', pathMatch: 'full' },
       { path: 'usuario/reunioes/:id', redirectTo: 'reunioes/:id', pathMatch: 'full' },
-      { path: 'usuario/acoes', redirectTo: 'acoes', pathMatch: 'full' },
+      { path: 'usuario/acoes', redirectTo: 'acoes/pendentes', pathMatch: 'full' },
     ]
   },
   {
