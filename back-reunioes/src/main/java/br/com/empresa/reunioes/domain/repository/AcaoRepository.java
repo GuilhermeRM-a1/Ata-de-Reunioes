@@ -9,5 +9,6 @@ import java.util.List;
 public interface AcaoRepository extends JpaRepository<Acao, Long> {
 
     List<Acao> findAllByReuniaoId(Long reuniaoId);
+    long countByConcluida(Boolean concluida);
 
 }
