@@ -16,10 +16,10 @@ export class AcaoService {
    * array puro. Aceita as duas formas e entrega sempre uma lista.
    */
   listarAcoes(): Observable<Acao[]> {
-    return this.http
-      .get<Acao[] | { content: Acao[] }>(this.apiUrl)
-      .pipe(map(resposta => Array.isArray(resposta) ? resposta : (resposta?.content ?? [])));
-  }
+  return this.http
+    .get<Acao[] | { content: Acao[] }>(this.apiUrl, { params: { size: 1000 } })
+    .pipe(map(resposta => Array.isArray(resposta) ? resposta : (resposta?.content ?? [])));
+}
 
   /**
    * A acao so existe dentro de uma reuniao ja salva — por isso o id da

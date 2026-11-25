@@ -76,7 +76,7 @@ carregarAcoes(): void {
         Array.isArray(dados) ? dados : (dados?.content || dados?.itens || [])
       );
 
-      // se a página atual deixou de existir (excluiu o último item dela), volta para a última
+      // se a página atual deixou de existir, volta para a última
       if (this.paginaAtual() > this.totalPaginas()) {
         this.paginaAtual.set(this.totalPaginas());
       }
