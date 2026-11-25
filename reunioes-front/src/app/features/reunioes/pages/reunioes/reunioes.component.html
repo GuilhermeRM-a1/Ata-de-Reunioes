@@ -7,6 +7,29 @@
   }
 </header>
 
+@if (dashboard(); as dashboard) {
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm text-center"><div class="card-body">
+        <h3 class="mb-1">{{ dashboard.totalReunioes }}</h3>
+        <p class="text-muted small mb-0">Total de reuniões</p>
+      </div></div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm text-center"><div class="card-body">
+        <h3 class="mb-1">{{ dashboard.reunioesConcluidas }}</h3>
+        <p class="text-muted small mb-0">Reuniões concluídas</p>
+      </div></div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm text-center"><div class="card-body">
+        <h3 class="mb-1">{{ dashboard.reunioesConcluidasUltimos3Meses }}</h3>
+        <p class="text-muted small mb-0">Concluídas nos últimos 3 meses</p>
+      </div></div>
+    </div>
+  </div>
+}
+
 @if (carregando()) {
   <div class="text-center py-5">
     <div class="spinner-border text-primary" role="status">

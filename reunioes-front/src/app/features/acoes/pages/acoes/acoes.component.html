@@ -2,6 +2,23 @@
   <h1 class="h3 mb-0">Ações</h1>
 </header>
 
+@if (dashboard(); as dashboard) {
+  <div class="row g-3 mb-4">
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm text-center"><div class="card-body">
+        <h3 class="mb-1">{{ dashboard.acoesConcluidas }}</h3>
+        <p class="text-muted small mb-0">Ações concluídas</p>
+      </div></div>
+    </div>
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm text-center"><div class="card-body">
+        <h3 class="mb-1">{{ dashboard.acoesPendentes }}</h3>
+        <p class="text-muted small mb-0">Ações pendentes</p>
+      </div></div>
+    </div>
+  </div>
+}
+
 @if (carregando()) {
   <div class="text-center py-5">
     <div class="spinner-border text-primary" role="status">

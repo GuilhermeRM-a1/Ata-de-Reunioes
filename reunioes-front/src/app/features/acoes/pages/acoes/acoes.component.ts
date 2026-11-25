@@ -7,6 +7,8 @@ import { Acao } from '../../../../core/models';
 import { AcaoService } from '../../../../core/services/acao.service';
 import { AlertaService } from '../../../../core/services/alerta.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { DashboardService } from '../../../../core/services/dashboard.service';
+import { Dashboard } from '../../../../core/models/dashboard.model';
 
 /**
  * Tela unica de acoes. Os controles de edicao e exclusao so aparecem
@@ -22,6 +24,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 })
 export class AcoesComponent implements OnInit {
 
+  private readonly dashboardService = inject(DashboardService);
   private readonly acaoService = inject(AcaoService);
   private readonly alertaService = inject(AlertaService);
   private readonly router = inject(Router);
@@ -29,6 +32,7 @@ export class AcoesComponent implements OnInit {
   /** Publico de proposito: o template le `auth.isAdmin`. */
   readonly auth = inject(AuthService);
 
+  readonly dashboard = signal<Dashboard | null>(null);
   readonly carregando = signal(true);
   readonly paginaAtual = signal(1);
   readonly limite = signal(10);
@@ -53,25 +57,39 @@ export class AcoesComponent implements OnInit {
   ));
 
   ngOnInit(): void {
-    this.carregarAcoes();
-  }
+  this.carregarAcoes();
+}
 
-  carregarAcoes(): void {
-    this.carregando.set(true);
+carregarDashboard(): void {
+  this.dashboardService.buscar().subscribe({
+    next: d => this.dashboard.set(d),
+    error: err => console.error('Erro ao carregar dashboard', err)
+  });
+}
 
-    this.acaoService.listarAcoes().subscribe({
-      next: (dados: any) => {
-        this.todasAcoes.set(
-          Array.isArray(dados) ? dados : (dados?.content || dados?.itens || [])
-        );
-        this.carregando.set(false);
-      },
-      error: (err) => {
-        console.error('Erro ao carregar ações', err);
-        this.carregando.set(false);
+carregarAcoes(): void {
+  this.carregando.set(true);
+
+  this.acaoService.listarAcoes().subscribe({
+    next: (dados: any) => {
+      this.todasAcoes.set(
+        Array.isArray(dados) ? dados : (dados?.content || dados?.itens || [])
+      );
+
+      // se a página atual deixou de existir (excluiu o último item dela), volta para a última
+      if (this.paginaAtual() > this.totalPaginas()) {
+        this.paginaAtual.set(this.totalPaginas());
       }
-    });
-  }
+
+      this.carregando.set(false);
+      this.carregarDashboard();
+    },
+    error: (err) => {
+      console.error('Erro ao carregar ações', err);
+      this.carregando.set(false);
+    }
+  });
+}
 
   mudarStatus(acao: Acao): void {
     if (!this.auth.isAdmin) return;
