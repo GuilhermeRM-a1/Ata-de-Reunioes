@@ -11,14 +11,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-/**
- * Confere email e senha e, se estiverem certos, emite o token JWT.
- *
- * Quem compara a senha e o AuthenticationManager (BCrypt contra o hash do
- * banco). Se estiver errada, ele lanca AuthenticationException, que o
- * RestExceptionHandler transforma em 401 sem dizer se o erro foi no email
- * ou na senha.
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
