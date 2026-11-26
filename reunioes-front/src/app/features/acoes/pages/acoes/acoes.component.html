@@ -2,17 +2,17 @@
   <h1 class="h3 mb-0">Ações</h1>
 </header>
 
-@if (dashboard(); as dashboard) {
+@if (dashboard(); as d) {
   <div class="row g-3 mb-4">
     <div class="col-md-6">
       <div class="card border-0 shadow-sm text-center"><div class="card-body">
-        <h3 class="mb-1">{{ dashboard.acoesConcluidas }}</h3>
+        <h3 class="mb-1">{{ d.acoesConcluidas }}</h3>
         <p class="text-muted small mb-0">Ações concluídas</p>
       </div></div>
     </div>
     <div class="col-md-6">
       <div class="card border-0 shadow-sm text-center"><div class="card-body">
-        <h3 class="mb-1">{{ dashboard.acoesPendentes }}</h3>
+        <h3 class="mb-1">{{ d.acoesPendentes }}</h3>
         <p class="text-muted small mb-0">Ações pendentes</p>
       </div></div>
     </div>
@@ -31,7 +31,7 @@
   <section class="mb-4">
     <h2 class="h6 text-uppercase text-muted fw-semibold mb-3">Ações pendentes</h2>
 
-    @if (acoesPendentes().length === 0) {
+    @if (pendentes().length === 0) {
       <div class="card border-0 shadow-sm">
         <div class="card-body text-center text-muted py-4">
           <i class="fas fa-list-check fa-lg mb-2 d-block opacity-50"></i>
@@ -55,7 +55,7 @@
                 </tr>
               </thead>
               <tbody>
-                @for (acao of acoesPendentes(); track acao.id) {
+                @for (acao of pendentes(); track acao.id) {
                   <tr class="cursor-pointer" (dblclick)="verReuniao(acao.reuniaoId)" title="Clique duas vezes para ver a reunião">
                     <td class="ps-3 fw-semibold">{{ acao.titulo }}</td>
                     <td class="text-secondary">{{ acao.descricao }}</td>
@@ -86,7 +86,7 @@
   <section class="mb-4">
     <h2 class="h6 text-uppercase text-muted fw-semibold mb-3">Ações concluídas</h2>
 
-    @if (acoesConcluidas().length === 0) {
+    @if (concluidas().length === 0) {
       <div class="card border-0 shadow-sm">
         <div class="card-body text-center text-muted py-4">
           <i class="fas fa-circle-check fa-lg mb-2 d-block opacity-50"></i>
@@ -110,7 +110,7 @@
                 </tr>
               </thead>
               <tbody>
-                @for (acao of acoesConcluidas(); track acao.id) {
+                @for (acao of concluidas(); track acao.id) {
                   <tr class="cursor-pointer opacity-75" (dblclick)="verReuniao(acao.reuniaoId)" title="Clique duas vezes para ver a reunião">
                     <td class="ps-3 text-decoration-line-through">{{ acao.titulo }}</td>
                     <td class="text-secondary text-decoration-line-through">{{ acao.descricao }}</td>
