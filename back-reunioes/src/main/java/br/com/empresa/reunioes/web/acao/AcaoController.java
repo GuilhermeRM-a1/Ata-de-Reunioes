@@ -50,9 +50,10 @@ public class AcaoController {
     @ApiResponse(responseCode = "200", description = "Lista de ações devolvida")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'USUARIO')")
     @GetMapping()
-    public ResponseEntity<Page<AcaoDTO>> listar(Pageable paginacao) {
+    public ResponseEntity<Page<AcaoDTO>> listar(@RequestParam Boolean concluida,
+                                                Pageable paginacao) {
 
-        Page<AcaoDTO> dto = service.listar(paginacao)
+        Page<AcaoDTO> dto = service.listarPorConclusao(concluida, paginacao)
                 .map(AcaoWebMapper::acaoToDTO);
 
         return ResponseEntity.ok(dto);

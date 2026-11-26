@@ -14,7 +14,6 @@ export class AcaoService {
   /**
    * O endpoint e paginado e responde { content: [...] }, mas ja respondeu
    * array puro. Aceita as duas formas e entrega sempre uma lista.
-   * Solicita um tamanho amplo por padrao para evitar contagem parcial da primeira pagina.
    */
   listarAcoes(size = 1000, page = 0): Observable<Acao[]> {
     const params = new HttpParams()

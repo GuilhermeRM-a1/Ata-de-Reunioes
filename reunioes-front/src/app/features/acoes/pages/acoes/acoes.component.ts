@@ -26,7 +26,9 @@ export class AcoesComponent implements OnInit {
 
   readonly auth = inject(AuthService);
 
-  readonly exibeConcluidas = this.route.snapshot.data['status'] === 'concluidas';
+  readonly exibeConcluidas =
+    this.route.snapshot.data['status'] === 'concluidas' ||
+    this.route.snapshot.url.some(s => s.path === 'concluidas');
 
   readonly dashboard = signal<Dashboard | null>(null);
   readonly carregando = signal(true);
@@ -67,7 +69,7 @@ export class AcoesComponent implements OnInit {
         this.carregando.set(false);
         this.carregarDashboard();
       },
-      error: (err) => {
+      error: err => {
         console.error('Erro ao carregar ações', err);
         this.carregando.set(false);
         this.alertaService.erro('Erro ao carregar', 'Não foi possível carregar a lista de ações.');
@@ -87,10 +89,8 @@ export class AcoesComponent implements OnInit {
     };
 
     this.acaoService.atualizarParcial(acao.id, request).subscribe({
-      next: () => {
-        this.carregarAcoes();
-      },
-      error: (err) => {
+      next: () => this.carregarAcoes(),
+      error: err => {
         console.error('Erro ao alterar status', err);
         this.alertaService.erro('Erro ao atualizar', 'Não foi possível alterar o status da ação.');
       }
@@ -113,7 +113,7 @@ export class AcoesComponent implements OnInit {
         this.alertaService.sucesso('Ação excluída');
         this.carregarAcoes();
       },
-      error: (err) => {
+      error: err => {
         console.error('Erro ao excluir ação', err);
         this.alertaService.erro('Erro ao excluir', 'Não foi possível excluir a ação.');
       }
