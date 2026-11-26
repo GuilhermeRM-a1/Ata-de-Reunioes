@@ -78,6 +78,13 @@ public class AcaoService {
     }
 
     @Transactional(readOnly = true)
+    public Page<Acao> listarPorConclusao(Boolean concluida, Pageable paginacao) {
+        log.info("Iniciando listagem paginada de ações: concluida={}", concluida);
+
+        return acaoRepository.findAllByConcluida(concluida, paginacao);
+    }
+
+    @Transactional(readOnly = true)
     public List<Acao> listarPorReuniao(Long reuniaoId) {
         log.info("Iniciando listagem de ações da reunião: reuniaoId={}", reuniaoId);
 
