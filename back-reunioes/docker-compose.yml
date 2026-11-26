@@ -5,8 +5,8 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_DB: reunioes_dev
-      POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       # 5433 no host: a 5432 ja e do EnterpriseDB instalado na maquina.
       - "5433:5432"
@@ -27,7 +27,7 @@ services:
     environment:
       DB_USER: ${DB_USER:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
-      DB_URL: jdbc:postgresql://postgres:55432/reunioes_dev
+      DB_URL: jdbc:postgresql://postgres:5432/reunioes_dev
     ports:
       - "8080:8080"
     depends_on:
