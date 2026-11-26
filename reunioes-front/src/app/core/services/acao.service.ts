@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { Acao, AcaoRequestPayload } from '../models/acao.model';
 
@@ -14,11 +14,20 @@ export class AcaoService {
   /**
    * O endpoint e paginado e responde { content: [...] }, mas ja respondeu
    * array puro. Aceita as duas formas e entrega sempre uma lista.
+   * Solicita um tamanho amplo por padrao para evitar contagem parcial da primeira pagina.
    */
-  listarAcoes(): Observable<Acao[]> {
+  listarAcoes(size = 1000, page = 0): Observable<Acao[]> {
+    const params = new HttpParams()
+      .set('page', String(page))
+      .set('size', String(size));
+
     return this.http
-      .get<Acao[] | { content: Acao[] }>(this.apiUrl)
-      .pipe(map(resposta => Array.isArray(resposta) ? resposta : (resposta?.content ?? [])));
+      .get<Acao[] | { content: Acao[] }>(this.apiUrl, { params })
+      .pipe(
+        map(resposta =>
+          Array.isArray(resposta) ? resposta : (resposta?.content ?? [])
+        )
+      );
   }
 
   /**
@@ -30,8 +39,8 @@ export class AcaoService {
   }
 
   /** O id vem do back como String (AcaoDTO usa String.valueOf). */
-  atualizarParcial(id: string, dados: any): Observable<any> {
-    return this.http.patch(`${this.apiUrl}/${id}`, dados);
+  atualizarParcial(id: string, dados: Partial<AcaoRequestPayload>): Observable<Acao> {
+    return this.http.patch<Acao>(`${this.apiUrl}/${id}`, dados);
   }
 
   remover(reuniaoId: number, id: string): Observable<void> {

@@ -18,7 +18,6 @@ import { Dashboard } from '../../../../core/models/dashboard.model';
   styleUrls: ['./acoes.component.scss']
 })
 export class AcoesComponent implements OnInit {
-
   private readonly dashboardService = inject(DashboardService);
   private readonly acaoService = inject(AcaoService);
   private readonly alertaService = inject(AlertaService);
@@ -39,7 +38,7 @@ export class AcoesComponent implements OnInit {
   );
 
   readonly totalConcluidas = computed(() =>
-    this.todasAcoes().filter(a => a.concluida).length
+    this.todasAcoes().filter(a => !!a.concluida).length
   );
 
   readonly acoes = computed(() =>
@@ -63,17 +62,15 @@ export class AcoesComponent implements OnInit {
     this.carregando.set(true);
 
     this.acaoService.listarAcoes().subscribe({
-      next: (dados: any) => {
-        this.todasAcoes.set(
-          Array.isArray(dados) ? dados : (dados?.content || dados?.itens || [])
-        );
-
+      next: (dados: Acao[]) => {
+        this.todasAcoes.set(Array.isArray(dados) ? dados : []);
         this.carregando.set(false);
         this.carregarDashboard();
       },
       error: (err) => {
         console.error('Erro ao carregar ações', err);
         this.carregando.set(false);
+        this.alertaService.erro('Erro ao carregar', 'Não foi possível carregar a lista de ações.');
       }
     });
   }
@@ -90,8 +87,13 @@ export class AcoesComponent implements OnInit {
     };
 
     this.acaoService.atualizarParcial(acao.id, request).subscribe({
-      next: () => this.carregarAcoes(),
-      error: (err) => console.error('Erro ao alterar status', err)
+      next: () => {
+        this.carregarAcoes();
+      },
+      error: (err) => {
+        console.error('Erro ao alterar status', err);
+        this.alertaService.erro('Erro ao atualizar', 'Não foi possível alterar o status da ação.');
+      }
     });
   }
 
@@ -126,8 +128,9 @@ export class AcoesComponent implements OnInit {
 
   private ordenarPorPrazo(lista: Acao[]): Acao[] {
     return [...lista].sort((a, b) => {
-      if (a.prazo === null) return 1;
-      if (b.prazo === null) return -1;
+      if (!a.prazo && !b.prazo) return 0;
+      if (!a.prazo) return 1;
+      if (!b.prazo) return -1;
       return a.prazo.localeCompare(b.prazo);
     });
   }
