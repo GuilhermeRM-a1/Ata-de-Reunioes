@@ -1,6 +1,6 @@
 package br.com.empresa.reunioes.application.dashboard;
 
-import br.com.empresa.reunioes.domain.entity.Dashboard;
+import br.com.empresa.reunioes.application.dashboard.record.Dashboard;
 import br.com.empresa.reunioes.domain.enums.StatusReuniao;
 import br.com.empresa.reunioes.domain.repository.AcaoRepository;
 import br.com.empresa.reunioes.domain.repository.ReuniaoRepository;
@@ -24,14 +24,8 @@ public class DashboardService {
 
         String inicio = LocalDate.now().minusMonths(3).toString();
 
-        Dashboard dash = new Dashboard();
-
-        dash.setTotalReunioes(reuniaoRepository.count());
-        dash.setReunioesConcluidas(reuniaoRepository.countByStatusReuniao(StatusReuniao.FINALIZADA));
-        dash.setReunioesConcluidasUltimos3Meses(reuniaoRepository.countByStatusReuniaoAndDataGreaterThanEqual(StatusReuniao.FINALIZADA, inicio));
-        dash.setAcoesConcluidas(acaoRepository.countByConcluida(true));
-        dash.setAcoesPendentes(acaoRepository.countByConcluida(false));
-
-        return dash;
+        return new Dashboard(reuniaoRepository.count(), reuniaoRepository.countByStatusReuniao(StatusReuniao.FINALIZADA),
+        reuniaoRepository.countByStatusReuniaoAndDataGreaterThanEqual(StatusReuniao.FINALIZADA, inicio), acaoRepository.countByConcluida(true),
+        acaoRepository.countByConcluida(false));
   }
 }
