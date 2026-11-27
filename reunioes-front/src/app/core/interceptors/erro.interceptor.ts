@@ -47,7 +47,8 @@ export const erroInterceptor: HttpInterceptorFn = (requisicao, proximo) => {
     catchError((erro: HttpErrorResponse) => {
       console.error('Falha HTTP', requisicao.method, requisicao.url, erro.status);
 
-      const ehLogin = requisicao.url.includes('/auth/login');
+      // 401 em /auth/* (login) é credencial errada, não sessão expirada.
+      const ehLogin = requisicao.url.includes('/auth/');
 
       if (erro.status === 401 && ehLogin) {
         return throwError(() => erro);

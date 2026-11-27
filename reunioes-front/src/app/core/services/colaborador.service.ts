@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Colaborador } from '../models';
 import { Observable, map } from 'rxjs';
+import { API } from '../config/api.config';
 
 
 @Injectable({
@@ -12,13 +13,13 @@ export class ColaboradorService {
 
   http = inject(HttpClient);
 
-  API = "http://localhost:8080/api/reunioes/colaboradores"
+  private readonly apiUrl = API.colaboradores;
 
 
   constructor() { }
 
   save(colaborador: Colaborador): Observable<string>{
-    return this.http.post<string>(this.API, colaborador);
+    return this.http.post<string>(this.apiUrl, colaborador);
   }
 
   /**
@@ -27,29 +28,29 @@ export class ColaboradorService {
    */
   listar(): Observable<Colaborador[]> {
     return this.http
-      .get<Colaborador[] | { content: Colaborador[] }>(this.API)
+      .get<Colaborador[] | { content: Colaborador[] }>(this.apiUrl)
       .pipe(map(resposta => Array.isArray(resposta) ? resposta : (resposta?.content ?? [])));
   }
 
   buscarPorId(id: number): Observable<Colaborador>{
-    return this.http.get<Colaborador>(`${this.API}/${id}`);
+    return this.http.get<Colaborador>(`${this.apiUrl}/${id}`);
   }
 
   buscarPorEmail(email: string): Observable<Colaborador> {
-    return this.http.get<Colaborador>(`${this.API}/email/${email}`);
+    return this.http.get<Colaborador>(`${this.apiUrl}/email/${email}`);
   }
 
   atualizar(id: number, colaborador: Colaborador): Observable<Colaborador>{
-    return this.http.put<Colaborador>(`${this.API}/${id}`, colaborador);
+    return this.http.put<Colaborador>(`${this.apiUrl}/${id}`, colaborador);
   }
 
 
   atualizarParcial(id: number, colaborador: Partial<Colaborador>): Observable<Colaborador>{
-    return this.http.patch<Colaborador>(`${this.API}/${id}`, colaborador);
+    return this.http.patch<Colaborador>(`${this.apiUrl}/${id}`, colaborador);
   }
 
   deletar(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.API}/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
 }
