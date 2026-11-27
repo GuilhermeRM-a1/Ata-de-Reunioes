@@ -16,6 +16,12 @@ export const routes: Routes = [
       import('./features/login/pages/login/login.component').then(m => m.LoginComponent)
   },
   {
+    path: 'cadastro',
+    canActivate: [loginGuard],
+    loadComponent: () =>
+     import('./features/cadastro/pages/cadastro/cadastro.component').then(m => m.CadastroComponent)
+  },
+  {
     path: '',
     canActivate: [authGuard],
     loadComponent: () =>

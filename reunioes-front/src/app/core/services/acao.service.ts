@@ -3,12 +3,13 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { Acao, AcaoRequestPayload } from '../models/acao.model';
 import { Pagina } from '../models/pagina.model';
+import { API } from '../config/api.config';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AcaoService {
-  private apiUrl = 'http://localhost:8080/api/reunioes/acoes';
+  private apiUrl = API.acoes;
 
   constructor(private http: HttpClient) {}
 

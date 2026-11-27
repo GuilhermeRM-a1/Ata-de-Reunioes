@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable, tap } from 'rxjs';
+import { API } from '../config/api.config';
 
 export type Papel = 'ADMIN' | 'USUARIO';
 
@@ -11,7 +12,8 @@ export interface LoginResponse {
   papel: Papel;
 }
 
-const URL_LOGIN = 'http://localhost:8080/auth/login';
+const URL_LOGIN = `${API.auth}/login`;
+const URL_REGISTRO = `${API.auth}/register`;
 const CHAVE_TOKEN = 'token';
 const CHAVE_NOME = 'nome';
 const CHAVE_PAPEL = 'papel';
@@ -25,6 +27,16 @@ export class AuthService {
   login(email: string, senha: string): Observable<LoginResponse> {
     return this.http
       .post<LoginResponse>(URL_LOGIN, { email, senha })
+      .pipe(tap(resposta => this.guardarSessao(resposta)));
+  }
+
+  /**
+   * Cadastro público. O back sempre cria o colaborador como USUARIO e já
+   * devolve o token, então o usuário entra logado logo depois de se cadastrar.
+   */
+  registrar(nome: string, email: string, senha: string): Observable<LoginResponse> {
+    return this.http
+      .post<LoginResponse>(URL_REGISTRO, { nome, email, senha })
       .pipe(tap(resposta => this.guardarSessao(resposta)));
   }
 
