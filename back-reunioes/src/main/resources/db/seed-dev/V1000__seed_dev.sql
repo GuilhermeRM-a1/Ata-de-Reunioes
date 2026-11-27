@@ -1,7 +1,9 @@
--- V2__seed_data.sql
+
 -- Massa exclusivamente ficticia. Nenhum conteudo real de reuniao, nenhum dado
 -- pessoal de pessoa real. Serve para o CRUD e as listagens terem o que mostrar.
 --
+-- senha: senha123
+
 -- Os 8 nomes e as 4 areas sao os mesmos do mock do front
 -- (reunioes-front/src/app/core/mock/), para que os dois lados contem a mesma
 -- historia quando a integracao chegar.
@@ -18,14 +20,14 @@
 
 -- ---------------------------------------------------------------- colaborador
 insert into colaborador (id, nome, email, senha, papel, monitorar_reunioes, data_cadastro) values
-  (1, 'Ana Beatriz Fontes',    'ana.fontes@exemplo.com.br',     'senha-ficticia-trocar', 'ADMIN',   true,  '2026-05-04'),
-  (2, 'Carlos Eduardo Prado',  'carlos.prado@exemplo.com.br',   'senha-ficticia-trocar', 'USUARIO', true,  '2026-05-04'),
-  (3, 'Daniela Ribeiro Alves', 'daniela.alves@exemplo.com.br',  'senha-ficticia-trocar', 'USUARIO', false, '2026-05-11'),
-  (4, 'Eduardo Nunes Vieira',  'eduardo.vieira@exemplo.com.br', 'senha-ficticia-trocar', 'USUARIO', true,  '2026-05-11'),
-  (5, 'Fernanda Lopes Braga',  'fernanda.braga@exemplo.com.br', 'senha-ficticia-trocar', 'USUARIO', false, '2026-05-18'),
-  (6, 'Gustavo Henrique Sato', 'gustavo.sato@exemplo.com.br',   'senha-ficticia-trocar', 'ADMIN',   true,  '2026-05-18'),
-  (7, 'Helena Martins Rocha',  'helena.rocha@exemplo.com.br',   'senha-ficticia-trocar', 'USUARIO', false, '2026-05-25'),
-  (8, 'Igor Salgado Teixeira', 'igor.teixeira@exemplo.com.br',  'senha-ficticia-trocar', 'USUARIO', true,  '2026-05-25');
+  (1, 'Ana Beatriz Fontes',    'ana.fontes@exemplo.com.br',     '$2a$12$XwyZzvgIcCoUftbFsmO1tej4Mb0ufBJkK8K0YXChy0NZap9Z4GFk6', 'ADMIN',   true,  '2026-05-04'),
+  (2, 'Carlos Eduardo Prado',  'carlos.prado@exemplo.com.br',   '$2a$12$XwyZzvgIcCoUftbFsmO1tej4Mb0ufBJkK8K0YXChy0NZap9Z4GFk6', 'USUARIO', true,  '2026-05-04'),
+  (3, 'Daniela Ribeiro Alves', 'daniela.alves@exemplo.com.br',  '$2a$12$XwyZzvgIcCoUftbFsmO1tej4Mb0ufBJkK8K0YXChy0NZap9Z4GFk6', 'USUARIO', false, '2026-05-11'),
+  (4, 'Eduardo Nunes Vieira',  'eduardo.vieira@exemplo.com.br', '$2a$12$XwyZzvgIcCoUftbFsmO1tej4Mb0ufBJkK8K0YXChy0NZap9Z4GFk6', 'USUARIO', true,  '2026-05-11'),
+  (5, 'Fernanda Lopes Braga',  'fernanda.braga@exemplo.com.br', '$2a$12$XwyZzvgIcCoUftbFsmO1tej4Mb0ufBJkK8K0YXChy0NZap9Z4GFk6', 'USUARIO', false, '2026-05-18'),
+  (6, 'Gustavo Henrique Sato', 'gustavo.sato@exemplo.com.br',   '$2a$12$XwyZzvgIcCoUftbFsmO1tej4Mb0ufBJkK8K0YXChy0NZap9Z4GFk6', 'ADMIN',   true,  '2026-05-18'),
+  (7, 'Helena Martins Rocha',  'helena.rocha@exemplo.com.br',   '$2a$12$XwyZzvgIcCoUftbFsmO1tej4Mb0ufBJkK8K0YXChy0NZap9Z4GFk6', 'USUARIO', false, '2026-05-25'),
+  (8, 'Igor Salgado Teixeira', 'igor.teixeira@exemplo.com.br',  '$2a$12$XwyZzvgIcCoUftbFsmO1tej4Mb0ufBJkK8K0YXChy0NZap9Z4GFk6', 'USUARIO', true,  '2026-05-25');
 
 -- -------------------------------------------------------------------- reuniao
 -- Datas espalhadas por tres meses: junho, julho e agosto de 2026.

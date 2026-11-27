@@ -1,35 +1,30 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MdbFormsModule } from 'mdb-angular-ui-kit/forms';
 import { MdbRippleModule } from 'mdb-angular-ui-kit/ripple';
-import { ColaboradorService } from '../../../../core/services/colaborador.service';
 import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MdbFormsModule, MdbRippleModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, MdbFormsModule, MdbRippleModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
 export class LoginComponent {
   private readonly auth = inject(AuthService);
+  private readonly fb = inject(FormBuilder);
+  private readonly router = inject(Router);
 
-  form: FormGroup;
-  /** Mensagem exibida no formulario. Vazia quando nao ha erro. */
+  form: FormGroup = this.fb.group({
+    email: ['', [Validators.required, Validators.email]],
+    senha: ['', [Validators.required]]
+  });
+
   erroLogin = '';
-
-  constructor(private fb: FormBuilder, private router: Router, private colaboradorService: ColaboradorService) {
-    this.form = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      // A senha e obrigatoria no formulario, mas ainda NAO e verificada:
-      // o back nao tem endpoint de autenticacao. O login so confere o email.
-      senha: ['', [Validators.required]]
-    });
-  }
 
   get email() {
     return this.form.get('email');
@@ -47,24 +42,15 @@ export class LoginComponent {
       return;
     }
 
-    const emailDigitado = this.form.value.email;
+    const { email, senha } = this.form.value;
 
-    this.colaboradorService.buscarPorEmail(emailDigitado).subscribe({
-      next: (colaborador) => {
-        if (colaborador.papel === 'ADMIN' || colaborador.papel === 'USUARIO') {
-          this.auth.guardarSessao(emailDigitado, colaborador.papel);
-          this.router.navigate(['/reunioes']);
-        } else {
-          this.erroLogin = 'Seu cadastro está sem papel definido. Procure um administrador.';
-        }
-      },
+    this.auth.login(email, senha).subscribe({
+      next: () => this.router.navigate(['/reunioes']),
       error: (err: HttpErrorResponse) => {
-        // Separar os casos importa: servidor fora e email errado sao
-        // problemas diferentes e o usuario precisa saber qual e o dele.
         if (err.status === 0) {
           this.erroLogin = 'Sem conexão com o servidor. Verifique se a API está no ar.';
-        } else if (err.status === 404) {
-          this.erroLogin = 'E-mail não encontrado. Verifique e tente novamente.';
+        } else if (err.status === 401) {
+          this.erroLogin = 'E-mail ou senha incorretos';
         } else {
           this.erroLogin = 'Não foi possível entrar agora. Tente novamente em instantes.';
         }

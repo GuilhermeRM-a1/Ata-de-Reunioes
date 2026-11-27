@@ -6,9 +6,12 @@ import br.com.empresa.reunioes.domain.exception.RelatorioIndisponivelException;
 import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -17,6 +20,9 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.net.URI;
 import java.time.OffsetDateTime;
@@ -137,6 +143,67 @@ public class RestExceptionHandler {
         return montar(HttpStatus.SERVICE_UNAVAILABLE, "Serviço externo indisponível",
                 "Não foi possível consultar o calendário de feriados no momento. Tente novamente.",
                 "servico-externo-indisponivel");
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ProblemDetail tratarUsuarioNaoEncontrado(UsernameNotFoundException e) {
+
+        return montar(HttpStatus.NOT_FOUND, "Usuário não encontrado", e.getMessage(),
+                "usuario-nao-encontrado");
+    }
+
+    @ExceptionHandler({
+            AuthorizationDeniedException.class,
+            AccessDeniedException.class
+    })
+    public ProblemDetail tratarAcessoNegado(Exception e) {
+
+        log.warn("Acesso negado (403): {}", e.getMessage());
+
+        return montar(HttpStatus.FORBIDDEN, "Acesso negado",
+                "Você não tem permissão para executar esta operação.",
+                "acesso-negado");
+    }
+
+    /**
+     * Credenciais inválidas ou usuário inexistente no fluxo de autenticação.
+     * Retorna 401 sem expor detalhes internos da falha.
+     */
+    @ExceptionHandler({
+            BadCredentialsException.class
+    })
+    public ProblemDetail tratarCredenciaisInvalidas(Exception e) {
+
+        return montar(HttpStatus.UNAUTHORIZED, "Credenciais inválidas", "E-mail ou senha inválidos.",
+                "credenciais-invalidas");
+    }
+
+    /**
+     * Requisição sem token, com token inválido ou expirado em rota protegida.
+     * Chega aqui pelo RestAuthenticationEntryPoint. O handler de
+     * BadCredentialsException, mais específico, continua valendo para o login.
+     */
+    @ExceptionHandler(AuthenticationException.class)
+    public ProblemDetail tratarNaoAutenticado(AuthenticationException e) {
+
+        return montar(HttpStatus.UNAUTHORIZED, "Não autenticado",
+                "Autenticação necessária. Envie um token JWT válido no cabeçalho Authorization.",
+                "nao-autenticado");
+    }
+
+    /**
+     * Última barreira contra duplicidade (duas requisições simultâneas com o
+     * mesmo e-mail passam pela checagem do service) e contra excluir registro
+     * ainda vinculado a outros. Sem isto vira 500.
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ProblemDetail tratarIntegridade(DataIntegrityViolationException e) {
+
+        log.warn("Violação de integridade no banco: {}", e.getMostSpecificCause().getMessage());
+
+        return montar(HttpStatus.CONFLICT, "Conflito de dados",
+                "A operação viola uma regra de integridade: registro duplicado ou ainda vinculado a outros registros.",
+                "conflito-integridade");
     }
 
     /**

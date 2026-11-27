@@ -1,0 +1,23 @@
+spring:
+  jpa:
+    show-sql: false
+  flyway:
+    locations: classpath:db/migration,classpath:db/seed-prod
+    # Em banco novo nao precisa; evita mascarar um schema que nao e do Flyway.
+    baseline-on-migrate: false
+
+# Swagger desligado em producao.
+springdoc:
+  swagger-ui:
+    enabled: false
+  api-docs:
+    enabled: false
+
+logging:
+  level:
+    br.com.empresa.reunioes: INFO
+
+app:
+  cors:
+    # Dominio real do front, definido no ambiente (ex.: https://app.suaempresa.com.br)
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}

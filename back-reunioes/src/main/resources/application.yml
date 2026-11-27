@@ -1,14 +1,17 @@
 spring:
+  # Sem profiles.default de proposito: esquecer de definir o perfil em producao
+  # nao pode carregar a seed fake de dev. O perfil e escolhido por fora
+  # (SPRING_PROFILES_ACTIVE no ambiente ou spring.profiles.active no .env).
+  config:
+    import: optional:file:.env[.properties]
   application:
     name: reunioes
 
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/reunioes_dev}
-    username: ${DB_USER:postgres}
-    password: ${DB_PASSWORD:postgres}
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
-
-
 
   jpa:
     # validate: o Hibernate so confere se as entidades batem com o banco.
@@ -23,8 +26,20 @@ spring:
 
   flyway:
     enabled: true
+    # Base: so schema. Cada perfil acrescenta a sua pasta de seed.
     locations: classpath:db/migration
     baseline-on-migrate: true
+
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connectTimeout: 3000
+            readTimeout: 5000
+          brasilApiFeriados:
+            connectTimeout: 3000
+            readTimeout: 5000
 
 server:
   port: 8080
@@ -42,16 +57,14 @@ logging:
   level:
     br.com.empresa.reunioes: DEBUG
 
-# API externa de feriados nacionais, consumida por Feign.
 api:
+  security:
+    token:
+      secret: ${JWT_SECRET}
+      issuer: reunioes-api
+  # API externa de feriados nacionais, consumida por Feign.
   feriados:
     url: https://brasilapi.com.br/api/feriados/v1
-
-# Timeout curto: a consulta de feriado nao pode segurar a requisicao do usuario
-# se a API de terceiro estiver lenta.
-spring.cloud.openfeign.client.config.default:
-  connectTimeout: 3000
-  readTimeout: 5000
 
 app:
   cors:

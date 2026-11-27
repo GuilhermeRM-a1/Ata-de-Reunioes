@@ -1,11 +1,12 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable } from 'rxjs';
 import { ReuniaoApiDTO, ReuniaoApiRequest } from '../models/api/reuniao-api.model';
+import { API } from '../config/api.config';
 
 @Injectable({ providedIn: 'root' })
 export class ReuniaoService {
-  private readonly apiUrl = 'http://localhost:8080/api/reunioes'; 
+  private readonly apiUrl = API.reunioes;
 
   constructor(private http: HttpClient) {
 

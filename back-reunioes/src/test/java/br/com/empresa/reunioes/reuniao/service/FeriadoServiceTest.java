@@ -1,8 +1,6 @@
 package br.com.empresa.reunioes.reuniao.service;
 
 import br.com.empresa.reunioes.application.reuniao.FeriadoService;
-import br.com.empresa.reunioes.application.reuniao.ReuniaoService;
-import br.com.empresa.reunioes.domain.entity.Reuniao;
 import br.com.empresa.reunioes.domain.exception.RecursoNaoEncontradoException;
 import br.com.empresa.reunioes.infra.client.FeriadoClient;
 import br.com.empresa.reunioes.infra.client.dto.FeriadoClientResponse;
@@ -26,17 +24,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Unitario puro: o cliente Feign e o service de reuniao sao mocks, entao o
- * teste nao sobe contexto, nao toca banco e nao chama a BrasilAPI.
+ * Unitario puro: o cliente Feign e mock, entao o teste nao sobe contexto,
+ * nao toca banco e nao chama a BrasilAPI.
  */
 @ExtendWith(MockitoExtension.class)
 class FeriadoServiceTest {
 
     @Mock
     FeriadoClient feriadoClient;
-
-    @Mock
-    ReuniaoService reuniaoService;
 
     @InjectMocks
     FeriadoService feriadoService;
@@ -47,91 +42,53 @@ class FeriadoServiceTest {
     private static final FeriadoClientResponse CONFRATERNIZACAO =
             new FeriadoClientResponse("2026-01-01", "Confraternização mundial", "national", "quinta-feira");
 
-    private Reuniao reuniaoCom(String data) {
-        var reuniao = new Reuniao();
-        reuniao.setId(1L);
-        reuniao.setTitulo("Reunião de fechamento");
-        reuniao.setData(data);
-        return reuniao;
+    @Test
+    @DisplayName("Devolve o feriado quando a data bate com o calendário")
+    void deveDevolverFeriadoQuandoDataCoincide() {
+        when(feriadoClient.listarPorAno(2026)).thenReturn(List.of(CONFRATERNIZACAO, NATAL));
+
+        var resultado = feriadoService.buscarPorData("2026-12-25");
+
+        assertThat(resultado).isPresent();
+        assertThat(resultado.get().name()).isEqualTo("Natal");
+        assertThat(resultado.get().weekday()).isEqualTo("sexta-feira");
     }
 
     @Test
-    @DisplayName("Marca a reunião como feriado quando a data bate com o calendário")
-    void deveApontarFeriadoQuandoDataCoincide() {
-        when(reuniaoService.buscarPorId(1L)).thenReturn(reuniaoCom("2026-12-25"));
+    @DisplayName("Devolve vazio quando a data não está no calendário")
+    void deveDevolverVazioQuandoDataNaoEhFeriado() {
         when(feriadoClient.listarPorAno(2026)).thenReturn(List.of(CONFRATERNIZACAO, NATAL));
 
-        var resultado = feriadoService.verificarReuniao(1L);
-
-        assertThat(resultado.feriado()).isTrue();
-        assertThat(resultado.reuniaoId()).isEqualTo(1L);
-        assertThat(resultado.titulo()).isEqualTo("Reunião de fechamento");
-        assertThat(resultado.data()).isEqualTo("2026-12-25");
-        assertThat(resultado.nomeFeriado()).isEqualTo("Natal");
-        assertThat(resultado.diaSemana()).isEqualTo("sexta-feira");
-    }
-
-    @Test
-    @DisplayName("Devolve dia comum, sem nome de feriado, quando a data não está no calendário")
-    void deveDevolverDiaComumQuandoDataNaoEhFeriado() {
-        when(reuniaoService.buscarPorId(1L)).thenReturn(reuniaoCom("2026-06-02"));
-        when(feriadoClient.listarPorAno(2026)).thenReturn(List.of(CONFRATERNIZACAO, NATAL));
-
-        var resultado = feriadoService.verificarReuniao(1L);
-
-        assertThat(resultado.feriado()).isFalse();
-        assertThat(resultado.data()).isEqualTo("2026-06-02");
-        assertThat(resultado.nomeFeriado()).isNull();
-        assertThat(resultado.diaSemana()).isNull();
+        assertThat(feriadoService.buscarPorData("2026-06-02")).isEmpty();
     }
 
     @Test
     @DisplayName("Aceita data com hora e consulta o ano certo na API externa")
     void deveExtrairDiaDeDataComHora() {
-        when(reuniaoService.buscarPorId(1L)).thenReturn(reuniaoCom("2026-12-25T09:00:00"));
         when(feriadoClient.listarPorAno(2026)).thenReturn(List.of(NATAL));
 
-        var resultado = feriadoService.verificarReuniao(1L);
+        var resultado = feriadoService.buscarPorData("2026-12-25T09:00:00");
 
-        assertThat(resultado.feriado()).isTrue();
-        assertThat(resultado.data()).isEqualTo("2026-12-25");
+        assertThat(resultado).isPresent();
         verify(feriadoClient).listarPorAno(2026);
     }
 
     @Test
-    @DisplayName("Devolve dia comum quando a API externa não traz feriado nenhum")
-    void deveDevolverDiaComumQuandoListaVazia() {
-        when(reuniaoService.buscarPorId(1L)).thenReturn(reuniaoCom("2026-12-25"));
+    @DisplayName("Devolve vazio quando a API externa não traz feriado nenhum")
+    void deveDevolverVazioQuandoListaVazia() {
         when(feriadoClient.listarPorAno(2026)).thenReturn(List.of());
 
-        var resultado = feriadoService.verificarReuniao(1L);
-
-        assertThat(resultado.feriado()).isFalse();
+        assertThat(feriadoService.buscarPorData("2026-12-25")).isEmpty();
     }
 
     @ParameterizedTest(name = "data = \"{0}\"")
     @NullSource
     @ValueSource(strings = {"", "2026", "25/12/2026", "ontem à noite"})
-    @DisplayName("Rejeita reunião sem data reconhecível e nem chama a API externa")
+    @DisplayName("Rejeita data sem formato reconhecível e nem chama a API externa")
     void deveRejeitarDataIrreconhecivel(String data) {
-        when(reuniaoService.buscarPorId(1L)).thenReturn(reuniaoCom(data));
-
-        assertThatThrownBy(() -> feriadoService.verificarReuniao(1L))
+        assertThatThrownBy(() -> feriadoService.buscarPorData(data))
                 .isInstanceOf(RecursoNaoEncontradoException.class)
-                .hasMessageContaining("1")
                 .hasMessageContaining("aaaa-MM-dd");
-
-        verify(feriadoClient, never()).listarPorAno(anyInt());
-    }
-
-    @Test
-    @DisplayName("Propaga o 404 do service de reunião sem consultar a API externa")
-    void devePropagarQuandoReuniaoNaoExiste() {
-        when(reuniaoService.buscarPorId(99L))
-                .thenThrow(new RecursoNaoEncontradoException("Reunião não encontrada."));
-
-        assertThatThrownBy(() -> feriadoService.verificarReuniao(99L))
-                .isInstanceOf(RecursoNaoEncontradoException.class);
 
         verify(feriadoClient, never()).listarPorAno(anyInt());
     }

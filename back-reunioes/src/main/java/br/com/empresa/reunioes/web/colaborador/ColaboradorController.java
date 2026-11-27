@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -22,7 +23,6 @@ import static br.com.empresa.reunioes.web.colaborador.mapper.ColaboradorWebMappe
 @RestController
 @RequestMapping("/api/reunioes/colaboradores")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "${app.cors.allowed-origins}")
 @Tag(name = "Colaboradores", description = "CRUD de colaboradores")
 public class ColaboradorController {
 
@@ -32,6 +32,7 @@ public class ColaboradorController {
             description = "A senha é gravada na entidade, mas nunca volta na resposta.")
     @ApiResponse(responseCode = "201", description = "Colaborador criado")
     @ApiResponse(responseCode = "400", description = "Campos obrigatórios ausentes ou inválidos")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping()
     public ResponseEntity<ColaboradorDTO> salvar(@Valid @RequestBody ColaboradorRequest request) {
 
@@ -44,6 +45,7 @@ public class ColaboradorController {
     @Operation(summary = "Lista colaboradores paginados",
             description = "Devolve o envelope padrão com content, page, size, totalElements e totalPages.")
     @ApiResponse(responseCode = "200", description = "Página de colaboradores devolvida")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USUARIO')")
     @GetMapping()
     public ResponseEntity<Page<ColaboradorDTO>> listar(Pageable paginacao) {
 
@@ -56,6 +58,7 @@ public class ColaboradorController {
     @Operation(summary = "Busca um colaborador pelo id")
     @ApiResponse(responseCode = "200", description = "Colaborador encontrado")
     @ApiResponse(responseCode = "404", description = "Nenhum colaborador com esse id")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USUARIO')")
     @GetMapping("/{id}")
     public ResponseEntity<ColaboradorDTO> buscarPorId(@PathVariable Long id) {
         Colaborador colaborador = service.buscarPorId(id);
@@ -67,6 +70,7 @@ public class ColaboradorController {
     @Operation(summary = "Busca um colaborador pelo email")
     @ApiResponse(responseCode = "200", description = "Colaborador encontrado")
     @ApiResponse(responseCode = "404", description = "Nenhum colaborador com esse email")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USUARIO')")
     @GetMapping("/email/{email}")
     public ResponseEntity<ColaboradorDTO> buscarPorEmail(@PathVariable String email) {
         Colaborador colaborador = service.buscarPorEmail(email);
@@ -79,6 +83,7 @@ public class ColaboradorController {
     @ApiResponse(responseCode = "202", description = "Colaborador atualizado")
     @ApiResponse(responseCode = "400", description = "Campos obrigatórios ausentes ou inválidos")
     @ApiResponse(responseCode = "404", description = "Nenhum colaborador com esse id")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<ColaboradorDTO> atualizar(@PathVariable Long id, @Valid @RequestBody ColaboradorRequest request) {
         Colaborador colaborador = service.atualizar(id, request);
@@ -93,6 +98,7 @@ public class ColaboradorController {
     @ApiResponse(responseCode = "202", description = "Colaborador atualizado")
     @ApiResponse(responseCode = "400", description = "Campo enviado veio vazio")
     @ApiResponse(responseCode = "404", description = "Nenhum colaborador com esse id")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PatchMapping("/{id}")
     public ResponseEntity<ColaboradorDTO> atualizarParcial(@PathVariable Long id,
                                                            @Valid @RequestBody ColaboradorPatchRequest request) {
@@ -106,6 +112,7 @@ public class ColaboradorController {
     @Operation(summary = "Exclui um colaborador")
     @ApiResponse(responseCode = "204", description = "Colaborador excluído")
     @ApiResponse(responseCode = "404", description = "Nenhum colaborador com esse id")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
 

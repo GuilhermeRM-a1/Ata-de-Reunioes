@@ -1,6 +1,12 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormArray,
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, forkJoin, of } from 'rxjs';
 import { MdbFormsModule } from 'mdb-angular-ui-kit/forms';
@@ -11,18 +17,25 @@ import { AcaoService } from '../../../../core/services/acao.service';
 import { ColaboradorService } from '../../../../core/services/colaborador.service';
 import { AlertaService } from '../../../../core/services/alerta.service';
 import { AuthService } from '../../../../core/services/auth.service';
-import { AcaoRequestPayload, Colaborador, ReuniaoApiDTO, ReuniaoApiRequest } from '../../../../core/models';
-
+import {
+  AcaoRequestPayload,
+  Colaborador,
+  ReuniaoApiDTO,
+  ReuniaoApiRequest,
+} from '../../../../core/models';
+import { FeriadoApiDTO } from '../../../../core/models';
+import { FeriadoService } from '../../../../core/services/feriado.service';
 @Component({
   selector: 'app-reuniao-form',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, MdbFormsModule, MdbRippleModule],
   templateUrl: './reuniao-form.component.html',
-  styleUrl: './reuniao-form.component.scss'
+  styleUrl: './reuniao-form.component.scss',
 })
 export class ReuniaoFormComponent implements OnInit {
   // publico de proposito: o template le auth.isAdmin
   readonly auth = inject(AuthService);
+  private readonly feriadoService = inject(FeriadoService);
 
   private readonly fb = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
@@ -35,6 +48,8 @@ export class ReuniaoFormComponent implements OnInit {
   readonly idEditando = signal<number | null>(null);
   readonly idNaoEncontrado = signal(false);
   readonly salvando = signal(false);
+  readonly verificandoFeriado = signal(false);
+  readonly resultadoFeriado = signal<FeriadoApiDTO | null>(null);
 
   /** Alimenta o select de responsavel de cada acao. */
   readonly colaboradores = signal<Colaborador[]>([]);
@@ -49,7 +64,7 @@ export class ReuniaoFormComponent implements OnInit {
     participantes: [''],
     pontosChave: [''],
     transcricaoPura: [''],
-    acoes: this.fb.array([])
+    acoes: this.fb.array([]),
   });
 
   ngOnInit(): void {
@@ -62,14 +77,14 @@ export class ReuniaoFormComponent implements OnInit {
     // os colaboradores vem antes da reuniao porque o responsavel de uma acao
     // ja salva volta da API como nome e precisa ser reconvertido em id
     this.colaboradorService.listar().subscribe({
-      next: lista => {
+      next: (lista) => {
         this.colaboradores.set(lista ?? []);
         this.carregarReuniao();
       },
       error: () => {
         this.colaboradores.set([]);
         this.carregarReuniao();
-      }
+      },
     });
   }
 
@@ -94,17 +109,21 @@ export class ReuniaoFormComponent implements OnInit {
 
         this.form.patchValue({
           tituloReuniao: reuniao.titulo,
-          dataProcessamento: reuniao.data ? String(reuniao.data).split('T')[0] : '',
+          dataProcessamento: reuniao.data
+            ? String(reuniao.data).split('T')[0]
+            : '',
           resumoExecutivo: reuniao.resumo ?? reuniao.resumoExecutivo ?? '',
           statusTranscricao: reuniao.statusTranscricao,
           statusReuniao: reuniao.statusReuniao,
-          areas: Array.isArray(reuniao.areas) ? reuniao.areas.join(', ') : reuniao.areas,
+          areas: Array.isArray(reuniao.areas)
+            ? reuniao.areas.join(', ')
+            : reuniao.areas,
           participantes: Array.isArray(reuniao.participantes)
             ? reuniao.participantes.join(', ')
             : reuniao.participantes,
           pontosChave: Array.isArray(reuniao.pontosChaves)
             ? reuniao.pontosChaves.join('\n')
-            : reuniao.pontosChaves
+            : reuniao.pontosChaves,
         });
 
         for (const acao of reuniao.acoes ?? []) {
@@ -116,17 +135,40 @@ export class ReuniaoFormComponent implements OnInit {
               descricao: [acao.descricao, Validators.required],
               tipo: [acao.tipo, Validators.required],
               prazo: [acao.prazo],
-              responsavel: [this.idDoPrimeiroResponsavel(acao.responsavel)]
-            })
+              responsavel: [this.idDoPrimeiroResponsavel(acao.responsavel)],
+            }),
           );
         }
       },
-      error: () => this.idNaoEncontrado.set(true)
+      error: () => this.idNaoEncontrado.set(true),
     });
   }
 
   get acoes(): FormArray {
     return this.form.get('acoes') as FormArray;
+  }
+
+  validarData(): void {
+    const data = this.form.get('dataProcessamento')?.value;
+
+    if (!data) return;
+
+    this.verificandoFeriado.set(true);
+    this.resultadoFeriado.set(null);
+
+    this.feriadoService.verificarData(data).subscribe({
+      next: (resposta) => {
+        this.resultadoFeriado.set(resposta);
+        this.verificandoFeriado.set(false);
+      },
+      error: () => {
+        this.verificandoFeriado.set(false);
+        this.alerta.erro(
+          'Não foi possível verificar',
+          'Tente novamente em instantes.',
+        );
+      },
+    });
   }
 
   adicionarAcao(): void {
@@ -137,8 +179,8 @@ export class ReuniaoFormComponent implements OnInit {
         descricao: ['', Validators.required],
         tipo: ['ACAO', Validators.required],
         prazo: [null],
-        responsavel: [null]
-      })
+        responsavel: [null],
+      }),
     );
   }
 
@@ -160,11 +202,13 @@ export class ReuniaoFormComponent implements OnInit {
     // a acao so pode ser criada debaixo de uma reuniao que ja existe, entao o
     // corpo da reuniao leva apenas os ids das acoes que ja estao no banco
     const acoesExistentes = grupos
-      .filter(a => a.id !== null && a.id !== undefined && a.id !== '')
-      .map(a => Number(a.id))
-      .filter(id => !isNaN(id));
+      .filter((a) => a.id !== null && a.id !== undefined && a.id !== '')
+      .map((a) => Number(a.id))
+      .filter((id) => !isNaN(id));
 
-    const acoesNovas = grupos.filter(a => a.id === null || a.id === undefined || a.id === '');
+    const acoesNovas = grupos.filter(
+      (a) => a.id === null || a.id === undefined || a.id === '',
+    );
 
     const dados: ReuniaoApiRequest = {
       titulo: bruto.tituloReuniao,
@@ -174,46 +218,57 @@ export class ReuniaoFormComponent implements OnInit {
       areas: this.textoParaLista(bruto.areas),
       pontosChaves: this.textoParaLinhas(bruto.pontosChave),
       participantes: this.idsDosParticipantes(bruto.participantes),
-      acoes: acoesExistentes
+      acoes: acoesExistentes,
     };
 
     const id = this.idEditando();
-    const operacao$: Observable<ReuniaoApiDTO> = id !== null
-      ? this.reuniaoService.atualizar(id, dados)
-      : this.reuniaoService.criar(dados);
+    const operacao$: Observable<ReuniaoApiDTO> =
+      id !== null
+        ? this.reuniaoService.atualizar(id, dados)
+        : this.reuniaoService.criar(dados);
 
     this.salvando.set(true);
 
     operacao$
       .pipe(
-        switchMap(reuniao => {
+        switchMap((reuniao) => {
           const reuniaoId = reuniao?.id ?? id;
 
           // forkJoin([]) completa sem emitir: sem acao nova, nem entra no passo 2
           if (!reuniaoId || acoesNovas.length === 0) return of<string[]>([]);
 
           return forkJoin(
-            acoesNovas.map(acao =>
-              this.acaoService.criar(reuniaoId, this.paraPayloadDeAcao(acao)).pipe(
-                map(() => null),
-                // uma acao que falha nao derruba as outras nem apaga a reuniao ja salva
-                catchError(() => of(acao.titulo || acao.descricao || 'sem título'))
-              )
-            )
-          ).pipe(map(resultados => resultados.filter((t): t is string => !!t)));
-        })
+            acoesNovas.map((acao) =>
+              this.acaoService
+                .criar(reuniaoId, this.paraPayloadDeAcao(acao))
+                .pipe(
+                  map(() => null),
+                  // uma acao que falha nao derruba as outras nem apaga a reuniao ja salva
+                  catchError(() =>
+                    of(acao.titulo || acao.descricao || 'sem título'),
+                  ),
+                ),
+            ),
+          ).pipe(
+            map((resultados) => resultados.filter((t): t is string => !!t)),
+          );
+        }),
       )
       .subscribe({
-        next: falhas => {
+        next: (falhas) => {
           this.salvando.set(false);
 
           if (falhas.length > 0) {
             this.alerta.erro(
-              id !== null ? 'Reunião atualizada com pendências' : 'Reunião criada com pendências',
-              `A reunião foi salva, mas não foi possível criar ${falhas.length === 1 ? 'a ação' : 'as ações'}: ${falhas.join(', ')}.`
+              id !== null
+                ? 'Reunião atualizada com pendências'
+                : 'Reunião criada com pendências',
+              `A reunião foi salva, mas não foi possível criar ${falhas.length === 1 ? 'a ação' : 'as ações'}: ${falhas.join(', ')}.`,
             );
           } else {
-            this.alerta.sucesso(id !== null ? 'Reunião atualizada' : 'Reunião criada');
+            this.alerta.sucesso(
+              id !== null ? 'Reunião atualizada' : 'Reunião criada',
+            );
           }
 
           this.router.navigate(['/reunioes']);
@@ -221,7 +276,7 @@ export class ReuniaoFormComponent implements OnInit {
         error: (err: any) => {
           this.salvando.set(false);
           console.error('Erro ao salvar reunião:', err);
-        }
+        },
       });
   }
 
@@ -238,7 +293,7 @@ export class ReuniaoFormComponent implements OnInit {
       tipo: acao.tipo,
       prazo: acao.prazo || null,
       concluida: false,
-      responsavel: acao.responsavel && !isNaN(responsavel) ? [responsavel] : []
+      responsavel: acao.responsavel && !isNaN(responsavel) ? [responsavel] : [],
     };
   }
 
@@ -247,7 +302,9 @@ export class ReuniaoFormComponent implements OnInit {
     if (!Array.isArray(responsavel) || responsavel.length === 0) return null;
 
     const nome = String(responsavel[0]).trim().toLowerCase();
-    const encontrado = this.colaboradores().find(c => c.nome?.trim().toLowerCase() === nome);
+    const encontrado = this.colaboradores().find(
+      (c) => c.nome?.trim().toLowerCase() === nome,
+    );
 
     return encontrado?.id ?? null;
   }
@@ -255,9 +312,11 @@ export class ReuniaoFormComponent implements OnInit {
   /** O campo e texto livre, mas o back espera ids — nome desconhecido e descartado. */
   private idsDosParticipantes(texto: string): number[] {
     return this.textoParaLista(texto)
-      .map(nome => {
+      .map((nome) => {
         const alvo = nome.toLowerCase();
-        return this.colaboradores().find(c => c.nome?.trim().toLowerCase() === alvo)?.id;
+        return this.colaboradores().find(
+          (c) => c.nome?.trim().toLowerCase() === alvo,
+        )?.id;
       })
       .filter((id): id is number => typeof id === 'number');
   }
@@ -266,15 +325,15 @@ export class ReuniaoFormComponent implements OnInit {
     if (!texto) return [];
     return String(texto)
       .split(',')
-      .map(item => item.trim())
-      .filter(item => item.length > 0);
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
   }
 
   private textoParaLinhas(texto: string): string[] {
     if (!texto) return [];
     return String(texto)
       .split('\n')
-      .map(item => item.trim())
-      .filter(item => item.length > 0);
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
   }
 }

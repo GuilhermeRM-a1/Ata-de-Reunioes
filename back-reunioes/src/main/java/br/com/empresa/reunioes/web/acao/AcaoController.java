@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,7 +25,6 @@ import static br.com.empresa.reunioes.web.acao.mapper.AcaoWebMapper.acaoToDTO;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/reunioes/acoes")
-@CrossOrigin(origins = "${app.cors.allowed-origins}")
 @Tag(name = "Ações", description = "CRUD de ações")
 public class AcaoController {
 
@@ -35,6 +35,7 @@ public class AcaoController {
     @ApiResponse(responseCode = "201", description = "Ação criada")
     @ApiResponse(responseCode = "400", description = "Dados inválidos")
     @ApiResponse(responseCode = "404", description = "Responsável ou reunião informada não existe")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/{reuniaoId}")
     public ResponseEntity<AcaoDTO> salvar(@PathVariable Long reuniaoId,
                                           @Valid @RequestBody AcaoRequest request) {
@@ -47,10 +48,12 @@ public class AcaoController {
     @Operation(summary = "Lista ações",
             description = "Devolve o envelope padrão com content, page, size, totalElements e totalPages.")
     @ApiResponse(responseCode = "200", description = "Lista de ações devolvida")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USUARIO')")
     @GetMapping()
-    public ResponseEntity<Page<AcaoDTO>> listar(Pageable paginacao) {
+    public ResponseEntity<Page<AcaoDTO>> listar(@RequestParam Boolean concluida,
+                                                Pageable paginacao) {
 
-        Page<AcaoDTO> dto = service.listar(paginacao)
+        Page<AcaoDTO> dto = service.listarPorConclusao(concluida, paginacao)
                 .map(AcaoWebMapper::acaoToDTO);
 
         return ResponseEntity.ok(dto);
@@ -62,6 +65,7 @@ public class AcaoController {
     @Operation(summary = "Lista ações",
             description = "Devolve a lista de ações cadastradas por reunião.")
     @ApiResponse(responseCode = "200", description = "Lista de ações devolvida")
+    @PreAuthorize("hasAnyAuthority('ADMIN','USUARIO')")
     @GetMapping("/reuniao")
     public ResponseEntity<List<AcaoDTO>> listarPorReuniao(@RequestParam Long reuniaoId) {
 
@@ -77,6 +81,7 @@ public class AcaoController {
     @ApiResponse(responseCode = "200", description = "Ação encontrada")
     @ApiResponse(responseCode = "404", description = "Nenhuma ação com esse id")
     @ApiResponse(responseCode = "400", description = "Id em formato inválido")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USUARIO')")
     @GetMapping("/{id}")
     public ResponseEntity<AcaoDTO> buscarPorId(@PathVariable Long id) {
         Acao acao = service.buscarPorId(id);
@@ -89,6 +94,7 @@ public class AcaoController {
     @ApiResponse(responseCode = "202", description = "Ação atualizada")
     @ApiResponse(responseCode = "400", description = "Dados inválidos")
     @ApiResponse(responseCode = "404", description = "Nenhuma ação com esse id")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<AcaoDTO> atualizar(@PathVariable Long id,
                                              @Valid @RequestBody AcaoRequest request) {
@@ -102,6 +108,7 @@ public class AcaoController {
             description = "Campo ausente ou nulo é ignorado — só o que vier no corpo é alterado.")
     @ApiResponse(responseCode = "202", description = "Ação atualizada")
     @ApiResponse(responseCode = "404", description = "Nenhuma ação com esse id")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PatchMapping("/{id}")
     public ResponseEntity<AcaoDTO> atualizarParcial(
             @PathVariable Long id,
@@ -115,6 +122,7 @@ public class AcaoController {
     @Operation(summary = "Exclui uma ação")
     @ApiResponse(responseCode = "204", description = "Ação excluída")
     @ApiResponse(responseCode = "404", description = "Nenhuma ação com esse id")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{reuniaoId}/{id}")
     public ResponseEntity<Void> deletar(
             @PathVariable Long id) {
