@@ -1,4 +1,4 @@
-package br.com.empresa.reunioes.login;
+package br.com.empresa.reunioes.infra.config.security;
 
 import br.com.empresa.reunioes.application.login.LoginService;
 import br.com.empresa.reunioes.domain.entity.Colaborador;
@@ -60,9 +60,9 @@ class LoginServiceTest {
                 new LoginRequest("ana.fontes@exemplo.com.br", "senha123"));
 
         assertThat(resposta.token()).isEqualTo("token-jwt");
-        assertThat(resposta.nome()).isEqualTo("Ana Beatriz Fontes");
-        assertThat(resposta.email()).isEqualTo("ana.fontes@exemplo.com.br");
-        assertThat(resposta.papel()).isEqualTo(Papel.ADMIN);
+        assertThat(resposta.colaborador().getNome()).isEqualTo("Ana Beatriz Fontes");
+        assertThat(resposta.colaborador().getEmail()).isEqualTo("ana.fontes@exemplo.com.br");
+        assertThat(resposta.colaborador().getPapel()).isEqualTo(Papel.ADMIN);
     }
 
     @Test
