@@ -1,4 +1,7 @@
 spring:
+  # Sem profiles.default de proposito: esquecer de definir o perfil em producao
+  # nao pode carregar a seed fake de dev. O perfil e escolhido por fora
+  # (SPRING_PROFILES_ACTIVE no ambiente ou spring.profiles.active no .env).
   config:
     import: optional:file:.env[.properties]
   application:
@@ -23,6 +26,7 @@ spring:
 
   flyway:
     enabled: true
+    # Base: so schema. Cada perfil acrescenta a sua pasta de seed.
     locations: classpath:db/migration
     baseline-on-migrate: true
 
@@ -31,22 +35,14 @@ spring:
       client:
         config:
           default:
-            # Timeout curto: a consulta de feriado nao pode segurar a requisicao do usuario
-            # se a API de terceiro estiver lenta.
+            connectTimeout: 3000
+            readTimeout: 5000
+          brasilApiFeriados:
             connectTimeout: 3000
             readTimeout: 5000
 
 server:
   port: 8080
-
-  spring:
-    cloud:
-      openfeign:
-        client:
-          config:
-            brasilApiFeriados:
-              connect-timeout: 3000
-              read-timeout: 5000
 
 # Swagger UI em /swagger-ui.html — e por onde a API e testada sem Postman.
 springdoc:

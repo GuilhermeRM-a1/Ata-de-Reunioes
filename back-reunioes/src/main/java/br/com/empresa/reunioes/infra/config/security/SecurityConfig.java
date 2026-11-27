@@ -37,7 +37,7 @@ public class SecurityConfig {
             RestAccessDeniedHandler accessDeniedHandler,
             @Value("${app.cors.allowed-origins:http://localhost:4200}") String allowedOrigins) {
         this.securityFilter = securityFilter;
-        this.authenticationEntryPoint = authenticationEntryPoint;
+        this.authenticationEntryPoint = authenticationEntryPoint; 
         this.accessDeniedHandler = accessDeniedHandler;
         this.allowedOrigins = allowedOrigins;
     }
