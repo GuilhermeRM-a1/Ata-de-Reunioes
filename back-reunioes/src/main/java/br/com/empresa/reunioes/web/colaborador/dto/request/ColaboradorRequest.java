@@ -4,6 +4,7 @@ import br.com.empresa.reunioes.domain.enums.Papel;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * Corpo do POST e do PUT, os dois marcados com @Valid no controller.
@@ -22,6 +23,7 @@ public record ColaboradorRequest(@NotBlank(message = "O nome é obrigatório")
                                  String email,
 
                                  @NotBlank(message = "A senha é obrigatória")
+                                 @Size(min = 8, max = 20, message = "A senha deve ter entre 8 e 20 caracteres")
                                  String senha,
 
                                  @NotNull(message = "O papel é obrigatório")

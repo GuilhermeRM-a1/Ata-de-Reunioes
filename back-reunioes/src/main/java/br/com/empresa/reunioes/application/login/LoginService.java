@@ -1,5 +1,6 @@
 package br.com.empresa.reunioes.application.login;
 
+import br.com.empresa.reunioes.application.login.record.Auth;
 import br.com.empresa.reunioes.domain.entity.Colaborador;
 import br.com.empresa.reunioes.infra.config.security.JwtService;
 import br.com.empresa.reunioes.web.login.dto.LoginRequest;
@@ -19,7 +20,7 @@ public class LoginService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
-    public LoginResponse autenticar(LoginRequest request) {
+    public Auth autenticar(LoginRequest request) {
         log.info("Tentativa de login para {}.", request.email());
 
         Authentication autenticacao = authenticationManager.authenticate(
@@ -31,6 +32,6 @@ public class LoginService {
 
         log.info("Login concluído para o colaborador {}.", colaborador.getId());
 
-        return new LoginResponse(token, colaborador.getNome(), colaborador.getEmail(), colaborador.getPapel());
+        return new Auth(colaborador, token);
     }
 }
