@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { Acao, AcaoRequestPayload } from '../models/acao.model';
+import { Pagina } from '../models/pagina.model';
 
 @Injectable({
   providedIn: 'root'
@@ -11,15 +12,12 @@ export class AcaoService {
 
   constructor(private http: HttpClient) {}
 
-  /**
-   * O endpoint e paginado e responde { content: [...] }, mas ja respondeu
-   * array puro. Aceita as duas formas e entrega sempre uma lista.
-   */
-  listarAcoes(): Observable<Acao[]> {
-    return this.http
-      .get<Acao[] | { content: Acao[] }>(this.apiUrl)
-      .pipe(map(resposta => Array.isArray(resposta) ? resposta : (resposta?.content ?? [])));
-  }
+
+listarPagina(concluida: boolean, pagina: number, tamanho: number): Observable<Pagina<Acao>> {
+  return this.http.get<Pagina<Acao>>(this.apiUrl, {
+    params: { concluida, page: pagina - 1, size: tamanho, sort: ['prazo,asc', 'id,asc'] }
+  });
+}
 
   /**
    * A acao so existe dentro de uma reuniao ja salva — por isso o id da

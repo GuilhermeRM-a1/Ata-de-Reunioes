@@ -7,6 +7,8 @@ import { AlertaService } from '../../../../core/services/alerta.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
 import { ReuniaoApiDTO } from '../../../../core/models';
+import { DashboardService } from '../../../../core/services/dashboard.service';
+import { Dashboard } from '../../../../core/models/dashboard.model';
 
 /** Bloco de listagem: um titulo e as reunioes daquele status. */
 interface GrupoReunioes {
@@ -25,11 +27,12 @@ interface GrupoReunioes {
 export class ReunioesComponent implements OnInit {
   // publico de proposito: o template le auth.isAdmin para mostrar ou esconder o CRUD
   readonly auth = inject(AuthService);
-
+  private readonly dashboardService = inject(DashboardService);
   private readonly reuniaoService = inject(ReuniaoService);
   private readonly router = inject(Router);
   private readonly alerta = inject(AlertaService);
 
+  readonly dashboard = signal<Dashboard | null>(null);
   readonly todasReunioes = signal<ReuniaoApiDTO[]>([]);
   readonly carregando = signal(true);
   readonly erro = signal<string | null>(null);
@@ -77,6 +80,13 @@ export class ReunioesComponent implements OnInit {
     this.carregarReunioes();
   }
 
+  carregarDashboard(): void {
+  this.dashboardService.buscar().subscribe({
+    next: d => this.dashboard.set(d),
+    error: err => console.error('Erro ao carregar dashboard', err)
+  });
+}
+
   private porStatus(status: string, ordem: 'asc' | 'desc'): ReuniaoApiDTO[] {
     return this.todasReunioes()
       .filter(r => r.statusReuniao === status)
@@ -94,6 +104,7 @@ export class ReunioesComponent implements OnInit {
         // o back devolve pagina (content) em alguns ambientes e array puro em outros
         this.todasReunioes.set(Array.isArray(dados) ? dados : (dados?.content ?? []));
         this.carregando.set(false);
+        this.carregarDashboard();
       },
       error: (err: any) => {
         console.error('Erro ao carregar reuniões:', err);
@@ -145,6 +156,7 @@ export class ReunioesComponent implements OnInit {
       next: () => {
         // tira da lista na hora, sem recarregar tudo do back
         this.todasReunioes.update(lista => lista.filter(r => r.id !== reuniao.id));
+        this.carregarDashboard();
         this.alerta.sucesso('Reunião excluída', reuniao.titulo);
       },
       error: () => {}
