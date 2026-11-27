@@ -1,7 +1,7 @@
 # Ata de Reuniões — URBIA Cataratas
 
 Sistema de gestão de atas de reunião: cadastro de reuniões, ações e colaboradores,
-relatório consolidado, dashboard e consulta de feriados nacionais. Autenticação
+indicadores, verificação de feriado nacional e relatório consolidado. Autenticação
 por **JWT**, com perfis `ADMIN` e `USUARIO`.
 
 ```
@@ -37,17 +37,21 @@ Ata-de-Reunioes/
 
 ## Funcionalidades
 
-**CRUD** de reuniões, ações e colaboradores, com persistência em PostgreSQL.
+**CRUD** de reuniões, ações e colaboradores, persistido em PostgreSQL.
 
 **Além do CRUD:**
 
-- **Cadastro público e login com JWT** — o usuário se cadastra em `/cadastro` e já
-  entra logado.
-- **Dashboard** com indicadores consolidados (`GET /api/dashboard`).
-- **Relatório consolidado da reunião** (`GET /api/reunioes/{id}/relatorio`).
-- **Ingestão de resumo e transcrição** vindos da IA (`PATCH /api/reunioes/{id}/ingestao`).
-- **Consulta de feriados nacionais** na BrasilAPI via **Spring Cloud OpenFeign**,
-  indicando se a data da reunião cai em feriado.
+| Funcionalidade | Onde está |
+|---|---|
+| Cadastro público e login com **JWT** | Telas `/cadastro` e `/login`; `POST /auth/register` e `POST /auth/login` |
+| **Dashboard**: total de reuniões, reuniões finalizadas, finalizadas nos últimos 3 meses, ações concluídas e pendentes | Cards nas telas de reuniões e ações; `GET /api/dashboard` |
+| **Verificação de feriado nacional** da data da reunião, via **Spring Cloud OpenFeign** na BrasilAPI | Formulário de reunião (`GET /api/reunioes/feriados?data=aaaa-MM-dd`); `GET /api/reunioes/{id}/feriado` |
+| **Ingestão da análise da IA** (resumo executivo e transcrição) | Somente API: `PATCH /api/reunioes/{id}/ingestao` |
+| **Relatório consolidado** da reunião | Somente API: `GET /api/reunioes/{id}/relatorio` |
+
+No relatório, participantes, ações, responsáveis, áreas e pontos-chave vêm do que o
+administrador registrou; da IA entra apenas o resumo executivo. Sem o resumo, o
+relatório é recusado com **409**.
 
 ---
 
@@ -60,7 +64,7 @@ O back-end é organizado em camadas, dentro de `br.com.empresa.reunioes`:
 | `web` | Controllers, DTOs de entrada e saída, mappers web e `RestExceptionHandler` |
 | `application` | Services com as regras de negócio e mappers de aplicação |
 | `domain` | Entidades JPA, enums, repositories e exceções de domínio |
-| `infra` | Configuração de segurança (JWT, filtro, CORS), cliente Feign e OpenAPI |
+| `infra` | Segurança (JWT, filtro, CORS), cliente Feign e OpenAPI |
 
 O schema é criado e versionado pelo **Flyway**. O Hibernate roda com
 `ddl-auto: validate` e só confere se as entidades batem com o banco.
@@ -69,33 +73,36 @@ O schema é criado e versionado pelo **Flyway**. O Hibernate roda com
 back-reunioes/src/main/resources/db/
 ├── migration/   V1, V3...   só schema — roda em todos os perfis
 ├── seed-dev/    V1000       massa fictícia de desenvolvimento (perfil dev)
-└── seed-prod/   V1000       reuniões de demonstração, sem usuários (perfil prod)
+└── seed-prod/   V1000       7 reuniões de demonstração, sem usuários (perfil prod)
 ```
 
 Os perfis Spring são escolhidos **por fora do código** (`SPRING_PROFILES_ACTIVE`).
 Não existe perfil padrão de propósito: esquecer de definir o perfil em produção
-não carrega dados fictícios de desenvolvimento.
+não carrega a massa fictícia de desenvolvimento.
 
 ---
 
 ## Segurança
 
 - **JWT** assinado com HMAC256, emitido em `/auth/login` e `/auth/register`, com
-  **expiração de 8 horas**.
+  **expiração de 8 horas**. O token leva `id` e `papel`.
 - **Senhas** gravadas com **BCrypt**.
-- **Spring Security** stateless: qualquer rota fora de `/auth/login` e
-  `/auth/register` exige token. Requisição sem token ou com token inválido recebe
-  **401**; usuário sem o papel necessário recebe **403**. A autorização por papel
-  é feita com `@PreAuthorize` em cada endpoint.
-- **CORS** liberado apenas para as origens definidas em `app.cors.allowed-origins`.
-- **Angular**: `authInterceptor` anexa o `Bearer` token em toda requisição;
-  `authGuard`, `adminGuard` e `loginGuard` protegem as rotas;
-  `erroInterceptor` traduz os erros da API em mensagens para o usuário e
-  redireciona ao login quando a sessão expira.
-- **Nenhum segredo no repositório.** Senha do banco e `JWT_SECRET` são lidos de
-  variáveis de ambiente. Em produção o `deploy.sh` gera os dois de forma aleatória
-  na própria instância, em `/etc/reunioes.env` (permissão `600`). O arquivo `.env`
-  local está no `.gitignore`; o repositório versiona apenas o `.env.example`.
+- **Spring Security** stateless: só `/auth/login`, `/auth/register` e a
+  documentação OpenAPI são públicos; qualquer outra rota exige token. Sem token, com
+  token inválido ou expirado, ou com credenciais erradas, a resposta é **401**.
+  Token válido sem o papel necessário recebe **403**. O papel é verificado com
+  `@PreAuthorize` em cada endpoint.
+- **CORS** liberado apenas para as origens de `app.cors.allowed-origins` (lista
+  separada por vírgula).
+- **Angular**: `authInterceptor` anexa o `Bearer` token em toda requisição fora de
+  `/auth/`; `authGuard`, `adminGuard` e `loginGuard` protegem as rotas;
+  `erroInterceptor` traduz os erros da API em mensagens para o usuário e, em caso de
+  401, encerra a sessão e volta ao login. O `authGuard` também considera a
+  expiração do token.
+- **Nenhum segredo no repositório.** Senha do banco e `JWT_SECRET` vêm de variáveis
+  de ambiente. Em produção o `deploy.sh` gera os dois de forma aleatória na própria
+  instância, em `/etc/reunioes.env` (permissão `600`). O `.env` local está no
+  `.gitignore`; o repositório versiona apenas o `.env.example`.
 
 > O tráfego é HTTP puro (porta 80). Para uso real, coloque um domínio e HTTPS
 > (por exemplo, Certbot) na frente do Nginx.
@@ -113,7 +120,7 @@ a aplicação.
 | Item | Valor |
 |---|---|
 | AMI | Ubuntu Server 22.04 ou 24.04 LTS |
-| Tipo | `t3.small` (2 GB) recomendado; `t3.micro` funciona, mais devagar, porque o script cria swap |
+| Tipo | `t3.small` (2 GB) recomendado; em instâncias menores o script cria swap, mas o build fica mais lento |
 | Disco | 20 GB |
 | Par de chaves | O seu, para acessar por SSH |
 
@@ -134,14 +141,25 @@ conversa com o banco dentro da própria instância.
 
 Acesse a instância por SSH e rode:
 
+### 3. Execute o script
+
+Acesse a instância por SSH e rode:
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/GuilhermeRM-a1/Ata-de-Reunioes/develop/scripts/deploy.sh -o deploy.sh
-read -rsp "Senha do admin (8 a 20 caracteres): " ADMIN_SENHA; echo
-sudo ADMIN_EMAIL=seu@email.com ADMIN_SENHA="$ADMIN_SENHA" bash deploy.sh
+sudo ADMIN_EMAIL=seu@email.com ADMIN_SENHA=Senha1234 bash deploy.sh
 ```
 
+A senha do admin precisa ter entre **8 e 20 caracteres**, que é a regra de validação do cadastro.
+
+Ao final o script imprime `Pronto: http://<IP-PÚBLICO>/`. Abra o endereço no
+navegador e entre com o e-mail e a senha informados.
+
+Variáveis opcionais: `BRANCH` (padrão `develop`) e `HOST` (padrão: IP público
+detectado). Exemplo: `sudo BRANCH=main ADMIN_EMAIL=... ADMIN_SENHA=... bash deploy.sh`.
+
 O `read -s` evita que a senha apareça na tela e no histórico do shell. Ela precisa
-ter entre **8 e 20 caracteres**, que é a regra do cadastro.
+ter entre **8 e 20 caracteres**, que é a regra de validação do cadastro.
 
 Ao final o script imprime `Pronto: http://<IP-PÚBLICO>/`. Abra o endereço no
 navegador e entre com o e-mail e a senha informados.
@@ -162,11 +180,10 @@ detectado). Exemplo: `sudo BRANCH=main ADMIN_EMAIL=... ADMIN_SENHA=... bash depl
 | 7 | Nginx | Serve o Angular com **fallback para rotas SPA** (`try_files ... /index.html`) e repassa `/api/` e `/auth/` para `127.0.0.1:8080` |
 | 8 | Admin inicial | Cadastra o admin pela API (`/auth/register`) e o promove a `ADMIN` no banco |
 
-O banco é criado com o perfil `prod`: o Flyway aplica o schema e a `seed-prod`
-(7 reuniões de demonstração, sem usuários). O Swagger fica desligado em produção
-e o CORS usa o IP público da instância.
-
-O script **não usa credenciais da AWS**: ele roda dentro da instância.
+O back sobe com o perfil `prod`: o Flyway aplica o schema e a `seed-prod`
+(7 reuniões de demonstração, sem usuários). O Swagger fica desligado e o CORS usa o
+IP público da instância. O script **não usa credenciais da AWS**: ele roda dentro
+da instância.
 
 ### 4. Confira
 
@@ -191,11 +208,11 @@ sudo tail -f /var/log/nginx/access.log            # requisições recebidas
 ### 6. Atualizar a aplicação
 
 Rode o mesmo script de novo. Ele faz `git pull`, recompila back e front, reinicia
-o serviço e recarrega o Nginx. Os segredos já existentes são preservados e novas
+o serviço e recarrega o Nginx. Os segredos existentes são preservados e novas
 migrations do Flyway são aplicadas na subida.
 
-Se o IP público da instância mudar (parar e iniciar a EC2 gera um novo IP), rode o
-script de novo para atualizar o CORS, ou associe um **Elastic IP** à instância.
+Se o IP público mudar (parar e iniciar a EC2 gera um novo IP), rode o script de
+novo para atualizar o CORS, ou associe um **Elastic IP** à instância.
 
 ### Problemas comuns
 
@@ -217,18 +234,20 @@ Pré-requisitos: **JDK 17** (não um JRE), Node.js 20+ e Docker.
 
 ```bash
 cd back-reunioes
-cp .env.example .env     # preencha DB_PASSWORD e JWT_SECRET
+cp .env.example .env     # preencha os valores
 docker compose up -d postgres
 ```
 
 O contêiner publica o Postgres em `localhost:5433` (a 5432 costuma estar ocupada
-por um Postgres instalado na máquina). No `.env`, aponte a aplicação para ela:
+por um Postgres instalado na máquina). O `docker-compose.yml` lê `DB_NAME`,
+`DB_USER` e `DB_PASSWORD` do `.env`, e a aplicação lê `DB_URL`, `DB_USER`,
+`DB_PASSWORD` e `JWT_SECRET`:
 
 ```
 DB_URL=jdbc:postgresql://localhost:5433/reunioes
+DB_NAME=reunioes
 DB_USER=postgres
 DB_PASSWORD=sua_senha
-DB_NAME=reunioes
 JWT_SECRET=<mínimo 32 caracteres; gere com: openssl rand -base64 48>
 ```
 
@@ -252,7 +271,7 @@ $env:SPRING_PROFILES_ACTIVE = "dev"
 ```
 
 Confira no log: `The following 1 profile is active: "dev"`. A API sobe em
-`http://localhost:8080`. O perfil `dev` carrega a massa fictícia (`seed-dev`).
+`http://localhost:8080` e o perfil `dev` carrega a massa fictícia (`seed-dev`).
 
 ### 3. Front-end
 
@@ -261,7 +280,7 @@ cd reunioes-front && npm install && npm start
 ```
 
 Abre em `http://localhost:4200`. O `proxy.conf.json` repassa `/api` e `/auth` para
-`localhost:8080`, então o front não tem endereço de API fixo no código.
+`localhost:8080`; o front só usa caminhos relativos (`core/config/api.config.ts`).
 
 ### Usuários de desenvolvimento
 
@@ -273,12 +292,16 @@ Senha de todos: `senha123`.
 | `gustavo.sato@exemplo.com.br` | ADMIN |
 | `carlos.prado@exemplo.com.br` | USUARIO |
 
+Os demais colaboradores da seed são `USUARIO`.
+
 ### Documentação da API (somente dev)
 
 - Swagger UI: http://localhost:8080/swagger-ui.html
 - OpenAPI: http://localhost:8080/v3/api-docs
-- Coleção do Insomnia: `back-reunioes/docs/insomnia-reunioes.json`
-- Manual de testes: `back-reunioes/docs/MANUAL-TESTES-API.md`
+
+Em `back-reunioes/docs/` há uma coleção do Insomnia e um manual de testes, mas eles
+**não incluem autenticação**. Para usá-los, faça `POST /auth/login` e envie o token
+no cabeçalho `Authorization: Bearer <token>` em todas as chamadas.
 
 ---
 
@@ -287,16 +310,17 @@ Senha de todos: `senha123`.
 | Rota | Tela | Acesso |
 |---|---|---|
 | `/login` | Entrada | público |
-| `/cadastro` | Cadastro de novo usuário | público |
-| `/reunioes` | Listagem, agrupada por status | autenticado |
-| `/reunioes/novo` | Cadastro de reunião | admin |
-| `/reunioes/:id` | Detalhe, relatório e feriado | autenticado |
+| `/cadastro` | Cadastro de novo usuário (entra logado em seguida) | público |
+| `/reunioes` | Cards do dashboard e listagem agrupada por status | autenticado |
+| `/reunioes/novo` | Cadastro de reunião, com verificação de feriado da data | admin |
+| `/reunioes/:id` | Detalhe: resumo, pontos-chave, ações e participantes | autenticado |
 | `/reunioes/:id/editar` | Edição | admin |
-| `/acoes` | Listagem de ações | autenticado |
+| `/acoes` | Ações pendentes e concluídas, paginadas | autenticado |
 | `/colaboradores` | CRUD de colaboradores | admin |
 
-Os botões de criar, editar e excluir só aparecem para `ADMIN`, mas quem decide é o
-back-end: cada endpoint valida o papel do token e responde 403 quando não é permitido.
+As rotas antigas `/admin/**` e `/usuario/**` redirecionam para as atuais. Os botões
+de criar, editar e excluir só aparecem para `ADMIN`, mas quem decide é o back-end:
+cada endpoint valida o papel do token e responde 403 quando não é permitido.
 
 ---
 
@@ -307,84 +331,101 @@ Todas as rotas, exceto `/auth/login` e `/auth/register`, exigem o cabeçalho
 
 ### Autenticação — `/auth`
 
-| Método | Rota | Descrição | Acesso |
+| Método | Rota | Sucesso | Acesso |
 |---|---|---|---|
-| POST | `/auth/login` | Login; devolve o token JWT | público |
-| POST | `/auth/register` | Cadastro (sempre `USUARIO`); devolve o token | público |
-
-O cadastro valida nome, e-mail e senha de 8 a 20 caracteres. E-mail repetido
-devolve **409**.
+| POST | `/auth/login` | 200, devolve `token`, `nome`, `email` e `papel` | público |
+| POST | `/auth/register` | 201, cria sempre como `USUARIO` e devolve o token | público |
 
 ### Reuniões — `/api/reunioes`
 
-| Método | Rota | Acesso |
-|---|---|---|
-| GET | `/api/reunioes` | autenticado |
-| GET | `/api/reunioes/{id}` | autenticado |
-| POST | `/api/reunioes` | admin |
-| PUT | `/api/reunioes/{id}` | admin |
-| PATCH | `/api/reunioes/{id}` | admin |
-| PATCH | `/api/reunioes/{id}/ingestao` | admin |
-| GET | `/api/reunioes/{id}/relatorio` | autenticado |
-| GET | `/api/reunioes/feriados` | autenticado |
-| GET | `/api/reunioes/{id}/feriado` | autenticado |
-| DELETE | `/api/reunioes/{id}` | admin |
+| Método | Rota | Sucesso | Acesso |
+|---|---|---|---|
+| GET | `/api/reunioes` | 200, paginado | autenticado |
+| GET | `/api/reunioes/{id}` | 200 | autenticado |
+| POST | `/api/reunioes` | 201, com cabeçalho `Location` | admin |
+| PUT | `/api/reunioes/{id}` | 200 | admin |
+| PATCH | `/api/reunioes/{id}` | 200 | admin |
+| PATCH | `/api/reunioes/{id}/ingestao` | 202 | admin |
+| GET | `/api/reunioes/{id}/relatorio` | 200; 409 se não há resumo da IA | autenticado |
+| GET | `/api/reunioes/feriados?data=aaaa-MM-dd` | 200; 404 se a data é inválida; 503 se a BrasilAPI falha | autenticado |
+| GET | `/api/reunioes/{id}/feriado` | 200; 404; 503 | autenticado |
+| DELETE | `/api/reunioes/{id}` | 204 | admin |
+
+Corpo de criação/substituição da reunião: `titulo` (mínimo 5 caracteres), `data`,
+`statusTranscricao` e `statusReuniao` são obrigatórios; `areas`, `pontosChaves`,
+`resumo` são opcionais; `participantes` e `acoes` são **listas de ids** de registros
+que já existem. No PATCH, campo ausente ou nulo não altera nada.
+
+Ingestão: `resumo` é obrigatório e `transcricao` é opcional (reenviar só o resumo
+não apaga a transcrição já gravada).
+
+Valores aceitos: `statusReuniao` = `PENDENTE`, `EM_ANDAMENTO`, `FINALIZADA`;
+`statusTranscricao` = `RECEBIDA`, `TRANSCREVENDO`, `ANALISANDO`, `CONCLUIDA`, `ERRO`.
 
 ### Ações — `/api/reunioes/acoes`
 
-| Método | Rota | Acesso |
-|---|---|---|
-| POST | `/api/reunioes/acoes/{reuniaoId}` | admin |
-| GET | `/api/reunioes/acoes` | autenticado |
-| GET | `/api/reunioes/acoes/reuniao?reuniaoId={id}` | autenticado |
-| GET | `/api/reunioes/acoes/{id}` | autenticado |
-| PUT | `/api/reunioes/acoes/{id}` | admin |
-| PATCH | `/api/reunioes/acoes/{id}` | admin |
-| DELETE | `/api/reunioes/acoes/{reuniaoId}/{id}` | admin |
+| Método | Rota | Sucesso | Acesso |
+|---|---|---|---|
+| POST | `/api/reunioes/acoes/{reuniaoId}` | 201 | admin |
+| GET | `/api/reunioes/acoes?concluida=true\|false` | 200, paginado; `concluida` é obrigatório | autenticado |
+| GET | `/api/reunioes/acoes/reuniao?reuniaoId={id}` | 200, lista | autenticado |
+| GET | `/api/reunioes/acoes/{id}` | 200 | autenticado |
+| PUT | `/api/reunioes/acoes/{id}` | 200 | admin |
+| PATCH | `/api/reunioes/acoes/{id}` | 200 | admin |
+| DELETE | `/api/reunioes/acoes/{reuniaoId}/{id}` | 204 | admin |
+
+Corpo da ação: `titulo` obrigatório; `descricao`, `tipo`, `prazo`, `concluida` e
+`responsavel` (lista de ids de colaboradores) opcionais.
 
 ### Colaboradores — `/api/reunioes/colaboradores`
 
-| Método | Rota | Acesso |
-|---|---|---|
-| POST | `/api/reunioes/colaboradores` | admin |
-| GET | `/api/reunioes/colaboradores` | autenticado |
-| GET | `/api/reunioes/colaboradores/{id}` | autenticado |
-| GET | `/api/reunioes/colaboradores/email/{email}` | autenticado |
-| PUT | `/api/reunioes/colaboradores/{id}` | admin |
-| PATCH | `/api/reunioes/colaboradores/{id}` | admin |
-| DELETE | `/api/reunioes/colaboradores/{id}` | admin |
+| Método | Rota | Sucesso | Acesso |
+|---|---|---|---|
+| POST | `/api/reunioes/colaboradores` | 201 | admin |
+| GET | `/api/reunioes/colaboradores` | 200, paginado | autenticado |
+| GET | `/api/reunioes/colaboradores/{id}` | 200 | autenticado |
+| GET | `/api/reunioes/colaboradores/email/{email}` | 200 | autenticado |
+| PUT | `/api/reunioes/colaboradores/{id}` | 200 | admin |
+| PATCH | `/api/reunioes/colaboradores/{id}` | 200 | admin |
+| DELETE | `/api/reunioes/colaboradores/{id}` | 204 | admin |
+
+Corpo do colaborador: `nome`, `email` válido, `senha` de **8 a 20 caracteres** e
+`papel` (`ADMIN` ou `USUARIO`) são obrigatórios. E-mail repetido devolve 409.
 
 ### Dashboard — `/api/dashboard`
 
-| Método | Rota | Acesso |
-|---|---|---|
-| GET | `/api/dashboard` | autenticado |
+| Método | Rota | Resposta | Acesso |
+|---|---|---|---|
+| GET | `/api/dashboard` | `totalReunioes`, `reunioesConcluidas`, `reunioesConcluidasUltimos3Meses`, `acoesConcluidas`, `acoesPendentes` | autenticado |
 
-### Contrato
+"Concluída" aqui significa reunião com status `FINALIZADA`.
 
-- Listagens devolvem um envelope com `content`, `page`, `size`, `totalElements` e
-  `totalPages`, e aceitam `page`, `size` e `sort`.
-- Erros seguem **ProblemDetail (RFC 7807)**, sem stack trace. Quando a validação
-  reprova campos, a resposta traz o array `campos` com `campo` e `mensagem`.
-- Ao criar ou substituir uma reunião, `acoes` e `participantes` são **listas de
-  ids** de registros já existentes.
+### Contrato de erros
+
+Listagens paginadas aceitam `page`, `size` e `sort`. Erros seguem
+**ProblemDetail (RFC 7807)**, sem stack trace; quando a validação reprova campos, a
+resposta traz o array `campos` com `campo` e `mensagem`.
 
 | Status | Quando |
 |---|---|
-| 400 | Campo inválido ou ausente, JSON malformado, parâmetro obrigatório ausente |
-| 401 | Sem token, token inválido ou expirado, credenciais incorretas |
+| 400 | Campo inválido ou ausente, JSON malformado, id ou parâmetro com tipo errado, parâmetro obrigatório ausente |
+| 401 | Sem token, token inválido ou expirado, e-mail ou senha incorretos |
 | 403 | Token válido, mas sem o papel necessário |
 | 404 | Recurso ou rota inexistente |
-| 405 | Método HTTP não suportado |
-| 409 | E-mail já cadastrado ou violação de integridade (registro vinculado) |
-| 500 | Erro inesperado (o detalhe fica só no log) |
+| 405 | Método HTTP não suportado na rota |
+| 409 | E-mail já cadastrado, relatório sem resumo da IA, ou violação de integridade (registro ainda vinculado a outros) |
+| 503 | A API externa de feriados (BrasilAPI) está indisponível |
+| 500 | Erro inesperado; o detalhe fica só no log |
 
 ### Limitações conhecidas
 
-- `data` e `prazo` são texto livre, sem validação de formato.
-- `Acao.tipo` é texto livre, sem enum.
-- A `seed-dev` marca todas as ações como concluídas, então a aba de ações
-  pendentes aparece vazia em desenvolvimento.
+- `data`, `prazo` e `dataCadastro` são texto livre, sem validação de formato; `Acao.tipo` também.
+- O front lista reuniões e colaboradores sem paginar: aparece só a primeira página
+  da API (20 itens, padrão do Spring).
+- Relatório e ingestão existem só na API; não há tela para eles.
+- Na documentação OpenAPI, PUT e PATCH anunciam 202, mas o código responde 200.
+- A `seed-dev` marca todas as ações como concluídas, então a aba de pendentes
+  aparece vazia em desenvolvimento.
 - A comunicação em produção é HTTP; HTTPS depende de domínio e certificado.
 
 ---
