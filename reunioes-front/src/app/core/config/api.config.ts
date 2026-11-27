@@ -12,4 +12,5 @@ export const API = {
   acoes: '/api/reunioes/acoes',
   colaboradores: '/api/reunioes/colaboradores',
   dashboard: '/api/dashboard',
+  feriados: '/api/reunioes/feriados',
 } as const;
