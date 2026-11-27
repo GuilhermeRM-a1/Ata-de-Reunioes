@@ -1,6 +1,6 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable } from 'rxjs';
 import { ReuniaoApiDTO, ReuniaoApiRequest } from '../models/api/reuniao-api.model';
 
 @Injectable({ providedIn: 'root' })
