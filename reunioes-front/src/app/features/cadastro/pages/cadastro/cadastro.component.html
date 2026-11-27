@@ -1,0 +1,83 @@
+<div class="min-vh-100 d-flex align-items-center justify-content-center bg-body-secondary p-3">
+  <div class="card border-0 shadow-sm cadastro-card">
+    <div class="card-body p-4">
+      <div class="text-center mb-4">
+        <i class="fas fa-user-plus fa-2x text-primary mb-3"></i>
+        <h1 class="h4 mb-1">Criar conta</h1>
+        <p class="text-muted small mb-0">Preencha os dados para acessar o sistema</p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="cadastrar()">
+
+        <div class="mb-4">
+          <mdb-form-control>
+            <input mdbInput type="text" id="nome" formControlName="nome" class="form-control"
+              [class.is-invalid]="nome?.invalid && nome?.touched" />
+            <label mdbLabel class="form-label" for="nome">Nome</label>
+          </mdb-form-control>
+          @if (nome?.invalid && nome?.touched) {
+            <div class="invalid-feedback d-block">Nome é obrigatório.</div>
+          }
+        </div>
+
+        <div class="mb-4">
+          <mdb-form-control>
+            <input mdbInput type="email" id="email" formControlName="email" class="form-control"
+              [class.is-invalid]="email?.invalid && email?.touched" />
+            <label mdbLabel class="form-label" for="email">E-mail</label>
+          </mdb-form-control>
+          @if (email?.invalid && email?.touched) {
+            <div class="invalid-feedback d-block">
+              @if (email?.errors?.['required']) {
+                E-mail é obrigatório.
+              } @else {
+                Informe um e-mail válido.
+              }
+            </div>
+          }
+        </div>
+
+        <div class="mb-4">
+          <mdb-form-control>
+            <input mdbInput type="password" id="senha" formControlName="senha" class="form-control"
+              [class.is-invalid]="senha?.invalid && senha?.touched" />
+            <label mdbLabel class="form-label" for="senha">Senha</label>
+          </mdb-form-control>
+          @if (senha?.invalid && senha?.touched) {
+            <div class="invalid-feedback d-block">
+              @if (senha?.errors?.['required']) {
+                Senha é obrigatória.
+              } @else if (senha?.errors?.['minlength']) {
+                A senha precisa ter pelo menos {{ senhaMin }} caracteres.
+              } @else {
+                A senha pode ter no máximo 72 caracteres.
+              }
+            </div>
+          }
+        </div>
+
+        <div class="mb-4">
+          <mdb-form-control>
+            <input mdbInput type="password" id="confirmarSenha" formControlName="confirmarSenha"
+              class="form-control" [class.is-invalid]="senhasDiferem" />
+            <label mdbLabel class="form-label" for="confirmarSenha">Confirmar senha</label>
+          </mdb-form-control>
+          @if (confirmarSenha?.touched && confirmarSenha?.errors?.['required']) {
+            <div class="invalid-feedback d-block">Confirme a senha.</div>
+          } @else if (senhasDiferem) {
+            <div class="invalid-feedback d-block">As senhas não conferem.</div>
+          }
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100 mt-2" mdbRipple [disabled]="enviando">
+          <i class="fas fa-user-plus me-1"></i> {{ enviando ? 'Cadastrando...' : 'Cadastrar' }}
+        </button>
+
+        <p class="text-center small text-muted mt-3 mb-0">
+          Já tem conta? <a routerLink="/login">Entrar</a>
+        </p>
+
+      </form>
+    </div>
+  </div>
+</div>
